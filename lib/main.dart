@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gtco_smart_invoice_flutter/screens/auth/business_info_screen.dart';
+import 'package:gtco_smart_invoice_flutter/screens/auth/profile_info_screen.dart';
+import 'package:gtco_smart_invoice_flutter/screens/auth/setup_screen.dart';
 import 'screens/auth/login_screen.dart';
 
 void main() {
@@ -36,7 +39,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const LoginScreen(),
+      // home: const BusinessInfoScreen(),
+      home: const ProfileInfoScreen(),
+      
+      // home: const LoginScreen(),
     );
   }
 }

@@ -52,7 +52,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const Gap(16),
               CustomTextField(
                 label: 'Password',
-                hint: 'Create password',
+                hint: '********',
                 isPassword: true,
                 controller: _passwordController,
                 suffixIcon: IconButton(
