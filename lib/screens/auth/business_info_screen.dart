@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../widgets/auth/custom_text_field.dart';
 import '../../widgets/auth/gtco_logo.dart';
+import '../../widgets/auth/auth_background.dart';
 import '../../widgets/common/app_text.dart';
 
 class BusinessInfoScreen extends StatefulWidget {
@@ -43,91 +44,81 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const GtcoLogo(),
-                const Gap(32),
-                AppText.heading(
-                  'Tell us about your business so we\ncan tailor your experience',
-                  textAlign: TextAlign.center,
-                ),
-                const Gap(32),
-                CustomTextField(
-                  label: "What is your company's name?",
-                  hint: 'Enter company name',
-                  controller: _companyNameController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your company name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                _buildDropdown(
-                  'Where are you located?',
-                  _selectedIndustry,
-                  _industries,
-                  (String? value) {
-                    setState(() {
-                      _selectedIndustry = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 24),
-                _buildDropdown(
-                  'How would you describe your business?',
-                  _selectedBusinessType,
-                  _businessTypes,
-                  (String? value) {
-                    setState(() {
-                      _selectedBusinessType = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 24),
-                _buildDropdown(
-                  'Upload your business logo',
-                  _selectedLogoOption,
-                  ['Take a photo', 'Choose from gallery'],
-                  (String? value) {
-                    setState(() {
-                      _selectedLogoOption = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Handle form submission
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
+      body: AuthBackground(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Gap(32),
+              const GtcoLogo(),
+              const Gap(32),
+              AppText.subheading(
+                'Tell us about your business so we can tailor your experience',
+                textAlign: TextAlign.left,
+              ),
+              const Gap(32),
+              CustomTextField(
+                label: "What is your company's name?",
+                hint: 'Enter company name',
+                controller: _companyNameController,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your company name';
+                  }
+                  return null;
+                },
+              ),
+              const Gap(24),
+              _buildDropdown(
+                'Where are you located?',
+                _selectedIndustry,
+                _industries,
+                (String? value) {
+                  setState(() {
+                    _selectedIndustry = value;
+                  });
+                },
+              ),
+              const Gap(24),
+              _buildDropdown(
+                'How would you describe your business?',
+                _selectedBusinessType,
+                _businessTypes,
+                (String? value) {
+                  setState(() {
+                    _selectedBusinessType = value;
+                  });
+                },
+              ),
+              const Gap(24),
+              _buildDropdown(
+                'Upload your business logo',
+                _selectedLogoOption,
+                ['Take a photo', 'Choose from gallery'],
+                (String? value) {
+                  setState(() {
+                    _selectedLogoOption = value;
+                  });
+                },
+              ),
+              const Gap(48),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // Handle form submission
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              ],
-            ),
+                child: AppText.button('Next'),
+              ),
+            ],
           ),
         ),
       ),
@@ -143,23 +134,20 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        AppText(
           label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF333333),
-          ),
+          weight: FontWeight.w500,
+          color: const Color(0xFF333333),
         ),
-        const SizedBox(height: 8),
+        const Gap(8),
         Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButtonFormField<String>(
             value: value,
-            hint: const Text('Choose an option'),
+            hint: AppText('Choose an option', color: Colors.grey[600]),
             decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(horizontal: 16),
@@ -167,7 +155,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
             items: items.map((String item) {
               return DropdownMenuItem(
                 value: item,
-                child: Text(item),
+                child: AppText(item),
               );
             }).toList(),
             onChanged: onChanged,

@@ -24,7 +24,8 @@ class SetupScreen extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
               const Gap(32),
-              AppText.heading('Set up your business', textAlign: TextAlign.center),
+              AppText.heading('Set up your business',
+                  textAlign: TextAlign.center),
               const Gap(16),
               AppText.subheading(
                 'Create professional invoices, track payments, and manage your business finances all in one place.',
