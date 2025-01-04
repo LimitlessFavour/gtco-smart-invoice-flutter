@@ -159,9 +159,9 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
               AppButton(
                 text: 'Next',
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
+                  // if (_formKey.currentState!.validate()) {
                     // Handle form submission
-                  }
+                  // }
                 },
               ),
             ],

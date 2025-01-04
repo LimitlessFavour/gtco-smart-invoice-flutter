@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 
-class AuthBackground extends StatelessWidget {
+class AuthBackground extends StatefulWidget {
   final Widget child;
 
   const AuthBackground({
@@ -9,13 +10,31 @@ class AuthBackground extends StatelessWidget {
   });
 
   @override
+  State<AuthBackground> createState() => _AuthBackgroundState();
+}
+
+class _AuthBackgroundState extends State<AuthBackground> {
+  @override
+  void initState() {
+    super.initState();
+    _precacheImages();
+  }
+
+  Future<void> _precacheImages() async {
+    await Future.wait([
+      precacheImage(const AssetImage('assets/images/background.png'), context),
+      precacheImage(
+          const AssetImage('assets/images/background_mobile.png'), context),
+    ]);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isLargeScreen = screenWidth > 600;
 
     return Stack(
       children: [
-        // Background Image
         Image.asset(
           isLargeScreen
               ? 'assets/images/background.png'
@@ -24,11 +43,9 @@ class AuthBackground extends StatelessWidget {
           width: double.infinity,
           height: double.infinity,
         ),
-        // White Container with rounded corners
         Positioned.fill(
           child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+            child: CustomScrollWrapper(
               child: Container(
                 height: isLargeScreen ? null : 804,
                 width: isLargeScreen ? 600 : 400,
@@ -47,7 +64,7 @@ class AuthBackground extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: SingleChildScrollView(
+                child: CustomScrollWrapper(
                   child: Padding(
                     padding: const EdgeInsets.only(
                       left: 24.0,
@@ -55,7 +72,7 @@ class AuthBackground extends StatelessWidget {
                       top: 32.0,
                       bottom: 24.0,
                     ),
-                    child: child,
+                    child: widget.child,
                   ),
                 ),
               ),

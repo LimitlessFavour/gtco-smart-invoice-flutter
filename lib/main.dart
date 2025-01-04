@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gtco_smart_invoice_flutter/screens/auth/business_info_screen.dart';
-import 'package:gtco_smart_invoice_flutter/screens/auth/profile_info_screen.dart';
-import 'package:gtco_smart_invoice_flutter/screens/auth/setup_screen.dart';
-import 'screens/auth/login_screen.dart';
+import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,11 +35,29 @@ class MyApp extends StatelessWidget {
             borderSide: const BorderSide(color: Color(0xFFE84C3D)),
           ),
         ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: ButtonStyle(
+            shape: MaterialStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+        ),
       ),
+      debugShowCheckedModeBanner: false,
       // home: const BusinessInfoScreen(),
-      home: const ProfileInfoScreen(),
-      
-      // home: const LoginScreen(),
+      // home: const InvoiceListScreen(),
+      home: const LandingScreen(),
     );
   }
 }
