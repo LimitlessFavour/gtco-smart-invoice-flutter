@@ -9,6 +9,7 @@ class AppText extends StatelessWidget {
   final TextAlign? textAlign;
   final int? maxLines;
   final TextOverflow? overflow;
+  final TextDecoration? decoration;
 
   const AppText(
     this.text, {
@@ -19,6 +20,7 @@ class AppText extends StatelessWidget {
     this.textAlign,
     this.maxLines,
     this.overflow,
+    this.decoration,
   });
 
   // Predefined styles
@@ -27,11 +29,12 @@ class AppText extends StatelessWidget {
     Key? key,
     Color? color,
     TextAlign? textAlign,
+    double size = 24,
   }) =>
       AppText(
         text,
         key: key,
-        size: 24,
+        size: size,
         weight: FontWeight.w600,
         color: color ?? const Color(0xFF333333),
         textAlign: textAlign,
@@ -75,6 +78,7 @@ class AppText extends StatelessWidget {
         fontSize: size,
         fontWeight: weight,
         color: color,
+        decoration: decoration,
       ),
       textAlign: textAlign,
       maxLines: maxLines,

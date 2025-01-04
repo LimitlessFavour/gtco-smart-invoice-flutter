@@ -5,6 +5,7 @@ import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/auth/auth_background.dart';
 import 'login_screen.dart';
 import '../../widgets/common/app_text.dart';
+import 'setup_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -90,9 +91,14 @@ class _SignupScreenState extends State<SignupScreen> {
               ElevatedButton(
                 onPressed: _acceptedTerms
                     ? () {
-                        if (_formKey.currentState!.validate()) {
-                          // Handle signup
-                        }
+                        // if (_formKey.currentState!.validate()) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SetupScreen(),
+                            ),
+                          );
+                        // }
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/common/app_text.dart';
+import '../../screens/auth/business_info_screen.dart';
 
 class SetupScreen extends StatelessWidget {
   const SetupScreen({super.key});
@@ -34,7 +35,12 @@ class SetupScreen extends StatelessWidget {
               const Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to business info screen
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BusinessInfoScreen(),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,

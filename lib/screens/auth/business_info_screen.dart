@@ -4,6 +4,7 @@ import '../../widgets/auth/custom_text_field.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/auth/auth_background.dart';
 import '../../widgets/common/app_text.dart';
+import '../../screens/auth/profile_info_screen.dart';
 
 class BusinessInfoScreen extends StatefulWidget {
   const BusinessInfoScreen({super.key});
@@ -105,9 +106,14 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
               const Gap(48),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Handle form submission
-                  }
+                  // if (_formKey.currentState!.validate()) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ProfileInfoScreen(),
+                      ),
+                    );
+                  // }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
