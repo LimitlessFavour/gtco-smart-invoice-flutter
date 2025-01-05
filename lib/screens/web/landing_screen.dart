@@ -71,8 +71,7 @@ class LandingScreen extends StatelessWidget {
     final buttonPaddingV = (12.0 * scaleFactor).clamp(10.0, 12.0);
     final buttonSpacing = (20.0 * scaleFactor).clamp(16.0, 20.0);
 
-    print('logoWidth $logoWidth');
-    print('logoHeight $logoHeight');
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 48,

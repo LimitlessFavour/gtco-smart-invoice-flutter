@@ -1,54 +1,51 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../layouts/responsive_layout.dart';
+import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dashboard/payment_chart.dart';
 import '../../widgets/dashboard/stats_card.dart';
 import '../../widgets/dashboard/activity_card.dart';
 import '../../widgets/dashboard/top_list_card.dart';
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+class DashboardContent extends StatelessWidget {
+  const DashboardContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      title: 'Overview',
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: _buildPaymentsChart(),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: _buildPaymentsChart(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStatsCard(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildListsRow(),
+                    const SizedBox(height: 24),
+                  ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatsCard(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      _buildListsRow(),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: ActivityCard(),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: ActivityCard(),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -86,8 +83,7 @@ class DashboardScreen extends StatelessWidget {
             SizedBox(
               height: 300,
               child: BarChart(
-                // Implement chart data
-                BarChartData(),
+                createChartData(),
               ),
             ),
           ],
