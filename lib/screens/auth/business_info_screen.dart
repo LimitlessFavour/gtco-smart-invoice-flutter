@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
 import '../../widgets/auth/custom_text_field.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/auth/auth_background.dart';
@@ -110,7 +111,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ProfileInfoScreen(),
+                        builder: (context) => const WebMainLayout(),
                       ),
                     );
                   // }

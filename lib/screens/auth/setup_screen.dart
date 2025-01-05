@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/screens/auth/profile_info_screen.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/common/app_text.dart';
 import '../../screens/auth/business_info_screen.dart';
@@ -38,7 +39,7 @@ class SetupScreen extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const BusinessInfoScreen(),
+                      builder: (context) => const ProfileInfoScreen(),
                     ),
                   );
                 },

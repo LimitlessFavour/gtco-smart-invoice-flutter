@@ -17,34 +17,50 @@ class ResponsiveLayout extends StatelessWidget {
     final isWeb = MediaQuery.of(context).size.width > 768;
 
     if (isWeb) {
-      return Row(
-        children: [
-          const SidebarMenu(),
-          Expanded(
-            child: Scaffold(
-              appBar: AppBar(
-                title: Text(title),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {},
+      return Scaffold(
+        backgroundColor: const Color(0xFFFAFAFA),
+        body: Row(
+          children: [
+            const SidebarMenu(),
+            Expanded(
+              child: Column(
+                children: [
+                  Container(
+                    color: const Color(0xFFFAFAFA),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.notifications_outlined),
+                          onPressed: () {},
+                        ),
+                        const CircleAvatar(
+                          backgroundImage: AssetImage('assets/images/avatar_placeholder.png'),
+                        ),
+                      ],
+                    ),
                   ),
-                  const CircleAvatar(
-                    backgroundImage:
-                        AssetImage('assets/images/avatar_placeholder.png'),
-                  ),
-                  const SizedBox(width: 16),
+                  Expanded(child: child),
                 ],
               ),
-              body: child,
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
+        backgroundColor: const Color(0xFFFAFAFA),
         title: Text(title),
         actions: [
           IconButton(

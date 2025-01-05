@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gtco_smart_invoice_flutter/screens/dashboard/dashboard_screen.dart';
-import 'package:gtco_smart_invoice_flutter/screens/help/help_center_screen.dart';
-import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_list_screen.dart';
-import 'package:gtco_smart_invoice_flutter/screens/settings/settings_screen.dart';
 import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:provider/provider.dart';
-import 'services/navigation_service.dart';
+import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
 
 void main() {
   runApp(
@@ -66,37 +63,8 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: const AppShell(),
+      // home: const WebMainLayout(),
+      home: const LandingScreen(),
     );
-  }
-}
-
-class AppShell extends StatelessWidget {
-  const AppShell({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<NavigationService>(
-      builder: (context, navigation, _) {
-        return _buildScreen(navigation.currentScreen);
-      },
-    );
-  }
-
-  Widget _buildScreen(AppScreen screen) {
-    switch (screen) {
-      case AppScreen.dashboard:
-        return const DashboardScreen();
-      case AppScreen.invoice:
-        return const InvoiceListScreen();
-      case AppScreen.product:
-        return const Center(child: Text('Product Screen - Coming Soon'));
-      case AppScreen.client:
-        return const Center(child: Text('Client Screen - Coming Soon'));
-      case AppScreen.settings:
-        return const SettingsScreen();
-      case AppScreen.helpCenter:
-        return const HelpCenterScreen();
-    }
   }
 }

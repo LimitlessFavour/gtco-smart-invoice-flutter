@@ -17,6 +17,7 @@ class SidebarMenu extends StatelessWidget {
         width: 250,
         color: Colors.white,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -26,6 +27,15 @@ class SidebarMenu extends StatelessWidget {
               ),
             ),
             const Divider(),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: AppText(
+                'MAIN MENU',
+                size: 12,
+                color: Colors.grey,
+                weight: FontWeight.w600,
+              ),
+            ),
             _buildMenuItem(
               context,
               'Dashboard',
@@ -54,8 +64,16 @@ class SidebarMenu extends StatelessWidget {
               AppScreen.client,
               isSelected: navigation.currentScreen == AppScreen.client,
             ),
-            const Spacer(),
-            const Divider(),
+            const SizedBox(height: 24),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: AppText(
+                'PREFERENCES',
+                size: 12,
+                color: Colors.grey,
+                weight: FontWeight.w600,
+              ),
+            ),
             _buildMenuItem(
               context,
               'Settings',
