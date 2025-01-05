@@ -29,11 +29,13 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cupertino_icons: ^1.0.8
+  fl_chart: ^0.66.2
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.16
   gap: ^3.0.1
   google_fonts: ^6.1.0
+  provider: ^6.1.2
 
 dev_dependencies:
 
@@ -85,10 +87,4 @@ flutter:
   # see https://flutter.dev/to/font-from-package
   assets:
     - assets/images/
-    - assets/images/smart_invoice_logo.svg
-    - assets/images/google.png
-    - assets/images/apple.png
-    - assets/images/receipt.png
-    - assets/images/background.png
-    - assets/images/background_mobile.png
-    - assets/images/gtco_logo.png
+    - assets/icons/
