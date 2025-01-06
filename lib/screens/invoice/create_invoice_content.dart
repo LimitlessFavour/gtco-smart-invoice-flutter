@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/invoice/invoice_form.dart';
 import '../../widgets/invoice/preview_card.dart';
+import '../../services/navigation_service.dart';
 
 class CreateInvoiceContent extends StatelessWidget {
   const CreateInvoiceContent({super.key});
@@ -32,10 +34,23 @@ class CreateInvoiceContent extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const AppText(
-                'New Invoice',
-                size: 24,
-                weight: FontWeight.w600,
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      context
+                          .read<NavigationService>()
+                          .navigateToInvoiceScreen(InvoiceScreen.list);
+                    },
+                  ),
+                  const Gap(8),
+                  const AppText(
+                    'New Invoice',
+                    size: 24,
+                    weight: FontWeight.w600,
+                  ),
+                ],
               ),
               Row(
                 children: [
@@ -70,7 +85,7 @@ class CreateInvoiceContent extends StatelessWidget {
             ],
           ),
         ),
-          
+
         // Form and Preview side by side
         Expanded(
           child: Padding(

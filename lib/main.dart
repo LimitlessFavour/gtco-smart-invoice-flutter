@@ -1,15 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
+import 'package:provider/provider.dart';
 
 void main() {
+  // Initialize navigation history for web
+  if (kIsWeb) {
+    NavigationService().initializeHistory();
+  }
+  
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => NavigationService(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => NavigationService()),
+        // ... other providers
+      ],
       child: const MyApp(),
     ),
   );

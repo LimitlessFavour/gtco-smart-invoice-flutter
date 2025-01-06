@@ -82,7 +82,7 @@ class AppNavigationDrawer extends StatelessWidget {
     AppScreen screen, {
     bool isSelected = false,
   }) {
-    final navigation = Provider.of<NavigationService>(context);
+    // final navigation = Provider.of<NavigationService>(context);
 
     return ListTile(
       leading: SvgPicture.asset(

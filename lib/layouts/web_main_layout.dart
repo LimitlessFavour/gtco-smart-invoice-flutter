@@ -69,9 +69,12 @@ class WebMainLayout extends StatelessWidget {
       case AppScreen.invoice:
         return Consumer<NavigationService>(
           builder: (context, navigation, _) {
-            return navigation.currentInvoiceScreen == InvoiceScreen.list
-                ? const InvoiceListContent()
-                : const CreateInvoiceContent();
+            return KeyedSubtree(
+              key: ValueKey<InvoiceScreen>(navigation.currentInvoiceScreen),
+              child: navigation.currentInvoiceScreen == InvoiceScreen.list
+                  ? const InvoiceListContent()
+                  : const CreateInvoiceContent(),
+            );
           },
         );
       case AppScreen.product:
