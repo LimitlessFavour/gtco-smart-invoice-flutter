@@ -4,17 +4,17 @@ import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/client/client_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/dashboard/dashboard_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/help_center/help_center_content.dart';
-import 'package:gtco_smart_invoice_flutter/screens/invoice/create_invoice_content.dart';
-import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_list_content.dart';
+import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/product/product_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/settings/settings_content.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/client/create_client_form.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_form.dart';
 import 'package:provider/provider.dart';
+
 import '../services/navigation_service.dart';
-import '../widgets/web/sidebar_menu.dart';
 import '../widgets/common/slide_panel.dart';
+import '../widgets/web/sidebar_menu.dart';
 
 class WebMainLayout extends StatelessWidget {
   const WebMainLayout({super.key});
@@ -44,7 +44,8 @@ class WebMainLayout extends StatelessWidget {
                             return AnimatedSwitcher(
                               duration: const Duration(milliseconds: 200),
                               child: KeyedSubtree(
-                                key: ValueKey<AppScreen>(navigation.currentScreen),
+                                key: ValueKey<AppScreen>(
+                                    navigation.currentScreen),
                                 child: _buildContent(navigation.currentScreen),
                               ),
                             );
@@ -63,20 +64,25 @@ class WebMainLayout extends StatelessWidget {
                   children: [
                     // Client Create Panel
                     SlidePanel(
-                      isOpen: navigation.currentScreen == AppScreen.client && 
-                             navigation.currentClientScreen == ClientScreen.create,
-                      onClose: () => navigation.navigateToClientScreen(ClientScreen.list),
+                      isOpen: navigation.currentScreen == AppScreen.client &&
+                          navigation.currentClientScreen == ClientScreen.create,
+                      onClose: () =>
+                          navigation.navigateToClientScreen(ClientScreen.list),
                       child: CreateClientForm(
-                        onCancel: () => navigation.navigateToClientScreen(ClientScreen.list),
+                        onCancel: () => navigation
+                            .navigateToClientScreen(ClientScreen.list),
                       ),
                     ),
                     // Product Create Panel
                     SlidePanel(
-                      isOpen: navigation.currentScreen == AppScreen.product && 
-                             navigation.currentProductScreen == ProductScreen.create,
-                      onClose: () => navigation.navigateToProductScreen(ProductScreen.list),
+                      isOpen: navigation.currentScreen == AppScreen.product &&
+                          navigation.currentProductScreen ==
+                              ProductScreen.create,
+                      onClose: () => navigation
+                          .navigateToProductScreen(ProductScreen.list),
                       child: CreateProductForm(
-                        onCancel: () => navigation.navigateToProductScreen(ProductScreen.list),
+                        onCancel: () => navigation
+                            .navigateToProductScreen(ProductScreen.list),
                       ),
                     ),
                   ],
@@ -94,16 +100,7 @@ class WebMainLayout extends StatelessWidget {
       case AppScreen.dashboard:
         return const DashboardContent();
       case AppScreen.invoice:
-        return Consumer<NavigationService>(
-          builder: (context, navigation, _) {
-            return KeyedSubtree(
-              key: ValueKey<InvoiceScreen>(navigation.currentInvoiceScreen),
-              child: navigation.currentInvoiceScreen == InvoiceScreen.list
-                  ? const InvoiceListContent()
-                  : const CreateInvoiceContent(),
-            );
-          },
-        );
+        return const InvoiceContent();
       case AppScreen.product:
         return const ProductContent();
       case AppScreen.client:

@@ -2,15 +2,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
 import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
+import 'package:gtco_smart_invoice_flutter/services/api_client.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:gtco_smart_invoice_flutter/services/api_client.dart';
-import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
-import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
-import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
-import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
 
 void main() {
   // Initialize navigation history for web
@@ -133,15 +134,18 @@ class _AppInitializerState extends State<AppInitializer> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          // return const LandingScreen();
+          return const LandingScreen();
           // Replace with your actual initial screen
-          return const WebMainLayout();
+          // return const WebMainLayout();
         }
         // Show a loading screen while precaching
-        return const MaterialApp(
+        return MaterialApp(
           home: Scaffold(
             body: Center(
-              child: CircularProgressIndicator(),
+              child: LoadingAnimationWidget.threeArchedCircle(
+                color: Theme.of(context).primaryColor,
+                size: 50,
+              ),
             ),
           ),
         );

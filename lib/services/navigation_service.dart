@@ -15,6 +15,7 @@ enum AppScreen {
 enum InvoiceScreen {
   list,
   create,
+  view,
 }
 
 enum ProductScreen {
@@ -38,6 +39,7 @@ enum SettingsScreen {
 class NavigationService extends ChangeNotifier {
   AppScreen _currentScreen = AppScreen.dashboard;
   InvoiceScreen _currentInvoiceScreen = InvoiceScreen.list;
+  String? _currentInvoiceId;
   ProductScreen _currentProductScreen = ProductScreen.list;
   ClientScreen _currentClientScreen = ClientScreen.list;
   SettingsScreen _currentSettingsScreen = SettingsScreen.list;
@@ -51,6 +53,7 @@ class NavigationService extends ChangeNotifier {
 
   AppScreen get currentScreen => _currentScreen;
   InvoiceScreen get currentInvoiceScreen => _currentInvoiceScreen;
+  String? get currentInvoiceId => _currentInvoiceId;
   ProductScreen get currentProductScreen => _currentProductScreen;
   ClientScreen get currentClientScreen => _currentClientScreen;
   SettingsScreen get currentSettingsScreen => _currentSettingsScreen;
@@ -58,7 +61,8 @@ class NavigationService extends ChangeNotifier {
   bool canGoBack() {
     switch (_currentScreen) {
       case AppScreen.invoice:
-        return _currentInvoiceScreen == InvoiceScreen.create;
+        return _currentInvoiceScreen == InvoiceScreen.create || 
+               _currentInvoiceScreen == InvoiceScreen.view;
       case AppScreen.product:
         return _currentProductScreen == ProductScreen.create;
       case AppScreen.client:
@@ -81,11 +85,22 @@ class NavigationService extends ChangeNotifier {
     
     if (path == '/') {
       _currentScreen = AppScreen.dashboard;
+      _currentInvoiceId = null;
     } else if (path.startsWith('/invoice')) {
       _currentScreen = AppScreen.invoice;
-      _currentInvoiceScreen = path == '/invoice/create' 
-          ? InvoiceScreen.create 
-          : InvoiceScreen.list;
+      
+      if (path == '/invoice/create') {
+        _currentInvoiceScreen = InvoiceScreen.create;
+        _currentInvoiceId = null;
+      } else if (path == '/invoice') {
+        _currentInvoiceScreen = InvoiceScreen.list;
+        _currentInvoiceId = null;
+      } else {
+        // Handle /invoice/{id} pattern
+        final invoiceId = path.split('/').last;
+        _currentInvoiceScreen = InvoiceScreen.view;
+        _currentInvoiceId = invoiceId;
+      }
     } else if (path.startsWith('/product')) {
       _currentScreen = AppScreen.product;
       _currentProductScreen = path == '/product/create' 
@@ -111,8 +126,10 @@ class NavigationService extends ChangeNotifier {
 
     switch (_currentScreen) {
       case AppScreen.invoice:
-        if (_currentInvoiceScreen == InvoiceScreen.create) {
+        if (_currentInvoiceScreen == InvoiceScreen.create || 
+            _currentInvoiceScreen == InvoiceScreen.view) {
           _currentInvoiceScreen = InvoiceScreen.list;
+          _currentInvoiceId = null;
           _updateBrowserUrl('/invoice');
           notifyListeners();
           return true;
@@ -147,10 +164,19 @@ class NavigationService extends ChangeNotifier {
     }
   }
 
-  void navigateToInvoiceScreen(InvoiceScreen screen) {
+  void navigateToInvoiceScreen(InvoiceScreen screen, {String? invoiceId}) {
     _currentInvoiceScreen = screen;
     _currentScreen = AppScreen.invoice;
-    _updateBrowserUrl('/invoice${screen == InvoiceScreen.create ? '/create' : ''}');
+    _currentInvoiceId = invoiceId;
+    
+    String path = '/invoice';
+    if (screen == InvoiceScreen.create) {
+      path = '$path/create';
+    } else if (screen == InvoiceScreen.view && invoiceId != null) {
+      path = '$path/$invoiceId';
+    }
+    
+    _updateBrowserUrl(path);
     notifyListeners();
   }
 

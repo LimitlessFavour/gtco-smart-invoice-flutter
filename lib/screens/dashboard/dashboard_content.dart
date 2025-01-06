@@ -1,13 +1,12 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+
 import '../../constants/styles.dart';
 import '../../widgets/common/app_text.dart';
-import '../../widgets/dashboard/payment_chart.dart';
-import '../../widgets/dashboard/stats_card.dart';
 import '../../widgets/dashboard/activity_card.dart';
-import '../../widgets/dashboard/top_list_card.dart';
 import '../../widgets/dashboard/invoice_stats_card.dart';
+import '../../widgets/dashboard/payment_chart.dart';
+import '../../widgets/dashboard/top_list_card.dart';
 
 class DashboardContent extends StatelessWidget {
   const DashboardContent({super.key});

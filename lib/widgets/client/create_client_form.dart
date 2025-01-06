@@ -4,7 +4,7 @@ import '../common/app_text.dart';
 
 class CreateClientForm extends StatefulWidget {
   final VoidCallback onCancel;
-  
+
   const CreateClientForm({
     super.key,
     required this.onCancel,
@@ -169,4 +169,4 @@ class _CreateClientFormState extends State<CreateClientForm> {
       widget.onCancel();
     }
   }
-} 
+}

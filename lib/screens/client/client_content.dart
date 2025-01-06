@@ -66,7 +66,9 @@ class CreateClientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.read<NavigationService>().navigateToClientScreen(ClientScreen.create);
+        context
+            .read<NavigationService>()
+            .navigateToClientScreen(ClientScreen.create);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(

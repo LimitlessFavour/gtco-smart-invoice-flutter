@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import '../../models/product.dart';
+import 'package:intl/intl.dart';
 
 class ProductTile extends StatelessWidget {
   final Product product;
@@ -12,6 +12,11 @@ class ProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currencyFormatter = NumberFormat.currency(
+      symbol: '₦',
+      decimalDigits: 2,
+    );
+
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -22,7 +27,10 @@ class ProductTile extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 16,
+        ),
         child: Row(
           children: [
             // Product Name
@@ -32,7 +40,6 @@ class ProductTile extends StatelessWidget {
                 product.productName,
                 style: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
                   color: Color(0xFF344054),
                 ),
               ),
@@ -40,23 +47,12 @@ class ProductTile extends StatelessWidget {
             // Price
             Expanded(
               child: Text(
-                '₦${product.price.toStringAsFixed(2)}',
+                currencyFormatter.format(product.price),
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF667085),
+                  color: Color(0xFF344054),
                 ),
               ),
-            ),
-            // Image
-            Expanded(
-              child: product.image != null
-                  ? Image.network(
-                      product.image!,
-                      height: 40,
-                      width: 40,
-                      fit: BoxFit.cover,
-                    )
-                  : const Icon(Icons.image_not_supported, color: Colors.grey),
             ),
             // Quantity
             Expanded(
@@ -64,8 +60,30 @@ class ProductTile extends StatelessWidget {
                 product.quantity.toString(),
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF667085),
+                  color: Color(0xFF344054),
                 ),
+              ),
+            ),
+            // Actions
+            SizedBox(
+              width: 100,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () {
+                      // TODO: Handle edit
+                    },
+                    color: const Color(0xFF667085),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline),
+                    onPressed: () {
+                      // TODO: Handle delete
+                    },
+                    color: const Color(0xFF667085),
+                  ),
+                ],
               ),
             ),
           ],

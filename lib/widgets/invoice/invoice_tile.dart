@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../models/invoice.dart';
+import '../../services/navigation_service.dart';
 
 class InvoiceTile extends StatelessWidget {
   final Invoice invoice;
@@ -13,69 +15,77 @@ class InvoiceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey[200]!,
-            width: 1,
+    return InkWell(
+      onTap: () {
+        context.read<NavigationService>().navigateToInvoiceScreen(
+              InvoiceScreen.view,
+              invoiceId: invoice.id,
+            );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.grey[200]!,
+              width: 1,
+            ),
           ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Row(
-          children: [
-            // Invoice Number
-            Expanded(
-              flex: 2,
-              child: Text(
-                '#${invoice.invoiceNumber}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF344054),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Row(
+            children: [
+              // Invoice Number
+              Expanded(
+                flex: 2,
+                child: Text(
+                  '#${invoice.invoiceNumber}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF344054),
+                  ),
                 ),
               ),
-            ),
-            // Client Name
-            Expanded(
-              flex: 3,
-              child: Text(
-                invoice.client.fullName,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF344054),
+              // Client Name
+              Expanded(
+                flex: 3,
+                child: Text(
+                  invoice.client.fullName,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF344054),
+                  ),
                 ),
               ),
-            ),
-            // Due Date
-            Expanded(
-              flex: 2,
-              child: Text(
-                DateFormat('dd.MM.yyyy').format(invoice.dueDate),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF667085),
+              // Due Date
+              Expanded(
+                flex: 2,
+                child: Text(
+                  DateFormat('dd.MM.yyyy').format(invoice.dueDate),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF667085),
+                  ),
                 ),
               ),
-            ),
-            // Amount
-            Expanded(
-              flex: 2,
-              child: Text(
-                '₦${NumberFormat('#,###').format(invoice.totalAmount)}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF344054),
+              // Amount
+              Expanded(
+                flex: 2,
+                child: Text(
+                  '₦${NumberFormat('#,###').format(invoice.totalAmount)}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF344054),
+                  ),
                 ),
               ),
-            ),
-            // Status
-            _buildStatusBadge(invoice.status),
-          ],
+              // Status
+              _buildStatusBadge(invoice.status),
+            ],
+          ),
         ),
       ),
     );
