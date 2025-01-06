@@ -138,7 +138,7 @@ class SidebarMenu extends StatelessWidget {
             icon,
             key: ValueKey(isSelected),
             color:
-                isSelected ? const Color(0xFFE84C3D) : const Color(0xFF464646),
+                isSelected ? const Color(0xFFE04403) : const Color(0xFF464646),
             width: 24,
             height: 24,
           ),
@@ -149,7 +149,7 @@ class SidebarMenu extends StatelessWidget {
             fontSize: 20,
             fontWeight: FontWeight.w600,
             color:
-                isSelected ? const Color(0xFFE84C3D) : const Color(0xFF464646),
+                isSelected ? const Color(0xFFE04403) : const Color(0xFF464646),
           ),
           child: Text(title),
         ),

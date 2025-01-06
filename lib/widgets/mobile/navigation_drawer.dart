@@ -16,7 +16,7 @@ class AppNavigationDrawer extends StatelessWidget {
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              color: Color(0xFFE84C3D),
+              color: Color(0xFFE04403),
             ),
             child: Center(
               child: Image.asset(
@@ -87,11 +87,11 @@ class AppNavigationDrawer extends StatelessWidget {
     return ListTile(
       leading: SvgPicture.asset(
         icon,
-        color: isSelected ? const Color(0xFFE84C3D) : Colors.grey[600],
+        color: isSelected ? const Color(0xFFE04403) : Colors.grey[600],
       ),
       title: AppText(
         title,
-        color: isSelected ? const Color(0xFFE84C3D) : Colors.grey[600],
+        color: isSelected ? const Color(0xFFE04403) : Colors.grey[600],
       ),
       selected: isSelected,
       onTap: () {

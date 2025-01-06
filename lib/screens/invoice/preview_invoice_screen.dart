@@ -59,7 +59,7 @@ class PreviewInvoiceScreen extends StatelessWidget {
                         // Handle send invoice
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE84C3D),
+                        backgroundColor: const Color(0xFFE04403),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),

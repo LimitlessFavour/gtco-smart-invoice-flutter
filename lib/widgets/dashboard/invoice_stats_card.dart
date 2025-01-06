@@ -75,7 +75,7 @@ class InvoiceStatsCard extends StatelessWidget {
                           ),
                           PieChartSectionData(
                             value: 50,
-                            color: const Color(0xFFE84C3D),
+                            color: const Color(0xFFE04403),
                             radius: 20,
                             showTitle: false,
                           ),
@@ -113,7 +113,7 @@ class InvoiceStatsCard extends StatelessWidget {
             children: [
               _buildLegendItem('Paid', Colors.green),
               const Gap(16),
-              _buildLegendItem('Unpaid', const Color(0xFFE84C3D)),
+              _buildLegendItem('Unpaid', const Color(0xFFE04403)),
               const Gap(16),
               _buildLegendItem('Drafted', Colors.grey),
             ],
@@ -143,4 +143,4 @@ class InvoiceStatsCard extends StatelessWidget {
       ],
     );
   }
-} 
+}

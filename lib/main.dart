@@ -24,8 +24,8 @@ class MyApp extends StatelessWidget {
       title: 'GTCO Smart Invoice',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFE84C3D),
-          primary: const Color(0xFFE84C3D),
+          seedColor: const Color(0xFFE04403),
+          primary: const Color(0xFFE04403),
         ),
         textTheme: GoogleFonts.urbanistTextTheme(
           Theme.of(context).textTheme,
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE84C3D)),
+            borderSide: const BorderSide(color: Color(0xFFE04403)),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(

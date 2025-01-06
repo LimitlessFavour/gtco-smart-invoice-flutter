@@ -61,8 +61,8 @@ class DashboardContent extends StatelessWidget {
                                         vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
-                                        border:
-                                            Border.all(color: Colors.grey[300]!),
+                                        border: Border.all(
+                                            color: Colors.grey[300]!),
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Row(
@@ -129,6 +129,7 @@ class DashboardContent extends StatelessWidget {
                               ],
                             ),
                           ),
+                          const Gap(24),
                         ],
                       ),
                     ),
@@ -151,6 +152,7 @@ class DashboardContent extends StatelessWidget {
                             decoration: AppStyles.cardDecoration,
                             child: const ActivityCard(),
                           ),
+                          const Gap(24),
                         ],
                       ),
                     ),

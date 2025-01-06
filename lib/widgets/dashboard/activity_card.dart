@@ -136,7 +136,7 @@ class ActivityCard extends StatelessWidget {
       ),
       ActivityItem(
         icon: Icons.receipt,
-        color: const Color(0xFFE84C3D),
+        color: const Color(0xFFE04403),
         title: 'Invoice Generated',
         description:
             'Invoice #1001 of amount N300,000 has been generated and is read to be sent to Ire Victor.',

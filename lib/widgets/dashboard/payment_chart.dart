@@ -17,7 +17,17 @@ class PaymentChart extends StatelessWidget {
                 sideTitles: SideTitles(
                   showTitles: true,
                   getTitlesWidget: (value, meta) {
-                    const months = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan'];
+                    const months = [
+                      'May',
+                      'Jun',
+                      'Jul',
+                      'Aug',
+                      'Sep',
+                      'Oct',
+                      'Nov',
+                      'Dec',
+                      'Jan'
+                    ];
                     if (value >= 0 && value < months.length) {
                       return Text(
                         months[value.toInt()],
@@ -65,16 +75,25 @@ class PaymentChart extends StatelessWidget {
             ),
             borderData: FlBorderData(show: false),
             barGroups: [
-              150000, 300000, 100000, 200000, 450000, 300000, 400000, 500000, 150000,
+              150000,
+              300000,
+              100000,
+              200000,
+              450000,
+              300000,
+              400000,
+              500000,
+              150000,
             ].asMap().entries.map((entry) {
               return BarChartGroupData(
                 x: entry.key,
                 barRods: [
                   BarChartRodData(
                     toY: entry.value.toDouble(),
-                    color: const Color(0xFFE84C3D),
+                    color: const Color(0xFFE04403),
                     width: constraints.maxWidth / 20,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(4)),
                   ),
                 ],
               );

@@ -99,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             _rememberMe = value ?? false;
                           });
                         },
-                        activeColor: const Color(0xFFE84C3D),
+                        activeColor: const Color(0xFFE04403),
                       ),
                       const AppText('Remember me'),
                     ],
@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: const AppText(
                       'Forgot Password?',
-                      color: Color(0xFFE84C3D),
+                      color: Color(0xFFE04403),
                     ),
                   ),
                 ],
@@ -123,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE84C3D),
+                  backgroundColor: const Color(0xFFE04403),
                   minimumSize: const Size(double.infinity, 48),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -195,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                     child: const AppText(
                       'Sign Up',
-                      color: Color(0xFFE84C3D),
+                      color: Color(0xFFE04403),
                     ),
                   ),
                 ],
