@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/invoice/invoices_sent_out_today.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/navigation_service.dart';
 import '../../widgets/invoice/invoice_empty_state.dart';
 import '../../widgets/invoice/invoice_stats_card.dart';
+import '../../widgets/invoice/invoice_tile.dart';
 
 class InvoiceListContent extends StatelessWidget {
   const InvoiceListContent({super.key});
@@ -23,41 +26,8 @@ class InvoiceListContent extends StatelessWidget {
               // Header Row
               const HeaderRow(),
               const Gap(24),
-
               // Stats Row
-              const SizedBox(
-                height: 120,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InvoiceStatsCard(
-                      icon: 'assets/icons/clock.svg',
-                      amount: '₦0',
-                      label: 'Overdue amount',
-                    ),
-                    // Gap(40),
-                    InvoiceStatsCard(
-                      icon: 'assets/icons/draft.svg',
-                      amount: '₦0',
-                      label: 'Drafted total',
-                    ),
-                    // Gap(40),
-                    InvoiceStatsCard(
-                      icon: 'assets/icons/update.svg',
-                      amount: '₦0',
-                      label: 'Updated total',
-                    ),
-                    // Gap(40),
-                    InvoiceStatsCard(
-                      icon: 'assets/icons/timer.svg',
-                      amount: '0 day',
-                      label: 'Average paid time',
-                    ),
-                    // Gap(40),
-                    InvoicesSentOutToday(),
-                  ],
-                ),
-              ),
+              const StatsRow(),
               Expanded(
                 child: Container(
                   width: double.maxFinite,
@@ -71,16 +41,37 @@ class InvoiceListContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: const Color(0xFFC6C1C1)),
                   ),
-                  child: const Column(
+                  child:  Column(
                     children: [
                       // Search and Filter Row
-                      SearchAndFilterRow(),
-                      Gap(24),
+                      const SearchAndFilterRow(),
+                      const Gap(24),
                       // Table Header
-                      TableHeader(),
-                      Gap(24),
+                      const TableHeader(),
+                      const Gap(24),
                       // Empty State
-                      Expanded(child: InvoiceEmptyState()),
+                      Expanded(
+                        child: Consumer<InvoiceProvider>(
+                          builder: (context, provider, child) {
+                            return LoadingOverlay(
+                              isLoading: provider.isLoading,
+                              child: provider.hasInvoices
+                                  ? ListView.separated(
+                                      padding: const EdgeInsets.all(24),
+                                      itemCount: provider.invoices.length,
+                                      separatorBuilder: (context, index) =>
+                                          const Gap(16),
+                                      itemBuilder: (context, index) {
+                                        final invoice =
+                                            provider.invoices[index];
+                                        return InvoiceTile(invoice: invoice);
+                                      },
+                                    )
+                                  : const InvoiceEmptyState(),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -90,6 +81,49 @@ class InvoiceListContent extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class StatsRow extends StatelessWidget {
+  const StatsRow({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 120,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          InvoiceStatsCard(
+            icon: 'assets/icons/clock.svg',
+            amount: '₦0',
+            label: 'Overdue amount',
+          ),
+          // Gap(40),
+          InvoiceStatsCard(
+            icon: 'assets/icons/draft.svg',
+            amount: '₦0',
+            label: 'Drafted total',
+          ),
+          // Gap(40),
+          InvoiceStatsCard(
+            icon: 'assets/icons/update.svg',
+            amount: '₦0',
+            label: 'Updated total',
+          ),
+          // Gap(40),
+          InvoiceStatsCard(
+            icon: 'assets/icons/timer.svg',
+            amount: '0 day',
+            label: 'Average paid time',
+          ),
+          // Gap(40),
+          InvoicesSentOutToday(),
+        ],
+      ),
     );
   }
 }

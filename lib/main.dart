@@ -2,9 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 import 'package:provider/provider.dart';
+import 'package:gtco_smart_invoice_flutter/services/api_client.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
+import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
+import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
 
 void main() {
   // Initialize navigation history for web
@@ -16,7 +22,30 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationService()),
-        // ... other providers
+        Provider(
+          create: (_) => ApiClient(baseUrl: 'https://api.example.com'),
+        ),
+        Provider(
+          create: (context) => InvoiceRepository(
+            context.read<ApiClient>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => InvoiceProvider(
+            context.read<InvoiceRepository>(),
+          ),
+        ),
+        // Product providers
+        Provider(
+          create: (context) => ProductRepository(
+            context.read<ApiClient>(),
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ProductProvider(
+            context.read<ProductRepository>(),
+          ),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -72,8 +101,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      // home: const AppInitializer(),
-      home: const WebMainLayout(),
+      home: const AppInitializer(),
     );
   }
 }
@@ -105,6 +133,7 @@ class _AppInitializerState extends State<AppInitializer> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
+          // return const LandingScreen();
           // Replace with your actual initial screen
           return const WebMainLayout();
         }

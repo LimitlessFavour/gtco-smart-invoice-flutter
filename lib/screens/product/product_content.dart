@@ -1,60 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/product/product_empty_state.dart';
 import '../../services/navigation_service.dart';
 import 'package:provider/provider.dart';
+import '../../widgets/product/product_tile.dart';
 
 class ProductContent extends StatelessWidget {
   const ProductContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Row
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppText(
-                'All Products',
-                size: 24,
-                weight: FontWeight.w600,
-              ),
-              CreateProductButton(),
-            ],
-          ),
-          const Gap(24),
+    return Consumer<ProductProvider>(
+      builder: (context, provider, child) {
+        return LoadingOverlay(
+          isLoading: provider.isLoading,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Row
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    AppText(
+                      'All Products',
+                      size: 24,
+                      weight: FontWeight.w600,
+                    ),
+                    CreateProductButton(),
+                  ],
+                ),
+                const Gap(24),
 
-          // Main Content
-          Expanded(
-            child: Container(
-              width: double.maxFinite,
-              padding: const EdgeInsets.symmetric(
-                vertical: 32,
-                horizontal: 24,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFC6C1C1)),
-              ),
-              child: const Column(
-                children: [
-                  ProductSearchRow(),
-                  Gap(24),
-                  ProductTableHeader(),
-                  Gap(24),
-                  Expanded(child: ProductEmptyState()),
-                ],
-              ),
+                // Main Content
+                Expanded(
+                  child: Container(
+                    width: double.maxFinite,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 32,
+                      horizontal: 24,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFC6C1C1)),
+                    ),
+                    child: Column(
+                      children: [
+                        ProductSearchRow(
+                          onSearch: provider.setSearchQuery,
+                        ),
+                        const Gap(24),
+                        const ProductTableHeader(),
+                        const Gap(24),
+                        Expanded(
+                          child: provider.hasProducts
+                              ? ListView.builder(
+                                  itemCount: provider.products.length,
+                                  itemBuilder: (context, index) {
+                                    return ProductTile(
+                                      product: provider.products[index],
+                                    );
+                                  },
+                                )
+                              : const ProductEmptyState(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -66,7 +89,9 @@ class CreateProductButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.read<NavigationService>().navigateToProductScreen(ProductScreen.create);
+        context
+            .read<NavigationService>()
+            .navigateToProductScreen(ProductScreen.create);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -146,7 +171,12 @@ class ProductTableHeader extends StatelessWidget {
 }
 
 class ProductSearchRow extends StatelessWidget {
-  const ProductSearchRow({super.key});
+  final Function(String) onSearch;
+
+  const ProductSearchRow({
+    super.key,
+    required this.onSearch,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +209,7 @@ class ProductSearchRow extends StatelessWidget {
                   vertical: 8,
                 ),
               ),
+              onChanged: onSearch,
             ),
           ),
         ),

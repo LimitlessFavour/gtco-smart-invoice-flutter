@@ -13,25 +13,27 @@ class SetupScreen extends StatelessWidget {
     return Scaffold(
       body: AuthBackground(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Gap(32),
             const GtcoLogo(),
-            const Spacer(),
+            const Gap(48),
             Image.asset(
               'assets/images/receipt.png',
               height: 200,
               fit: BoxFit.contain,
             ),
             const Gap(32),
-            AppText.heading('Set up your business',
-                textAlign: TextAlign.center),
+            AppText.heading(
+              'Set up your business',
+              textAlign: TextAlign.center,
+            ),
             const Gap(16),
             AppText.subheading(
               'Create professional invoices, track payments, and manage your business finances all in one place.',
               textAlign: TextAlign.center,
             ),
-            const Spacer(),
+            const Gap(48),
             ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(

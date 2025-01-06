@@ -27,11 +27,20 @@ enum ClientScreen {
   create,
 }
 
+enum SettingsScreen {
+  list,
+  basicInformation,
+  brandAppearance,
+  manageUsers,
+  productsUpdate,
+}
+
 class NavigationService extends ChangeNotifier {
   AppScreen _currentScreen = AppScreen.dashboard;
   InvoiceScreen _currentInvoiceScreen = InvoiceScreen.list;
   ProductScreen _currentProductScreen = ProductScreen.list;
   ClientScreen _currentClientScreen = ClientScreen.list;
+  SettingsScreen _currentSettingsScreen = SettingsScreen.list;
 
   NavigationService() {
     if (html.window != null) {
@@ -44,6 +53,7 @@ class NavigationService extends ChangeNotifier {
   InvoiceScreen get currentInvoiceScreen => _currentInvoiceScreen;
   ProductScreen get currentProductScreen => _currentProductScreen;
   ClientScreen get currentClientScreen => _currentClientScreen;
+  SettingsScreen get currentSettingsScreen => _currentSettingsScreen;
 
   bool canGoBack() {
     switch (_currentScreen) {
@@ -53,6 +63,8 @@ class NavigationService extends ChangeNotifier {
         return _currentProductScreen == ProductScreen.create;
       case AppScreen.client:
         return _currentClientScreen == ClientScreen.create;
+      case AppScreen.settings:
+        return _currentSettingsScreen != SettingsScreen.list;
       default:
         return false;
     }
@@ -122,6 +134,14 @@ class NavigationService extends ChangeNotifier {
           return true;
         }
         return false;
+      case AppScreen.settings:
+        if (_currentSettingsScreen != SettingsScreen.list) {
+          _currentSettingsScreen = SettingsScreen.list;
+          _updateBrowserUrl('/settings');
+          notifyListeners();
+          return true;
+        }
+        return false;
       default:
         return false;
     }
@@ -145,6 +165,13 @@ class NavigationService extends ChangeNotifier {
     _currentClientScreen = screen;
     _currentScreen = AppScreen.client;
     _updateBrowserUrl('/client${screen == ClientScreen.create ? '/create' : ''}');
+    notifyListeners();
+  }
+
+  void navigateToSettingsScreen(SettingsScreen screen) {
+    _currentSettingsScreen = screen;
+    _currentScreen = AppScreen.settings;
+    _updateBrowserUrl('/settings${screen == SettingsScreen.list ? '' : '/${screen.toString().split('.').last}'}');
     notifyListeners();
   }
 

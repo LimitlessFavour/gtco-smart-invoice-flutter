@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_button.dart';
 import '../common/app_text.dart';
 
 class CreateProductForm extends StatefulWidget {
@@ -122,13 +123,17 @@ class _CreateProductFormState extends State<CreateProductForm> {
                           child: const Text('Cancel'),
                         ),
                         const Gap(16),
-                        ElevatedButton(
-                          onPressed: _handleSubmit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4CAF50),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Save'),
+                        ProductActionButton(
+                          isEdit: widget.isEdit,
+                          formData: {
+                            'productName': _nameController.text,
+                            'description': _descriptionController.text,
+                            'category': _categoryController.text,
+                            'price': _priceController.text,
+                            'quantity': _quantityController.text,
+                            'vatCategory': _selectedVatCategory,
+                          },
+                          onCancel: widget.onCancel,
                         ),
                       ],
                     ),
