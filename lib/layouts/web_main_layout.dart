@@ -8,10 +8,13 @@ import 'package:gtco_smart_invoice_flutter/screens/invoice/create_invoice_conten
 import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_list_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/product/product_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/settings/settings_content.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/client/create_client_form.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_form.dart';
 import 'package:provider/provider.dart';
 import '../services/navigation_service.dart';
 import '../widgets/web/sidebar_menu.dart';
+import '../widgets/common/slide_panel.dart';
 
 class WebMainLayout extends StatelessWidget {
   const WebMainLayout({super.key});
@@ -26,35 +29,59 @@ class WebMainLayout extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFFAFAFA),
-        body: Row(
+        body: Stack(
           children: [
-            const SidebarMenu(),
-            Expanded(
-              child: Column(
-                children: [
-                  const TopBar(),
-                  Expanded(
-                    child: Consumer<NavigationService>(
-                      builder: (context, navigation, _) {
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder:
-                              (Widget child, Animation<double> animation) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
+            Row(
+              children: [
+                const SidebarMenu(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      const TopBar(),
+                      Expanded(
+                        child: Consumer<NavigationService>(
+                          builder: (context, navigation, _) {
+                            return AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: KeyedSubtree(
+                                key: ValueKey<AppScreen>(navigation.currentScreen),
+                                child: _buildContent(navigation.currentScreen),
+                              ),
                             );
                           },
-                          child: KeyedSubtree(
-                            key: ValueKey<AppScreen>(navigation.currentScreen),
-                            child: _buildContent(navigation.currentScreen),
-                          ),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
+            // Global Slide Panels
+            Consumer<NavigationService>(
+              builder: (context, navigation, _) {
+                return Stack(
+                  children: [
+                    // Client Create Panel
+                    SlidePanel(
+                      isOpen: navigation.currentScreen == AppScreen.client && 
+                             navigation.currentClientScreen == ClientScreen.create,
+                      onClose: () => navigation.navigateToClientScreen(ClientScreen.list),
+                      child: CreateClientForm(
+                        onCancel: () => navigation.navigateToClientScreen(ClientScreen.list),
+                      ),
+                    ),
+                    // Product Create Panel
+                    SlidePanel(
+                      isOpen: navigation.currentScreen == AppScreen.product && 
+                             navigation.currentProductScreen == ProductScreen.create,
+                      onClose: () => navigation.navigateToProductScreen(ProductScreen.list),
+                      child: CreateProductForm(
+                        onCancel: () => navigation.navigateToProductScreen(ProductScreen.list),
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ],
         ),

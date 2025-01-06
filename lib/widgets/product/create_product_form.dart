@@ -5,7 +5,7 @@ import '../common/app_text.dart';
 class CreateProductForm extends StatefulWidget {
   final bool isEdit;
   final VoidCallback onCancel;
-  
+
   const CreateProductForm({
     super.key,
     this.isEdit = false,
@@ -60,7 +60,6 @@ class _CreateProductFormState extends State<CreateProductForm> {
               ],
             ),
           ),
-          const Divider(),
           // Form Fields
           Expanded(
             child: SingleChildScrollView(
@@ -111,35 +110,31 @@ class _CreateProductFormState extends State<CreateProductForm> {
                   ),
                   const Gap(24),
                   _buildImageUpload(),
+                  // Actions
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: const BoxDecoration(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: widget.onCancel,
+                          child: const Text('Cancel'),
+                        ),
+                        const Gap(16),
+                        ElevatedButton(
+                          onPressed: _handleSubmit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF4CAF50),
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Save'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ),
-          // Actions
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Color(0xFFE0E0E0)),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: widget.onCancel,
-                  child: const Text('Cancel'),
-                ),
-                const Gap(16),
-                ElevatedButton(
-                  onPressed: _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Save'),
-                ),
-              ],
             ),
           ),
         ],
@@ -255,4 +250,4 @@ class _CreateProductFormState extends State<CreateProductForm> {
       widget.onCancel();
     }
   }
-} 
+}

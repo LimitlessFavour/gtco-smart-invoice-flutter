@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/widgets/common/slide_panel.dart';
-import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_form.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/product/product_empty_state.dart';
 import '../../services/navigation_service.dart';
@@ -12,79 +10,51 @@ class ProductContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<NavigationService>(
-      builder: (context, navigation, _) {
-        return Stack(
-          children: [
-            // Main Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Row
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppText(
-                        'All Products',
-                        size: 24,
-                        weight: FontWeight.w600,
-                      ),
-                      CreateProductButton(),
-                    ],
-                  ),
-                  const Gap(24),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText(
+                'All Products',
+                size: 24,
+                weight: FontWeight.w600,
+              ),
+              CreateProductButton(),
+            ],
+          ),
+          const Gap(24),
 
-                  // Main Content
-                  Expanded(
-                    child: Container(
-                      width: double.maxFinite,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 32,
-                        horizontal: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFC6C1C1)),
-                      ),
-                      child: const Column(
-                        children: [
-                          // Search and Filter Row
-                          ProductSearchRow(),
-                          Gap(24),
-                          // Table Header
-                          ProductTableHeader(),
-                          Gap(24),
-                          // Empty State
-                          Expanded(child: ProductEmptyState()),
-                        ],
-                      ),
-                    ),
-                  ),
+          // Main Content
+          Expanded(
+            child: Container(
+              width: double.maxFinite,
+              padding: const EdgeInsets.symmetric(
+                vertical: 32,
+                horizontal: 24,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFC6C1C1)),
+              ),
+              child: const Column(
+                children: [
+                  ProductSearchRow(),
+                  Gap(24),
+                  ProductTableHeader(),
+                  Gap(24),
+                  Expanded(child: ProductEmptyState()),
                 ],
               ),
             ),
-            // Slide Panel
-            SlidePanel(
-              isOpen: navigation.currentProductScreen == ProductScreen.create,
-              onClose: () {
-                context
-                    .read<NavigationService>()
-                    .navigateToProductScreen(ProductScreen.list);
-              },
-              child: CreateProductForm(
-                onCancel: () {
-                  context
-                      .read<NavigationService>()
-                      .navigateToProductScreen(ProductScreen.list);
-                },
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }

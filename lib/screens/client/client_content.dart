@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/widgets/common/slide_panel.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/client/client_empty_state.dart';
-import '../../widgets/client/create_client_form.dart';
 import '../../services/navigation_service.dart';
 import 'package:provider/provider.dart';
 
@@ -12,79 +10,51 @@ class ClientContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<NavigationService>(
-      builder: (context, navigation, _) {
-        return Stack(
-          children: [
-            // Main Content
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Header Row
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AppText(
-                        'Clients',
-                        size: 24,
-                        weight: FontWeight.w600,
-                      ),
-                      CreateClientButton(),
-                    ],
-                  ),
-                  const Gap(24),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppText(
+                'Clients',
+                size: 24,
+                weight: FontWeight.w600,
+              ),
+              CreateClientButton(),
+            ],
+          ),
+          const Gap(24),
 
-                  // Main Content
-                  Expanded(
-                    child: Container(
-                      width: double.maxFinite,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 32,
-                        horizontal: 24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFC6C1C1)),
-                      ),
-                      child: const Column(
-                        children: [
-                          // Search and Filter Row
-                          ClientSearchRow(),
-                          Gap(24),
-                          // Table Header
-                          ClientTableHeader(),
-                          Gap(24),
-                          // Empty State
-                          Expanded(child: ClientEmptyState()),
-                        ],
-                      ),
-                    ),
-                  ),
+          // Main Content
+          Expanded(
+            child: Container(
+              width: double.maxFinite,
+              padding: const EdgeInsets.symmetric(
+                vertical: 32,
+                horizontal: 24,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFC6C1C1)),
+              ),
+              child: const Column(
+                children: [
+                  ClientSearchRow(),
+                  Gap(24),
+                  ClientTableHeader(),
+                  Gap(24),
+                  Expanded(child: ClientEmptyState()),
                 ],
               ),
             ),
-            // Slide Panel
-            SlidePanel(
-              isOpen: navigation.currentClientScreen == ClientScreen.create,
-              onClose: () {
-                context
-                    .read<NavigationService>()
-                    .navigateToClientScreen(ClientScreen.list);
-              },
-              child: CreateClientForm(
-                onCancel: () {
-                  context
-                      .read<NavigationService>()
-                      .navigateToClientScreen(ClientScreen.list);
-                },
-              ),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      ),
     );
   }
 }
