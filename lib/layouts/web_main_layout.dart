@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/screens/client/client_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/dashboard/dashboard_content.dart';
-import 'package:gtco_smart_invoice_flutter/screens/help/help_center_content.dart';
+import 'package:gtco_smart_invoice_flutter/screens/help_center/help_center_content.dart';
+import 'package:gtco_smart_invoice_flutter/screens/invoice/create_invoice_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_list_content.dart';
+import 'package:gtco_smart_invoice_flutter/screens/product/product_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/settings/settings_content.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
@@ -15,39 +18,46 @@ class WebMainLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      body: Row(
-        children: [
-          const SidebarMenu(),
-          Expanded(
-            child: Column(
-              children: [
-                const TopBar(),
-                Expanded(
-                  child: Consumer<NavigationService>(
-                    builder: (context, navigation, _) {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                          return FadeTransition(
-                            opacity: animation,
-                            child: child,
-                          );
-                        },
-                        child: KeyedSubtree(
-                          key: ValueKey<AppScreen>(navigation.currentScreen),
-                          child: _buildContent(navigation.currentScreen),
-                        ),
-                      );
-                    },
+    return PopScope(
+      canPop: !context.read<NavigationService>().canGoBack(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        context.read<NavigationService>().handleBackPress();
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFAFAFA),
+        body: Row(
+          children: [
+            const SidebarMenu(),
+            Expanded(
+              child: Column(
+                children: [
+                  const TopBar(),
+                  Expanded(
+                    child: Consumer<NavigationService>(
+                      builder: (context, navigation, _) {
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder:
+                              (Widget child, Animation<double> animation) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
+                          child: KeyedSubtree(
+                            key: ValueKey<AppScreen>(navigation.currentScreen),
+                            child: _buildContent(navigation.currentScreen),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -57,11 +67,17 @@ class WebMainLayout extends StatelessWidget {
       case AppScreen.dashboard:
         return const DashboardContent();
       case AppScreen.invoice:
-        return const InvoiceListContent();
+        return Consumer<NavigationService>(
+          builder: (context, navigation, _) {
+            return navigation.currentInvoiceScreen == InvoiceScreen.list
+                ? const InvoiceListContent()
+                : const CreateInvoiceContent();
+          },
+        );
       case AppScreen.product:
-        return const Center(child: Text('Product Screen - Coming Soon'));
+        return const ProductContent();
       case AppScreen.client:
-        return const Center(child: Text('Client Screen - Coming Soon'));
+        return const ClientContent();
       case AppScreen.settings:
         return const SettingsContent();
       case AppScreen.helpCenter:

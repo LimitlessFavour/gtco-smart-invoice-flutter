@@ -3,8 +3,10 @@ import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/invoice/create_invoice_screen.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/invoice/invoices_sent_out_today.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/invoice/invoice_stats_card.dart';
 import '../../widgets/invoice/invoice_empty_state.dart';
+import '../../services/navigation_service.dart';
 
 class InvoiceListContent extends StatelessWidget {
   const InvoiceListContent({super.key});
@@ -114,20 +116,15 @@ class HeaderRow extends StatelessWidget {
 }
 
 class CreateInvoiceButton extends StatelessWidget {
-  const CreateInvoiceButton({
-    super.key,
-  });
+  const CreateInvoiceButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const CreateInvoiceScreen(),
-          ),
-        );
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.create);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(
