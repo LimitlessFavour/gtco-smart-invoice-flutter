@@ -5,7 +5,6 @@ import '../../widgets/auth/custom_text_field.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/auth/auth_background.dart';
 import '../../widgets/common/app_text.dart';
-import '../../screens/auth/profile_info_screen.dart';
 
 class BusinessInfoScreen extends StatefulWidget {
   const BusinessInfoScreen({super.key});

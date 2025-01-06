@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/dashboard/dashboard_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/help/help_center_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_list_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/settings/settings_content.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
 import '../services/navigation_service.dart';
 import '../widgets/web/sidebar_menu.dart';
-import '../screens/dashboard/dashboard_screen.dart';
-import '../screens/invoice/invoice_list_screen.dart';
-import '../screens/settings/settings_screen.dart';
-import '../screens/help/help_center_screen.dart';
 
 class WebMainLayout extends StatelessWidget {
   const WebMainLayout({super.key});
@@ -24,43 +23,24 @@ class WebMainLayout extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0XFFFFFFFF),
-                    border: Border.all(
-                      color: const Color(0XFFC6C1C1),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Consumer<NavigationService>(
-                        builder: (context, navigation, _) {
-                          return Text(
-                            _getTitle(navigation.currentScreen),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          );
-                        },
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_outlined),
-                        onPressed: () {},
-                      ),
-                      const CircleAvatar(
-                        backgroundImage:
-                            AssetImage('assets/images/avatar_placeholder.png'),
-                      ),
-                    ],
-                  ),
-                ),
+                const TopBar(),
                 Expanded(
                   child: Consumer<NavigationService>(
                     builder: (context, navigation, _) {
-                      return _buildContent(navigation.currentScreen);
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        },
+                        child: KeyedSubtree(
+                          key: ValueKey<AppScreen>(navigation.currentScreen),
+                          child: _buildContent(navigation.currentScreen),
+                        ),
+                      );
                     },
                   ),
                 ),
@@ -70,23 +50,6 @@ class WebMainLayout extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _getTitle(AppScreen screen) {
-    switch (screen) {
-      case AppScreen.dashboard:
-        return 'Overview';
-      case AppScreen.invoice:
-        return 'Invoices';
-      case AppScreen.product:
-        return 'Products';
-      case AppScreen.client:
-        return 'Clients';
-      case AppScreen.settings:
-        return 'Settings';
-      case AppScreen.helpCenter:
-        return 'Help Center';
-    }
   }
 
   Widget _buildContent(AppScreen screen) {
@@ -104,5 +67,61 @@ class WebMainLayout extends StatelessWidget {
       case AppScreen.helpCenter:
         return const HelpCenterContent();
     }
+  }
+}
+
+class TopBar extends StatelessWidget {
+  const TopBar({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      decoration: const BoxDecoration(
+        color: Color(0XFFFAFAFA),
+      ),
+      child: Row(
+        children: [
+          const Spacer(),
+          SvgPicture.asset(
+            'assets/icons/notification.svg',
+            colorFilter: const ColorFilter.mode(
+              Colors.black,
+              BlendMode.srcIn,
+            ),
+            width: 24,
+            height: 24,
+          ),
+          const Gap(40),
+          Row(
+            children: [
+              const CircleAvatar(
+                backgroundImage:
+                    AssetImage('assets/images/avatar_placeholder.png'),
+              ),
+              const Gap(12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText(
+                    'Bee Daisy Hair & Merchandise',
+                    weight: FontWeight.w600,
+                    size: 16,
+                  ),
+                  AppText(
+                    'Sales Admin',
+                    color: Colors.grey[600],
+                    size: 14,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

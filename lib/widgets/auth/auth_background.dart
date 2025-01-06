@@ -1,32 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 
-class AuthBackground extends StatefulWidget {
+class AuthBackground extends StatelessWidget {
   final Widget child;
 
   const AuthBackground({
     super.key,
     required this.child,
   });
-
-  @override
-  State<AuthBackground> createState() => _AuthBackgroundState();
-}
-
-class _AuthBackgroundState extends State<AuthBackground> {
-  @override
-  void initState() {
-    super.initState();
-    _precacheImages();
-  }
-
-  Future<void> _precacheImages() async {
-    await Future.wait([
-      precacheImage(const AssetImage('assets/images/background.png'), context),
-      precacheImage(
-          const AssetImage('assets/images/background_mobile.png'), context),
-    ]);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +53,7 @@ class _AuthBackgroundState extends State<AuthBackground> {
                       top: 32.0,
                       bottom: 24.0,
                     ),
-                    child: widget.child,
+                    child: child,
                   ),
                 ),
               ),

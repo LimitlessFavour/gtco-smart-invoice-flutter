@@ -4,6 +4,7 @@ import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 
 void main() {
   runApp(
@@ -63,8 +64,51 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      // home: const WebMainLayout(),
-      home: const LandingScreen(),
+      // home: const AppInitializer(),
+      home: const WebMainLayout(),
+    );
+  }
+}
+
+class AppInitializer extends StatefulWidget {
+  const AppInitializer({super.key});
+
+  @override
+  State<AppInitializer> createState() => _AppInitializerState();
+}
+
+class _AppInitializerState extends State<AppInitializer> {
+  late Future<void> _initFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFuture = _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await ImagePrecacher.precacheImages(context);
+    // Add any other initialization tasks here
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _initFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          // Replace with your actual initial screen
+          return const WebMainLayout();
+        }
+        // Show a loading screen while precaching
+        return const MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          ),
+        );
+      },
     );
   }
 }
