@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../widgets/invoice/invoice_stats_card.dart';
+import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/invoice/invoices_sent_out_today.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/navigation_service.dart';
 import '../../widgets/invoice/invoice_empty_state.dart';
-import '../../widgets/invoice/invoice_form.dart';
+import '../../widgets/invoice/invoice_stats_card.dart';
+import '../../widgets/invoice/invoice_tile.dart';
 
 class InvoiceListContent extends StatelessWidget {
   const InvoiceListContent({super.key});
@@ -10,123 +18,386 @@ class InvoiceListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Stack(
-          children: [
-            Container(
-              height: constraints.maxHeight,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InvoiceStatsCard(
-                            icon: 'assets/icons/clock.svg',
-                            amount: '₦30,000',
-                            label: 'Overdue amount',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: InvoiceStatsCard(
-                            icon: 'assets/icons/draft.svg',
-                            amount: '₦60,400',
-                            label: 'Drafted Total',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: InvoiceStatsCard(
-                            icon: 'assets/icons/update.svg',
-                            amount: '₦800,000',
-                            label: 'Updated Total',
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: InvoiceStatsCard(
-                            icon: 'assets/icons/timer.svg',
-                            amount: '8 days',
-                            label: 'Average paid time',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Enter invoice number',
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.filter_list),
-                          onPressed: () {},
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row
+              const HeaderRow(),
+              const Gap(24),
+              // Stats Row
+              const StatsRow(),
+              Expanded(
+                child: Container(
+                  width: double.maxFinite,
+                  margin: const EdgeInsets.only(top: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 32,
+                    horizontal: 24,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFC6C1C1)),
+                  ),
+                  child:  Column(
+                    children: [
+                      // Search and Filter Row
+                      const SearchAndFilterRow(),
+                      const Gap(24),
+                      // Table Header
+                      const TableHeader(),
+                      const Gap(24),
+                      // Empty State
+                      Expanded(
+                        child: Consumer<InvoiceProvider>(
+                          builder: (context, provider, child) {
+                            return LoadingOverlay(
+                              isLoading: provider.isLoading,
+                              child: provider.hasInvoices
+                                  ? ListView.separated(
+                                      padding: const EdgeInsets.all(24),
+                                      itemCount: provider.invoices.length,
+                                      separatorBuilder: (context, index) =>
+                                          const Gap(16),
+                                      itemBuilder: (context, index) {
+                                        final invoice =
+                                            provider.invoices[index];
+                                        return InvoiceTile(invoice: invoice);
+                                      },
+                                    )
+                                  : const InvoiceEmptyState(),
+                            );
+                          },
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: constraints.maxHeight - 300, // Adjust this value based on your content
-                      child: const InvoiceEmptyState(),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: FloatingActionButton.extended(
-                onPressed: () => _showCreateInvoice(context),
-                label: const Text('Create an invoice'),
-                icon: const Icon(Icons.add),
-                backgroundColor: const Color(0xFFE84C3D),
-              ),
-            ),
-          ],
+              const Gap(16),
+            ],
+          ),
         );
       },
     );
   }
+}
 
-  void _showCreateInvoice(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: Container(
-          width: 800,
-          height: MediaQuery.of(context).size.height * 0.9,
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Create Invoice',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+class StatsRow extends StatelessWidget {
+  const StatsRow({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 120,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          InvoiceStatsCard(
+            icon: 'assets/icons/clock.svg',
+            amount: '₦0',
+            label: 'Overdue amount',
+          ),
+          // Gap(40),
+          InvoiceStatsCard(
+            icon: 'assets/icons/draft.svg',
+            amount: '₦0',
+            label: 'Drafted total',
+          ),
+          // Gap(40),
+          InvoiceStatsCard(
+            icon: 'assets/icons/update.svg',
+            amount: '₦0',
+            label: 'Updated total',
+          ),
+          // Gap(40),
+          InvoiceStatsCard(
+            icon: 'assets/icons/timer.svg',
+            amount: '0 day',
+            label: 'Average paid time',
+          ),
+          // Gap(40),
+          InvoicesSentOutToday(),
+        ],
+      ),
+    );
+  }
+}
+
+class HeaderRow extends StatelessWidget {
+  const HeaderRow({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        AppText(
+          'Invoices',
+          size: 24,
+          weight: FontWeight.w600,
+        ),
+        CreateInvoiceButton(),
+      ],
+    );
+  }
+}
+
+class CreateInvoiceButton extends StatelessWidget {
+  const CreateInvoiceButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.create);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE04403),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AppText(
+              'Create invoice',
+              color: Colors.white,
+              weight: FontWeight.w500,
+            ),
+            Gap(4),
+            Icon(Icons.add, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TableHeader extends StatelessWidget {
+  const TableHeader({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE04403),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: AppText(
+              'INVOICE ID',
+              color: Colors.white,
+              weight: FontWeight.w600,
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: AppText(
+              'CUSTOMER',
+              color: Colors.white,
+              weight: FontWeight.w600,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: AppText(
+              'DATE',
+              color: Colors.white,
+              weight: FontWeight.w600,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: AppText(
+              'TOTAL',
+              color: Colors.white,
+              weight: FontWeight.w600,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: AppText(
+              'STATUS',
+              color: Colors.white,
+              weight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SearchAndFilterRow extends StatefulWidget {
+  const SearchAndFilterRow({
+    super.key,
+  });
+
+  @override
+  State<SearchAndFilterRow> createState() => _SearchAndFilterRowState();
+}
+
+class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
+  String selectedFilter = 'All invoices';
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Search Field
+        SizedBox(
+          width: 252, // Fixed width as per design
+          child: Container(
+            height: 32, // Height as per design
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Enter invoice number',
+                hintStyle: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey[600],
+                  size: 20,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
-              const Divider(),
-              const Expanded(
-                child: InvoiceForm(),
+            ),
+          ),
+        ),
+        const Gap(24),
+
+        // Filter Tabs
+        Container(
+          height: 32, // Match search bar height
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildFilterTab('All invoices'),
+              _buildFilterTab('Unpaid'),
+              _buildFilterTab('Draft'),
+            ],
+          ),
+        ),
+        const Spacer(),
+
+        // Filter Button
+        Container(
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.filter_list, size: 20, color: Colors.grey[800]),
+              const Gap(8),
+              Text(
+                'Filter',
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
+          ),
+        ),
+        const Gap(24),
+
+        // Sort Dropdown
+        Container(
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0E0E0)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Newest First',
+                style: TextStyle(
+                  color: Colors.grey[800],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const Gap(8),
+              Icon(Icons.keyboard_arrow_down,
+                  size: 20, color: Colors.grey[800]),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterTab(String label) {
+    final bool isSelected = selectedFilter == label;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectedFilter = label;
+        });
+      },
+      child: Container(
+        height: 32,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFF5F5F5) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[800],
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+            ),
           ),
         ),
       ),

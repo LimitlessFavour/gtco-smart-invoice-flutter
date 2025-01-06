@@ -76,7 +76,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         _acceptedTerms = value ?? false;
                       });
                     },
-                    activeColor: const Color(0xFFE84C3D),
+                    activeColor: const Color(0xFFE04403),
                   ),
                   Expanded(
                     child: AppText(
@@ -92,12 +92,12 @@ class _SignupScreenState extends State<SignupScreen> {
                 onPressed: _acceptedTerms
                     ? () {
                         // if (_formKey.currentState!.validate()) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SetupScreen(),
-                            ),
-                          );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SetupScreen(),
+                          ),
+                        );
                         // }
                       }
                     : null,
@@ -174,7 +174,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     },
                     child: const AppText(
                       'Log In',
-                      color: Color(0xFFE84C3D),
+                      color: Color(0xFFE04403),
                     ),
                   ),
                 ],

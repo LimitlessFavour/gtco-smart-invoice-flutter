@@ -71,7 +71,6 @@ class LandingScreen extends StatelessWidget {
     final buttonPaddingV = (12.0 * scaleFactor).clamp(10.0, 12.0);
     final buttonSpacing = (20.0 * scaleFactor).clamp(16.0, 20.0);
 
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 48,
@@ -83,7 +82,7 @@ class LandingScreen extends StatelessWidget {
         children: [
           if (isSmallScreen)
             Padding(
-              padding:  EdgeInsets.only(right:  0),
+              padding: EdgeInsets.only(right: 0),
               child: IconButton(
                 icon: const Icon(Icons.menu),
                 hoverColor: const Color(0xFFE04403).withOpacity(0.1),
@@ -117,7 +116,7 @@ class LandingScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFE84C3D)),
+                  side: const BorderSide(color: Color(0xFFE04403)),
                   padding: EdgeInsets.symmetric(
                     horizontal: buttonPaddingH,
                     vertical: buttonPaddingV,
@@ -136,7 +135,7 @@ class LandingScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const SignupScreen()),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE84C3D),
+                  backgroundColor: const Color(0xFFE04403),
                   padding: EdgeInsets.symmetric(
                     horizontal: buttonPaddingH,
                     vertical: buttonPaddingV,
@@ -163,7 +162,7 @@ class LandingScreen extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Color(0xFFE84C3D),
+              color: Color(0xFFE04403),
             ),
             child: GtcoLogo(color: Colors.white),
           ),
@@ -190,7 +189,6 @@ class LandingScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          
         ),
       ),
       child: AppText(
@@ -228,7 +226,7 @@ class LandingScreen extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE84C3D),
+                    color: const Color(0xFFE04403),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const AppText(
@@ -252,7 +250,7 @@ class LandingScreen extends StatelessWidget {
             'Send invoices on-the-go',
             size: 48,
             textAlign: TextAlign.center,
-            color: const Color(0xFFE84C3D),
+            color: const Color(0xFFE04403),
           ),
           const Gap(16),
           AppText.heading(

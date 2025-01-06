@@ -121,9 +121,7 @@ Generate code, corrections, and refactorings that comply with the basic principl
 - Deeply nested widgets can make state management more challenging. By keeping the tree shallow, it becomes easier to manage state and pass data between widgets
 - Break down large widgets into smaller, focused widgets
 - Utilize const constructors wherever possible to reduce rebuilds
-
-
-Use Gap instead of Sizedbox for spacing
+- Use Gap instead of Sizedbox for spacing
 
 
 ### Testing

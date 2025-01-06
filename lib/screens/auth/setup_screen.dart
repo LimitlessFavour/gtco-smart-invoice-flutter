@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/auth/profile_info_screen.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/common/app_text.dart';
-import '../../screens/auth/business_info_screen.dart';
+import '../../widgets/auth/auth_background.dart';
 
 class SetupScreen extends StatelessWidget {
   const SetupScreen({super.key});
@@ -11,56 +11,49 @@ class SetupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const GtcoLogo(),
-              const Spacer(),
-              Image.asset(
-                'assets/images/receipt.png',
-                height: 200,
-                fit: BoxFit.contain,
-              ),
-              const Gap(32),
-              AppText.heading('Set up your business',
-                  textAlign: TextAlign.center),
-              const Gap(16),
-              AppText.subheading(
-                'Create professional invoices, track payments, and manage your business finances all in one place.',
-                textAlign: TextAlign.center,
-              ),
-              const Spacer(),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ProfileInfoScreen(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+      body: AuthBackground(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Gap(32),
+            const GtcoLogo(),
+            const Gap(48),
+            Image.asset(
+              'assets/images/receipt.png',
+              height: 200,
+              fit: BoxFit.contain,
+            ),
+            const Gap(32),
+            AppText.heading(
+              'Set up your business',
+              textAlign: TextAlign.center,
+            ),
+            const Gap(16),
+            AppText.subheading(
+              'Create professional invoices, track payments, and manage your business finances all in one place.',
+              textAlign: TextAlign.center,
+            ),
+            const Gap(48),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileInfoScreen(),
                   ),
-                ),
-                child: const Text(
-                  'Get Started',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                minimumSize: const Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-            ],
-          ),
+              child: AppText.button('Get Started'),
+            ),
+            const Gap(32),
+          ],
         ),
       ),
     );

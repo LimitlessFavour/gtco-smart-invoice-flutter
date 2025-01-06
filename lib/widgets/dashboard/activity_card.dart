@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:timelines/timelines.dart';
+import 'package:gtco_smart_invoice_flutter/constants/styles.dart';
 import '../common/app_text.dart';
 
 class ActivityCard extends StatelessWidget {
@@ -6,41 +9,113 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: AppStyles.cardDecoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const AppText(
+            'Activity',
+            size: 18,
+            weight: FontWeight.w600,
+          ),
+          const Gap(24),
+          Expanded(
+            child: Timeline.tileBuilder(
+              theme: TimelineThemeData(
+                nodePosition: 0,
+                connectorTheme: const ConnectorThemeData(
+                  thickness: 1.0,
+                  color: Color(0xFFE0E0E0),
+                ),
+              ),
+              builder: TimelineTileBuilder.connected(
+                connectionDirection: ConnectionDirection.before,
+                itemCount: 3,
+                contentsBuilder: (_, index) {
+                  return _buildTimelineCard(
+                    getActivityData()[index],
+                  );
+                },
+                indicatorBuilder: (_, index) {
+                  final activity = getActivityData()[index];
+                  return DotIndicator(
+                    size: 32,
+                    color: activity.color.withOpacity(0.1),
+                    child: Icon(
+                      activity.icon,
+                      size: 16,
+                      color: activity.color,
+                    ),
+                  );
+                },
+                connectorBuilder: (_, index, __) {
+                  return const SolidLineConnector();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineCard(ActivityItem activity) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, bottom: 24.0),
+      child: Container(
+        margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFFC6C1C1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AppText(
-              'Activity',
-              size: 18,
+            AppText(
+              activity.title,
               weight: FontWeight.w600,
             ),
-            const SizedBox(height: 16),
-            _buildActivityItem(
-              icon: Icons.send,
-              color: Colors.green,
-              title: 'Invoice Sent',
-              description: 'Invoice #1001 of amount N100,000 has been sent to Ire Victor with email irevirctor@gmail.com',
-              time: '12:03 AM',
-              date: '11-02-2024',
+            const Gap(4),
+            AppText(
+              activity.description,
+              size: 14,
+              color: Colors.grey[600],
             ),
-            _buildActivityItem(
-              icon: Icons.receipt,
-              color: Colors.red,
-              title: 'Invoice Generated',
-              description: 'Invoice #1001 of amount N300,000 has been generated and is read to be sent to Ire Victor.',
-              time: '12:03 AM',
-              date: '11-02-2024',
-            ),
-            _buildActivityItem(
-              icon: Icons.inventory_2_outlined,
-              color: Colors.blue,
-              title: 'Product Created',
-              description: 'A new product named Bag of Rice has been added to your product list',
-              time: '12:03 AM',
-              date: '11-02-2024',
+            const Gap(8),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText(
+                    activity.date,
+                    size: 10,
+                    color: Colors.grey[600],
+                    weight: FontWeight.w600,
+                  ),
+                  const Gap(6),
+                  AppText(
+                    activity.time,
+                    size: 10,
+                    color: Colors.grey[600],
+                    weight: FontWeight.w600,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -48,60 +123,53 @@ class ActivityCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActivityItem({
-    required IconData icon,
-    required Color color,
-    required String title,
-    required String description,
-    required String time,
-    required String date,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(title, weight: FontWeight.w600),
-                const SizedBox(height: 4),
-                AppText(
-                  description,
-                  size: 14,
-                  color: Colors.grey[600],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    AppText(
-                      time,
-                      size: 12,
-                      color: Colors.grey[600],
-                    ),
-                    const SizedBox(width: 8),
-                    AppText(
-                      date,
-                      size: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+  List<ActivityItem> getActivityData() {
+    return [
+      ActivityItem(
+        icon: Icons.send,
+        color: Colors.green,
+        title: 'Invoice Sent',
+        description:
+            'Invoice #1001 of amount N100,000 has been sent to Ire Victor with email irevirctor@gmail.com',
+        time: '12:03AM',
+        date: '11-02-2025',
       ),
-    );
+      ActivityItem(
+        icon: Icons.receipt,
+        color: const Color(0xFFE04403),
+        title: 'Invoice Generated',
+        description:
+            'Invoice #1001 of amount N300,000 has been generated and is read to be sent to Ire Victor.',
+        time: '12:03AM',
+        date: '11-02-2025',
+      ),
+      ActivityItem(
+        icon: Icons.inventory_2_outlined,
+        color: Colors.blue,
+        title: 'Product Created',
+        description:
+            'A new product named Bag of Rice has been added to your product list',
+        time: '12:03AM',
+        date: '11-02-2025',
+      ),
+    ];
   }
-} 
+}
+
+class ActivityItem {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String description;
+  final String time;
+  final String date;
+
+  ActivityItem({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.description,
+    required this.time,
+    required this.date,
+  });
+}

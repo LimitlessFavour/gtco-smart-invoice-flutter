@@ -10,7 +10,7 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.text,
     this.onPressed,
-    this.backgroundColor = const Color(0xFFE84C3D),
+    this.backgroundColor = const Color(0xFFE04403),
   });
 
   @override
@@ -27,4 +27,4 @@ class AppButton extends StatelessWidget {
       child: AppText.button(text),
     );
   }
-} 
+}
