@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 
 import '../../widgets/common/app_text.dart';
 import 'widgets/settings_back_button.dart';
+import '../../widgets/common/app_switch.dart';
+import '../../widgets/common/app_number_input.dart';
 
 class ProductsUpdateSettings extends StatefulWidget {
   const ProductsUpdateSettings({super.key});
@@ -23,66 +26,77 @@ class _ProductsUpdateSettingsState extends State<ProductsUpdateSettings> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       width: double.maxFinite,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Gap(24),
-          const SettingsBackButton(),
-          const Gap(24),
-          AppText(
-            'Keep track of products while having seamless transcations',
-            size: 14,
-            color: Colors.grey[600],
-          ),
-          const Gap(32),
-          Container(
-            width: 0.55 * MediaQuery.of(context).size.width,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFC6C1C6)),
+      color: Colors.white,
+      child: CustomScrollWrapper(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Gap(24),
+            const SettingsBackButton(),
+            const Gap(24),
+            const AppText(
+              'Product Update',
+              size: 24,
+              weight: FontWeight.w600,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildSettingItem(
-                  'Track Inventory',
-                  'Display a product stock field and update when invoices are sent',
-                  value: _isTrackInventory,
-                  onChanged: (value) => setState(() => _isTrackInventory = value),
-                ),
-                const Gap(16),
-                _buildSettingItem(
-                  'Stock Notification',
-                  'Send an email when the stock reaches the threshold',
-                  value: _isStockNotification,
-                  onChanged: (value) => setState(() => _isStockNotification = value),
-                ),
-                const Gap(16),
-                _buildNumberInput(
-                  'Notification Threshold',
-                  _notificationThreshold,
-                  onChanged: (value) => setState(() => _notificationThreshold = value),
-                ),
-                const Gap(16),
-                _buildSettingItem(
-                  'Default Quantity',
-                  'Automatically set default quantity for products to one',
-                  value: _isDefaultQuantity,
-                  onChanged: (value) => setState(() => _isDefaultQuantity = value),
-                ),
-                const Gap(16),
-                _buildSettingItem(
-                  'Auto-Fill products',
-                  'Selecting a product will automatically fill in the cost',
-                  value: _isAutoFillProducts,
-                  onChanged: (value) => setState(() => _isAutoFillProducts = value),
-                ),
-              ],
+            const Gap(32),
+            const AppText(
+              'Keep track of products while having seamless transcations',
+              size: 16,
+              weight: FontWeight.w500,
+              color: Color(0xFF464646),
             ),
-          ),
-        ],
+            const Gap(50),
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.55,
+              ),
+              child: Column(
+                children: [
+                  _buildSettingItem(
+                    'Track Inventory',
+                    'Display a product stock field and update when invoices are sent',
+                    value: _isTrackInventory,
+                    onChanged: (value) =>
+                        setState(() => _isTrackInventory = value),
+                  ),
+                  const Gap(48),
+                  _buildSettingItem(
+                    'Stock Notification',
+                    'Send an email when the stock reaches the threshold',
+                    value: _isStockNotification,
+                    onChanged: (value) =>
+                        setState(() => _isStockNotification = value),
+                  ),
+                  const Gap(48),
+                  _buildSettingWithNumberInput(
+                    'Notification Threshold',
+                    _notificationThreshold,
+                    onChanged: (value) =>
+                        setState(() => _notificationThreshold = value),
+                  ),
+                  const Gap(48),
+                  _buildSettingItem(
+                    'Default Quantity',
+                    'Automatically set default quantity for products to one',
+                    value: _isDefaultQuantity,
+                    onChanged: (value) =>
+                        setState(() => _isDefaultQuantity = value),
+                  ),
+                  const Gap(48),
+                  _buildSettingItem(
+                    'Auto-Fill products',
+                    'Selecting a product will automatically fill in the cost',
+                    value: _isAutoFillProducts,
+                    onChanged: (value) =>
+                        setState(() => _isAutoFillProducts = value),
+                  ),
+                  const Gap(48),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -101,76 +115,47 @@ class _ProductsUpdateSettingsState extends State<ProductsUpdateSettings> {
             children: [
               AppText(
                 title,
-                size: 16,
+                size: 20,
                 weight: FontWeight.w600,
               ),
+              const Gap(12),
               AppText(
                 description,
-                size: 14,
-                color: Colors.grey[600],
+                size: 16,
+                weight: FontWeight.w500,
+                color: const Color(0xFF464646),
               ),
             ],
           ),
         ),
-        Switch(
+        AppSwitch(
           value: value,
           onChanged: onChanged,
-          activeColor: Theme.of(context).primaryColor,
         ),
       ],
     );
   }
 
-  Widget _buildNumberInput(
+  Widget _buildSettingWithNumberInput(
     String label,
     int value, {
     required ValueChanged<int> onChanged,
   }) {
     return Row(
       children: [
-        AppText(
-          label,
-          size: 16,
-          weight: FontWeight.w600,
+        Expanded(
+          child: AppText(
+            label,
+            size: 20,
+            weight: FontWeight.w600,
+          ),
         ),
-        const Spacer(),
-        Container(
-          width: 120,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  initialValue: value.toString(),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  onChanged: (value) => onChanged(int.tryParse(value) ?? 1),
-                ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  InkWell(
-                    onTap: () => onChanged(value + 1),
-                    child: const Icon(Icons.arrow_drop_up, size: 18),
-                  ),
-                  InkWell(
-                    onTap: () => onChanged(value > 1 ? value - 1 : 1),
-                    child: const Icon(Icons.arrow_drop_down, size: 18),
-                  ),
-                ],
-              ),
-            ],
-          ),
+        AppNumberInput(
+          value: value,
+          onChanged: onChanged,
+          min: 1,
         ),
       ],
     );
   }
-} 
+}
