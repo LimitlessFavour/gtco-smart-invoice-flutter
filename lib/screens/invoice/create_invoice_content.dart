@@ -10,6 +10,7 @@ import '../../services/navigation_service.dart';
 import '../../providers/invoice_provider.dart';
 import '../../widgets/dialogs/success_dialog.dart';
 import '../../widgets/common/loading_overlay.dart';
+import '../../widgets/dialogs/basic_confirmation_dialog.dart';
 
 class CreateInvoiceContent extends StatefulWidget {
   const CreateInvoiceContent({super.key});
@@ -189,24 +190,11 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
   void _showSendConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Send'),
-        content: const Text(
-          'Are you sure you want to send the invoice to John Doe?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _handleSendInvoice(context);
-            },
-            child: const Text('Send'),
-          ),
-        ],
+      builder: (context) => BasicConfirmationDialog(
+        title: 'Confirm Send',
+        message: 'Are you sure you want to send the invoice to John Doe?',
+        confirmText: 'Send',
+        onConfirm: () => _handleSendInvoice(context),
       ),
     );
   }

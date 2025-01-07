@@ -1,60 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/screens/client/current_client_content.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/client/client_empty_state.dart';
+import '../../widgets/client/client_list_view.dart';
 import '../../services/navigation_service.dart';
+import '../../providers/client_provider.dart';
 import 'package:provider/provider.dart';
 
-class ClientContent extends StatelessWidget {
+class ClientContent extends StatefulWidget {
   const ClientContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header Row
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppText(
-                'Clients',
-                size: 24,
-                weight: FontWeight.w600,
-              ),
-              CreateClientButton(),
-            ],
-          ),
-          const Gap(24),
+  State<ClientContent> createState() => _ClientContentState();
+}
 
-          // Main Content
-          Expanded(
-            child: Container(
-              width: double.maxFinite,
-              padding: const EdgeInsets.symmetric(
-                vertical: 32,
-                horizontal: 24,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFC6C1C1)),
-              ),
-              child: const Column(
+class _ClientContentState extends State<ClientContent> {
+  @override
+  void initState() {
+    super.initState();
+    // Load clients when the screen is first shown
+    //TODO: Readd this when we have a backend
+    // context.read<ClientProvider>().loadClients();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<NavigationService, ClientProvider>(
+      builder: (context, navigation, clientProvider, _) {
+        if (navigation.currentClientScreen == ClientScreen.view && 
+            navigation.currentClientId != null) {
+          try {
+            final client = clientProvider.getClientById(navigation.currentClientId!);
+            return CurrentClientContent(client: client);
+          } catch (e) {
+            // Handle the case when client is not found
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClientSearchRow(),
-                  Gap(24),
-                  ClientTableHeader(),
-                  Gap(24),
-                  Expanded(child: ClientEmptyState()),
+                  const AppText('Client not found'),
+                  const Gap(16),
+                  TextButton(
+                    onPressed: () => navigation.navigateToClientScreen(ClientScreen.list),
+                    child: const AppText('Back to Clients'),
+                  ),
                 ],
               ),
-            ),
+            );
+          }
+        }
+
+        // Show client list by default
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  AppText(
+                    'Clients',
+                    size: 24,
+                    weight: FontWeight.w600,
+                  ),
+                  CreateClientButton(),
+                ],
+              ),
+              const Gap(24),
+
+              // Main Content
+              Expanded(
+                child: Container(
+                  width: double.maxFinite,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 32,
+                    horizontal: 24,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFC6C1C1)),
+                  ),
+                  child: Column(
+                    children: [
+                      const ClientSearchRow(),
+                      const Gap(24),
+                      const ClientTableHeader(),
+                      const Gap(24),
+                      Expanded(
+                        child: clientProvider.hasClients
+                            ? const ClientListView()
+                            : const ClientEmptyState(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

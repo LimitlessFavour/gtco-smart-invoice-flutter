@@ -26,6 +26,8 @@ enum ProductScreen {
 enum ClientScreen {
   list,
   create,
+  view,
+  edit,
 }
 
 enum SettingsScreen {
@@ -43,6 +45,7 @@ class NavigationService extends ChangeNotifier {
   ProductScreen _currentProductScreen = ProductScreen.list;
   ClientScreen _currentClientScreen = ClientScreen.list;
   SettingsScreen _currentSettingsScreen = SettingsScreen.list;
+  String? _currentClientId;
 
   NavigationService() {
     if (html.window != null) {
@@ -57,6 +60,7 @@ class NavigationService extends ChangeNotifier {
   ProductScreen get currentProductScreen => _currentProductScreen;
   ClientScreen get currentClientScreen => _currentClientScreen;
   SettingsScreen get currentSettingsScreen => _currentSettingsScreen;
+  String? get currentClientId => _currentClientId;
 
   bool canGoBack() {
     switch (_currentScreen) {
@@ -66,7 +70,9 @@ class NavigationService extends ChangeNotifier {
       case AppScreen.product:
         return _currentProductScreen == ProductScreen.create;
       case AppScreen.client:
-        return _currentClientScreen == ClientScreen.create;
+        return _currentClientScreen == ClientScreen.create || 
+               _currentClientScreen == ClientScreen.view ||
+               _currentClientScreen == ClientScreen.edit;
       case AppScreen.settings:
         return _currentSettingsScreen != SettingsScreen.list;
       default:
@@ -108,9 +114,22 @@ class NavigationService extends ChangeNotifier {
           : ProductScreen.list;
     } else if (path.startsWith('/client')) {
       _currentScreen = AppScreen.client;
-      _currentClientScreen = path == '/client/create' 
-          ? ClientScreen.create 
-          : ClientScreen.list;
+      
+      if (path == '/client/create') {
+        _currentClientScreen = ClientScreen.create;
+        _currentClientId = null;
+      } else if (path == '/client') {
+        _currentClientScreen = ClientScreen.list;
+        _currentClientId = null;
+      } else if (path.contains('/edit/')) {
+        final clientId = path.split('/').last;
+        _currentClientScreen = ClientScreen.edit;
+        _currentClientId = clientId;
+      } else {
+        final clientId = path.split('/').last;
+        _currentClientScreen = ClientScreen.view;
+        _currentClientId = clientId;
+      }
     }
     
     notifyListeners();
@@ -144,8 +163,11 @@ class NavigationService extends ChangeNotifier {
         }
         return false;
       case AppScreen.client:
-        if (_currentClientScreen == ClientScreen.create) {
+        if (_currentClientScreen == ClientScreen.create || 
+            _currentClientScreen == ClientScreen.view ||
+            _currentClientScreen == ClientScreen.edit) {
           _currentClientScreen = ClientScreen.list;
+          _currentClientId = null;
           _updateBrowserUrl('/client');
           notifyListeners();
           return true;
@@ -187,10 +209,20 @@ class NavigationService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void navigateToClientScreen(ClientScreen screen) {
+  void navigateToClientScreen(ClientScreen screen, {String? clientId}) {
     _currentClientScreen = screen;
     _currentScreen = AppScreen.client;
-    _updateBrowserUrl('/client${screen == ClientScreen.create ? '/create' : ''}');
+    _currentClientId = clientId;
+    
+    String path = '/client';
+    if (screen == ClientScreen.create) {
+      path = '$path/create';
+    } else if ((screen == ClientScreen.view || screen == ClientScreen.edit) && 
+               clientId != null) {
+      path = '$path/${screen == ClientScreen.edit ? 'edit/' : ''}$clientId';
+    }
+    
+    _updateBrowserUrl(path);
     notifyListeners();
   }
 

@@ -15,6 +15,7 @@ import 'package:provider/provider.dart';
 import '../services/navigation_service.dart';
 import '../widgets/common/slide_panel.dart';
 import '../widgets/web/sidebar_menu.dart';
+import '../providers/client_provider.dart';
 
 class WebMainLayout extends StatelessWidget {
   const WebMainLayout({super.key});
@@ -62,15 +63,24 @@ class WebMainLayout extends StatelessWidget {
               builder: (context, navigation, _) {
                 return Stack(
                   children: [
-                    // Client Create Panel
+                    // Client Create/Edit Panel
                     SlidePanel(
                       isOpen: navigation.currentScreen == AppScreen.client &&
-                          navigation.currentClientScreen == ClientScreen.create,
+                          (navigation.currentClientScreen ==
+                                  ClientScreen.create ||
+                              navigation.currentClientScreen ==
+                                  ClientScreen.edit),
                       onClose: () =>
                           navigation.navigateToClientScreen(ClientScreen.list),
                       child: CreateClientForm(
                         onCancel: () => navigation
                             .navigateToClientScreen(ClientScreen.list),
+                        client:
+                            navigation.currentClientScreen == ClientScreen.edit
+                                ? context
+                                    .read<ClientProvider>()
+                                    .getClientById(navigation.currentClientId!)
+                                : null,
                       ),
                     ),
                     // Product Create Panel
