@@ -8,6 +8,7 @@ import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/client_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
+import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:gtco_smart_invoice_flutter/services/api_client.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
@@ -141,9 +142,9 @@ class _AppInitializerState extends State<AppInitializer> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          // return const LandingScreen();
+          return const LandingScreen();
           // Replace with your actual initial screen
-          return const WebMainLayout();
+          // return const WebMainLayout();
         }
         // Show a loading screen while precaching
         return MaterialApp(
