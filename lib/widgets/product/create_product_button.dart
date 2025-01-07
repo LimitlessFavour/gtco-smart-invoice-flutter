@@ -7,6 +7,7 @@ import '../dialogs/success_dialog.dart';
 import '../../models/product.dart';
 import '../../providers/product_provider.dart';
 import '../../services/navigation_service.dart';
+import '../dialogs/basic_confirmation_dialog.dart';
 
 class ProductActionButton extends StatelessWidget {
   final bool isEdit;
@@ -52,7 +53,7 @@ class ProductActionButton extends StatelessWidget {
   void _showConfirmation(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => BasicConfirmationDialog(
         title: isEdit ? 'Update Product' : 'Create Product',
         message: isEdit
             ? 'Are you sure you want to update this product?'

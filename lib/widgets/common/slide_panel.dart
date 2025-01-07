@@ -23,8 +23,16 @@ class SlidePanel extends StatelessWidget {
       width: 800,
       child: Material(
         elevation: 16,
+        type: MaterialType.transparency,
         child: Container(
-          color: Colors.white,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              bottomLeft: Radius.circular(8),
+            ),
+            // border: Border.all(color: const Color(0xFFC6C1C6)),
+          ),
           child: child,
         ),
       ),

@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/client_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
 import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
@@ -46,6 +48,12 @@ void main() {
           create: (context) => ProductProvider(
             context.read<ProductRepository>(),
           ),
+        ),
+        Provider(
+          create: (context) => ClientRepository(context.read<ApiClient>()),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ClientProvider(context.read<ClientRepository>()),
         ),
       ],
       child: const MyApp(),
