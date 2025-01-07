@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../../widgets/common/app_text.dart';
+import 'widgets/settings_back_button.dart';
 
 class ManageUsersSettings extends StatefulWidget {
   const ManageUsersSettings({super.key});
@@ -27,6 +28,9 @@ class _ManageUsersSettingsState extends State<ManageUsersSettings> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Gap(24),
+          const SettingsBackButton(),
+          const Gap(24),
           const AppText(
             'Manage users',
             size: 24,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:provider/provider.dart';
+
 import '../../widgets/common/app_text.dart';
-import '../../services/navigation_service.dart';
+import 'widgets/settings_back_button.dart';
 
 class ProductsUpdateSettings extends StatefulWidget {
   const ProductsUpdateSettings({super.key});
@@ -26,26 +26,9 @@ class _ProductsUpdateSettingsState extends State<ProductsUpdateSettings> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Back button and title
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  context.read<NavigationService>().navigateToSettingsScreen(
-                    SettingsScreen.list,
-                  );
-                },
-              ),
-              const Gap(8),
-              const AppText(
-                'Products Update',
-                size: 24,
-                weight: FontWeight.w600,
-              ),
-            ],
-          ),
-          const Gap(8),
+          const Gap(24),
+          const SettingsBackButton(),
+          const Gap(24),
           AppText(
             'Keep track of products while having seamless transcations',
             size: 14,

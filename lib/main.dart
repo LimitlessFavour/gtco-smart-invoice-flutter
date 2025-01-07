@@ -134,9 +134,9 @@ class _AppInitializerState extends State<AppInitializer> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return const LandingScreen();
+          // return const LandingScreen();
           // Replace with your actual initial screen
-          // return const WebMainLayout();
+          return const WebMainLayout();
         }
         // Show a loading screen while precaching
         return MaterialApp(
