@@ -1,7 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/firebase_options.dart';
 import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
@@ -14,116 +15,149 @@ import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
-void main() {
-  // Initialize navigation history for web
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (kIsWeb) {
     NavigationService().initializeHistory();
   }
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => NavigationService()),
-        Provider(
-          create: (_) => ApiClient(baseUrl: 'https://api.example.com'),
-        ),
-        Provider(
-          create: (context) => InvoiceRepository(
-            context.read<ApiClient>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => InvoiceProvider(
-            context.read<InvoiceRepository>(),
-          ),
-        ),
-        // Product providers
-        Provider(
-          create: (context) => ProductRepository(
-            context.read<ApiClient>(),
-          ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ProductProvider(
-            context.read<ProductRepository>(),
-          ),
-        ),
-        Provider(
-          create: (context) => ClientRepository(context.read<ApiClient>()),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ClientProvider(context.read<ClientRepository>()),
-        ),
-      ],
-      child: const MyApp(),
-    ),
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  runApp(const AppRoot());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AppRoot extends StatelessWidget {
+  const AppRoot({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: _createProviders(),
+      child: const SmartInvoiceApp(),
+    );
+  }
+
+  List<SingleChildWidget> _createProviders() {
+    return [
+      ChangeNotifierProvider(create: (_) => NavigationService()),
+      Provider(
+        create: (_) => ApiClient(baseUrl: 'https://api.example.com'),
+      ),
+      Provider(
+        create: (context) => InvoiceRepository(
+          context.read<ApiClient>(),
+        ),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => InvoiceProvider(
+          context.read<InvoiceRepository>(),
+        ),
+      ),
+      Provider(
+        create: (context) => ProductRepository(
+          context.read<ApiClient>(),
+        ),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => ProductProvider(
+          context.read<ProductRepository>(),
+        ),
+      ),
+      Provider(
+        create: (context) => ClientRepository(context.read<ApiClient>()),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => ClientProvider(context.read<ClientRepository>()),
+      ),
+    ];
+  }
+}
+
+class SmartInvoiceApp extends StatelessWidget {
+  const SmartInvoiceApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GTCO Smart Invoice',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFE04403),
-          primary: const Color(0xFFE04403),
-        ),
-        textTheme: GoogleFonts.urbanistTextTheme(
-          Theme.of(context).textTheme,
-        ),
-        useMaterial3: true,
-        inputDecorationTheme: InputDecorationTheme(
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.grey),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE04403)),
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
-        ),
-        outlinedButtonTheme: OutlinedButtonThemeData(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
+      theme: _buildAppTheme(context),
+      debugShowCheckedModeBanner: false,
+      home: const AppInitializationWrapper(),
+    );
+  }
+
+  ThemeData _buildAppTheme(BuildContext context) {
+    return ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFFE04403),
+        primary: const Color(0xFFE04403),
+      ),
+      textTheme: GoogleFonts.urbanistTextTheme(
+        Theme.of(context).textTheme,
+      ),
+      useMaterial3: true,
+      inputDecorationTheme: _buildInputDecorationTheme(),
+      elevatedButtonTheme: _buildElevatedButtonTheme(),
+      outlinedButtonTheme: _buildOutlinedButtonTheme(),
+    );
+  }
+
+  InputDecorationTheme _buildInputDecorationTheme() {
+    return InputDecorationTheme(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Colors.grey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: Color(0xFFE04403)),
+      ),
+    );
+  }
+
+  ElevatedButtonThemeData _buildElevatedButtonTheme() {
+    return ElevatedButtonThemeData(
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
           ),
         ),
       ),
-      debugShowCheckedModeBanner: false,
-      home: const AppInitializer(),
+    );
+  }
+
+  OutlinedButtonThemeData _buildOutlinedButtonTheme() {
+    return OutlinedButtonThemeData(
+      style: ButtonStyle(
+        shape: MaterialStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ),
     );
   }
 }
 
-class AppInitializer extends StatefulWidget {
-  const AppInitializer({super.key});
+class AppInitializationWrapper extends StatefulWidget {
+  const AppInitializationWrapper({super.key});
 
   @override
-  State<AppInitializer> createState() => _AppInitializerState();
+  State<AppInitializationWrapper> createState() =>
+      _AppInitializationWrapperState();
 }
 
-class _AppInitializerState extends State<AppInitializer> {
-  late Future<void> _initFuture;
+class _AppInitializationWrapperState extends State<AppInitializationWrapper> {
+  late final Future<void> _initFuture;
 
   @override
   void initState() {
@@ -143,21 +177,20 @@ class _AppInitializerState extends State<AppInitializer> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return const LandingScreen();
-          // Replace with your actual initial screen
-          // return const WebMainLayout();
         }
-        // Show a loading screen while precaching
-        return MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: LoadingAnimationWidget.threeArchedCircle(
-                color: Theme.of(context).primaryColor,
-                size: 50,
-              ),
-            ),
-          ),
-        );
+        return _buildLoadingScreen();
       },
+    );
+  }
+
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      body: Center(
+        child: LoadingAnimationWidget.threeArchedCircle(
+          color: Theme.of(context).primaryColor,
+          size: 50,
+        ),
+      ),
     );
   }
 }

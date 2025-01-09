@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1077130966408",
+    "project_id": "gtco-smart-invoice",
+    "storage_bucket": "gtco-smart-invoice.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077130966408:android:b1b451a7035deb60aab63d",
+        "android_client_info": {
+          "package_name": "com.gtco.smart_invoice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvUvFW2qgAnxX1nHUgiXn2h5af6XE-VWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
