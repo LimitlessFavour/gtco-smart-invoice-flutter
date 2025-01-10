@@ -1,0 +1,3221 @@
+{
+    "openapi": "3.0.0",
+    "paths": {
+      "/client": {
+        "post": {
+          "description": "Creates a new client for the current user's company",
+          "operationId": "ClientController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateClientDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Client has been successfully created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Client"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data or missing required fields"
+            },
+            "401": {
+              "description": "Unauthorized request"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Create a new client",
+          "tags": [
+            "Client"
+          ]
+        },
+        "get": {
+          "description": "Retrieves a list of all clients",
+          "operationId": "ClientController_findAll",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "List of all clients retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Client"
+                    }
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized request"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get all clients",
+          "tags": [
+            "Client"
+          ]
+        }
+      },
+      "/client/{id}": {
+        "get": {
+          "description": "Retrieves detailed information about a specific client including their invoice statistics",
+          "operationId": "ClientController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Client ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Client details retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ClientDetailsDto"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized request"
+            },
+            "404": {
+              "description": "Client not found"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get client details by ID",
+          "tags": [
+            "Client"
+          ]
+        },
+        "put": {
+          "description": "Updates the information of an existing client",
+          "operationId": "ClientController_update",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Client ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateClientDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Client has been successfully updated",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Client"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data"
+            },
+            "401": {
+              "description": "Unauthorized request"
+            },
+            "404": {
+              "description": "Client not found"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Update client details",
+          "tags": [
+            "Client"
+          ]
+        },
+        "delete": {
+          "description": "Removes a client from the system",
+          "operationId": "ClientController_remove",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Client ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Client has been successfully deleted"
+            },
+            "401": {
+              "description": "Unauthorized request"
+            },
+            "404": {
+              "description": "Client not found"
+            },
+            "409": {
+              "description": "Cannot delete client with existing invoices"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Delete a client",
+          "tags": [
+            "Client"
+          ]
+        }
+      },
+      "/client/bulk-upload/validate": {
+        "post": {
+          "operationId": "ClientBulkUploadController_validateFile",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "CSV file containing client data"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "File validated successfully"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Validate client bulk upload file",
+          "tags": [
+            "Client"
+          ]
+        }
+      },
+      "/client/bulk-upload": {
+        "post": {
+          "operationId": "ClientBulkUploadController_startBulkUpload",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "file",
+                    "columnMapping"
+                  ],
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "CSV file containing client data"
+                    },
+                    "columnMapping": {
+                      "type": "object",
+                      "properties": {
+                        "firstName": {
+                          "type": "string",
+                          "example": "First Name"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "example": "Last Name"
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "Email"
+                        },
+                        "phoneNumber": {
+                          "type": "string",
+                          "example": "Phone Number"
+                        },
+                        "address": {
+                          "type": "string",
+                          "example": "Address"
+                        }
+                      }
+                    },
+                    "defaultValues": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "batchSize": {
+                      "type": "number",
+                      "example": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Bulk upload job created"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Start client bulk upload process",
+          "tags": [
+            "Client"
+          ]
+        }
+      },
+      "/client/bulk-upload/{jobId}/status": {
+        "get": {
+          "operationId": "ClientBulkUploadController_getJobStatus",
+          "parameters": [
+            {
+              "name": "jobId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Returns job status"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get client bulk upload job status",
+          "tags": [
+            "Client"
+          ]
+        }
+      },
+      "/client/bulk-upload/{jobId}/errors": {
+        "get": {
+          "operationId": "ClientBulkUploadController_getJobErrors",
+          "parameters": [
+            {
+              "name": "jobId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Returns job errors"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get client bulk upload job errors",
+          "tags": [
+            "Client"
+          ]
+        }
+      },
+      "/company": {
+        "post": {
+          "operationId": "CompanyController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCompanyDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Company created successfully"
+            }
+          },
+          "summary": "Create a new company",
+          "tags": [
+            "Company"
+          ]
+        },
+        "get": {
+          "operationId": "CompanyController_findAll",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "List of all companies"
+            }
+          },
+          "summary": "Get all companies",
+          "tags": [
+            "Company"
+          ]
+        }
+      },
+      "/company/{id}": {
+        "get": {
+          "operationId": "CompanyController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Company ID",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Company details"
+            },
+            "404": {
+              "description": "Company not found"
+            }
+          },
+          "summary": "Get a company by ID",
+          "tags": [
+            "Company"
+          ]
+        },
+        "put": {
+          "operationId": "CompanyController_update",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Company ID",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Company updated successfully"
+            },
+            "404": {
+              "description": "Company not found"
+            }
+          },
+          "summary": "Update a company",
+          "tags": [
+            "Company"
+          ]
+        },
+        "delete": {
+          "operationId": "CompanyController_remove",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Company ID",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Company deleted successfully"
+            },
+            "404": {
+              "description": "Company not found"
+            }
+          },
+          "summary": "Delete a company",
+          "tags": [
+            "Company"
+          ]
+        }
+      },
+      "/activities/company/{companyId}": {
+        "get": {
+          "operationId": "ActivityController_getCompanyActivities",
+          "parameters": [
+            {
+              "name": "companyId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "startDate",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "name": "endDate",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Activity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Get company activities",
+          "tags": [
+            "Activities"
+          ]
+        }
+      },
+      "/activities/company/{companyId}/type/{entityType}": {
+        "get": {
+          "operationId": "ActivityController_getActivitiesByType",
+          "parameters": [
+            {
+              "name": "companyId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "entityType",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Activity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Get activities by entity type",
+          "tags": [
+            "Activities"
+          ]
+        }
+      },
+      "/notifications/devices": {
+        "post": {
+          "operationId": "NotificationController_registerDevice",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterDeviceDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Device registered successfully"
+            }
+          },
+          "summary": "Register a device for notifications",
+          "tags": [
+            "Notifications"
+          ]
+        },
+        "get": {
+          "operationId": "NotificationController_getDevices",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "List of registered devices"
+            }
+          },
+          "summary": "Get all registered devices",
+          "tags": [
+            "Notifications"
+          ]
+        }
+      },
+      "/notifications/devices/{token}": {
+        "delete": {
+          "operationId": "NotificationController_removeDevice",
+          "parameters": [
+            {
+              "name": "token",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Device removed successfully"
+            }
+          },
+          "summary": "Remove a device registration",
+          "tags": [
+            "Notifications"
+          ]
+        }
+      },
+      "/notifications/unread": {
+        "get": {
+          "operationId": "NotificationController_getUnreadNotifications",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "List of unread notifications"
+            }
+          },
+          "summary": "Get unread notifications",
+          "tags": [
+            "Notifications"
+          ]
+        }
+      },
+      "/notifications/{id}/read": {
+        "post": {
+          "operationId": "NotificationController_markAsRead",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Notification marked as read"
+            }
+          },
+          "summary": "Mark notification as read",
+          "tags": [
+            "Notifications"
+          ]
+        }
+      },
+      "/user/profile": {
+        "get": {
+          "operationId": "UserController_getProfile",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Returns the user profile"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get current user profile",
+          "tags": [
+            "User"
+          ]
+        },
+        "put": {
+          "operationId": "UserController_updateProfile",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Profile updated successfully"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Update user profile",
+          "tags": [
+            "User"
+          ]
+        }
+      },
+      "/user/onboard/user": {
+        "post": {
+          "operationId": "UserController_onboardUser",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardUserDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "User onboarding completed"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Complete user onboarding",
+          "tags": [
+            "User"
+          ]
+        }
+      },
+      "/user/onboard/company": {
+        "post": {
+          "operationId": "UserController_onboardCompany",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "companyName": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "logo": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Company onboarding completed"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Complete company onboarding",
+          "tags": [
+            "User"
+          ]
+        }
+      },
+      "/user/survey": {
+        "post": {
+          "operationId": "UserController_submitSurvey",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyResponseDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Survey response recorded"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Submit survey response",
+          "tags": [
+            "User"
+          ]
+        }
+      },
+      "/user/company": {
+        "get": {
+          "operationId": "UserController_getCompany",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Returns the company details"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get user company details",
+          "tags": [
+            "User"
+          ]
+        }
+      },
+      "/user/onboarding-status": {
+        "get": {
+          "operationId": "UserController_getOnboardingStatus",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Returns the onboarding status"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get user onboarding status",
+          "tags": [
+            "User"
+          ]
+        }
+      },
+      "/product": {
+        "post": {
+          "operationId": "ProductController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productName": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string",
+                      "enum": [
+                        "Electronics",
+                        "Clothing",
+                        "Food & Beverage",
+                        "Health & Beauty",
+                        "Home & Furniture",
+                        "Services",
+                        "Software",
+                        "Books",
+                        "Other"
+                      ]
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "defaultQuantity": {
+                      "type": "number"
+                    },
+                    "vatCategory": {
+                      "type": "number",
+                      "enum": [
+                        "ZERO_PERCENT",
+                        "FIVE_PERCENT",
+                        5,
+                        7.5,
+                        "SEVEN_POINT_FIVE_PERCENT",
+                        0
+                      ]
+                    },
+                    "image": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "required": [
+                    "productName",
+                    "price",
+                    "category",
+                    "vatCategory"
+                  ]
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Product created successfully"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Create a new product",
+          "tags": [
+            "Product"
+          ]
+        },
+        "get": {
+          "operationId": "ProductController_findAll",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "List of all products"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get all products",
+          "tags": [
+            "Product"
+          ]
+        }
+      },
+      "/product/{id}": {
+        "get": {
+          "operationId": "ProductController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Product ID",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Product details"
+            },
+            "404": {
+              "description": "Product not found"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get a product by ID",
+          "tags": [
+            "Product"
+          ]
+        },
+        "put": {
+          "operationId": "ProductController_update",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Product ID",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "productName": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string",
+                      "enum": [
+                        "Electronics",
+                        "Clothing",
+                        "Food & Beverage",
+                        "Health & Beauty",
+                        "Home & Furniture",
+                        "Services",
+                        "Software",
+                        "Books",
+                        "Other"
+                      ]
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "defaultQuantity": {
+                      "type": "number"
+                    },
+                    "vatCategory": {
+                      "type": "number",
+                      "enum": [
+                        "ZERO_PERCENT",
+                        "FIVE_PERCENT",
+                        5,
+                        7.5,
+                        "SEVEN_POINT_FIVE_PERCENT",
+                        0
+                      ]
+                    },
+                    "image": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Product updated successfully"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Update a product",
+          "tags": [
+            "Product"
+          ]
+        },
+        "delete": {
+          "operationId": "ProductController_remove",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Product ID",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Product deleted successfully"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Delete a product",
+          "tags": [
+            "Product"
+          ]
+        }
+      },
+      "/product/bulk-upload/validate": {
+        "post": {
+          "operationId": "BulkUploadController_validateFile",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "CSV file containing product data"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "File validated successfully"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Validate bulk upload file",
+          "tags": [
+            "Product"
+          ]
+        }
+      },
+      "/product/bulk-upload": {
+        "post": {
+          "operationId": "BulkUploadController_startBulkUpload",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "file",
+                    "columnMapping"
+                  ],
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "CSV file containing product data"
+                    },
+                    "columnMapping": {
+                      "type": "object",
+                      "properties": {
+                        "productName": {
+                          "type": "string",
+                          "example": "Product Name"
+                        },
+                        "description": {
+                          "type": "string",
+                          "example": "Description"
+                        },
+                        "category": {
+                          "type": "string",
+                          "example": "Category"
+                        },
+                        "price": {
+                          "type": "string",
+                          "example": "Price"
+                        },
+                        "defaultQuantity": {
+                          "type": "string",
+                          "example": "Quantity"
+                        },
+                        "vatCategory": {
+                          "type": "string",
+                          "example": "VAT"
+                        }
+                      }
+                    },
+                    "defaultValues": {
+                      "type": "object",
+                      "properties": {
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "Electronics",
+                            "Clothing",
+                            "Food & Beverage",
+                            "Health & Beauty",
+                            "Home & Furniture",
+                            "Services",
+                            "Software",
+                            "Books",
+                            "Other"
+                          ]
+                        },
+                        "vatCategory": {
+                          "type": "string",
+                          "enum": [
+                            "ZERO_PERCENT",
+                            "FIVE_PERCENT",
+                            5,
+                            7.5,
+                            "SEVEN_POINT_FIVE_PERCENT",
+                            0
+                          ]
+                        },
+                        "defaultQuantity": {
+                          "type": "number",
+                          "example": 1
+                        }
+                      }
+                    },
+                    "batchSize": {
+                      "type": "number",
+                      "example": 100
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Bulk upload job created"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Start bulk upload process",
+          "tags": [
+            "Product"
+          ]
+        }
+      },
+      "/product/bulk-upload/{jobId}/status": {
+        "get": {
+          "operationId": "BulkUploadController_getJobStatus",
+          "parameters": [
+            {
+              "name": "jobId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Returns job status"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get bulk upload job status",
+          "tags": [
+            "Product"
+          ]
+        }
+      },
+      "/product/bulk-upload/{jobId}/errors": {
+        "get": {
+          "operationId": "BulkUploadController_getJobErrors",
+          "parameters": [
+            {
+              "name": "jobId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Returns job errors"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get bulk upload job errors",
+          "tags": [
+            "Product"
+          ]
+        }
+      },
+      "/invoice": {
+        "post": {
+          "operationId": "InvoiceController_create",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateInvoiceDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Invoice created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "summary": "Create a new invoice",
+          "tags": [
+            "Invoice"
+          ]
+        },
+        "get": {
+          "operationId": "InvoiceController_findAll",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "List of all invoices",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Invoice"
+                    }
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "summary": "Get all invoices",
+          "tags": [
+            "Invoice"
+          ]
+        }
+      },
+      "/invoice/draft": {
+        "post": {
+          "operationId": "InvoiceController_createDraft",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateInvoiceDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Draft invoice created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "summary": "Create a new draft invoice",
+          "tags": [
+            "Invoice"
+          ]
+        }
+      },
+      "/invoice/draft/{id}/finalize": {
+        "post": {
+          "operationId": "InvoiceController_finalizeDraft",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Invoice ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Invoice finalized successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Invoice not found"
+            }
+          },
+          "summary": "Finalize a draft invoice",
+          "tags": [
+            "Invoice"
+          ]
+        }
+      },
+      "/invoice/{id}": {
+        "get": {
+          "operationId": "InvoiceController_findOne",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Invoice ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Invoice details",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Invoice not found"
+            }
+          },
+          "summary": "Get an invoice by ID",
+          "tags": [
+            "Invoice"
+          ]
+        },
+        "put": {
+          "operationId": "InvoiceController_update",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Invoice ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateInvoiceDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Invoice updated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data"
+            },
+            "404": {
+              "description": "Invoice not found"
+            }
+          },
+          "summary": "Update an invoice",
+          "tags": [
+            "Invoice"
+          ]
+        },
+        "delete": {
+          "operationId": "InvoiceController_remove",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "description": "Invoice ID",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Invoice deleted successfully"
+            },
+            "404": {
+              "description": "Invoice not found"
+            }
+          },
+          "summary": "Delete an invoice",
+          "tags": [
+            "Invoice"
+          ]
+        }
+      },
+      "/invoice/{id}/mark-paid": {
+        "post": {
+          "operationId": "InvoiceController_markAsPaid",
+          "parameters": [
+            {
+              "name": "id",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Mark invoice as paid manually",
+          "tags": [
+            "Invoice"
+          ]
+        }
+      },
+      "/transactions/company/{companyId}": {
+        "get": {
+          "operationId": "TransactionController_getCompanyTransactions",
+          "parameters": [
+            {
+              "name": "companyId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "startDate",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            {
+              "name": "endDate",
+              "required": true,
+              "in": "query",
+              "schema": {
+                "format": "date-time",
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Transaction"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Get company transactions",
+          "tags": [
+            "Transactions"
+          ]
+        }
+      },
+      "/transactions/client/{clientId}": {
+        "get": {
+          "operationId": "TransactionController_getClientTransactions",
+          "parameters": [
+            {
+              "name": "clientId",
+              "required": true,
+              "in": "path",
+              "schema": {
+                "type": "number"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Transaction"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Get client transactions",
+          "tags": [
+            "Transactions"
+          ]
+        }
+      },
+      "/auth/login": {
+        "post": {
+          "description": "Authenticate user with email and password",
+          "operationId": "AuthController_login",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginDto"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login successful",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LoginResponseDto"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid credentials",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponseDto"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Login user",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/signup": {
+        "post": {
+          "description": "Create a new user account with email and password",
+          "operationId": "AuthController_signup",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "description": "User registration details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignupDto"
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "email": "user@example.com",
+                      "password": "password123"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "User registered successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SignupResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input or password requirements not met"
+            },
+            "409": {
+              "description": "User already exists"
+            }
+          },
+          "summary": "Register a new user",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/validate": {
+        "post": {
+          "operationId": "AuthController_validateToken",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Token is valid",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ValidateTokenResponseDto"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid token"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Validate JWT token",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/google": {
+        "post": {
+          "operationId": "AuthController_signInWithGoogle",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Google OAuth URL generated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OAuthResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          },
+          "summary": "Sign in with Google",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/apple": {
+        "post": {
+          "description": "Initiate Apple OAuth authentication flow",
+          "operationId": "AuthController_signInWithApple",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "Apple OAuth URL generated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AppleOAuthResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Failed to generate Apple OAuth URL"
+            }
+          },
+          "summary": "Sign in with Apple",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/forgot-password": {
+        "post": {
+          "description": "Send password reset instructions to user email",
+          "operationId": "AuthController_forgotPassword",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "description": "User email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordDto"
+                },
+                "examples": {
+                  "example1": {
+                    "value": {
+                      "email": "user@example.com"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Password reset email sent successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ForgotPasswordResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid email or email not found"
+            }
+          },
+          "summary": "Request password reset",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/verify": {
+        "get": {
+          "description": "Verify user email using the token from verification email",
+          "operationId": "AuthController_verifyEmail",
+          "parameters": [
+            {
+              "name": "token",
+              "required": true,
+              "in": "query",
+              "description": "Email verification token",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Email verified successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/EmailVerificationResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid or expired verification token"
+            }
+          },
+          "summary": "Verify email address",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/refresh": {
+        "post": {
+          "description": "Get a new access token using a valid refresh token",
+          "operationId": "AuthController_refreshToken",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "refresh_token": {
+                      "type": "string",
+                      "example": "uuid-v4-refresh-token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "New access token generated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/RefreshTokenResponseDto"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid or expired refresh token"
+            }
+          },
+          "summary": "Refresh access token",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/google/callback": {
+        "get": {
+          "description": "Handle the Google OAuth authentication callback",
+          "operationId": "AuthController_handleGoogleCallback",
+          "parameters": [
+            {
+              "name": "code",
+              "required": true,
+              "in": "query",
+              "description": "OAuth authorization code",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Google authentication successful",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OAuthCallbackResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid OAuth code or authentication failed"
+            }
+          },
+          "summary": "Google OAuth callback",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/apple/callback": {
+        "get": {
+          "description": "Handle the Apple OAuth authentication callback",
+          "operationId": "AuthController_handleAppleCallback",
+          "parameters": [
+            {
+              "name": "code",
+              "required": true,
+              "in": "query",
+              "description": "OAuth authorization code",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Apple authentication successful",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OAuthCallbackResponseDto"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid OAuth code or authentication failed"
+            }
+          },
+          "summary": "Apple OAuth callback",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/auth/logout": {
+        "post": {
+          "description": "Revoke refresh token and invalidate current session",
+          "operationId": "AuthController_logout",
+          "parameters": [],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "refresh_token": {
+                      "type": "string",
+                      "example": "uuid-v4-refresh-token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Logged out successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LogoutResponseDto"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid token or unauthorized"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Logout user",
+          "tags": [
+            "Auth"
+          ]
+        }
+      },
+      "/webhooks/squad": {
+        "post": {
+          "operationId": "SquadWebhookController_handleWebhook",
+          "parameters": [
+            {
+              "name": "x-squad-encrypted-body",
+              "required": true,
+              "in": "header",
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Webhook processed successfully"
+            },
+            "401": {
+              "description": "Invalid or missing signature"
+            },
+            "500": {
+              "description": "Internal server error"
+            }
+          },
+          "summary": "Handle Squad payment webhook",
+          "tags": [
+            "Webhooks"
+          ]
+        }
+      },
+      "/analytics/dashboard/{companyId}": {
+        "get": {
+          "description": "Retrieves comprehensive dashboard analytics including payment timeline, invoice statistics, top paying clients, and top selling products",
+          "operationId": "AnalyticsController_getDashboardAnalytics",
+          "parameters": [
+            {
+              "name": "companyId",
+              "required": true,
+              "in": "path",
+              "description": "ID of the company to get analytics for",
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "name": "timeline",
+              "required": false,
+              "in": "query",
+              "description": "Time period for analytics data (defaults to LAST_MONTH)",
+              "schema": {
+                "enum": [
+                  "LAST_DAY",
+                  "LAST_WEEK",
+                  "LAST_MONTH",
+                  "LAST_3_MONTHS",
+                  "LAST_6_MONTHS",
+                  "LAST_9_MONTHS",
+                  "LAST_12_MONTHS"
+                ],
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Dashboard analytics data retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/DashboardAnalyticsDto"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized - JWT token is missing or invalid"
+            },
+            "403": {
+              "description": "Forbidden - User does not have access to this company"
+            }
+          },
+          "security": [
+            {
+              "bearer": []
+            }
+          ],
+          "summary": "Get dashboard analytics",
+          "tags": [
+            "Analytics"
+          ]
+        }
+      },
+      "/health": {
+        "get": {
+          "operationId": "HealthController_check",
+          "parameters": [],
+          "responses": {
+            "200": {
+              "description": "API is healthy",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string"
+                      },
+                      "timestamp": {
+                        "type": "string"
+                      },
+                      "database": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "summary": "Check API health status",
+          "tags": [
+            "Health"
+          ]
+        }
+      },
+      "/schema": {
+        "get": {
+          "tags": [
+            "Schema"
+          ],
+          "operationId": "getSchema",
+          "summary": "Get API Schema",
+          "description": "Returns the API schema in JSON or YAML format",
+          "parameters": [
+            {
+              "name": "format",
+              "in": "query",
+              "description": "Response format (json or yaml)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "json",
+                  "yaml"
+                ],
+                "default": "json"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "API Schema",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  }
+                },
+                "text/yaml": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "info": {
+      "title": "GTCO Smart Invoice API",
+      "description": "API documentation for GTCO Smart Invoice",
+      "version": "1.0",
+      "contact": {}
+    },
+    "tags": [
+      {
+        "name": "Schema",
+        "description": "API Schema, Documentation Operations and OpenAPI Specifications"
+      },
+      {
+        "name": "Health",
+        "description": "Health Check and System Status"
+      },
+      {
+        "name": "Auth",
+        "description": "Authentication, Authorization, OAuth2 Integration and Token Management"
+      },
+      {
+        "name": "User",
+        "description": "User Account Management, Profile Settings and Onboarding Flow"
+      },
+      {
+        "name": "Company",
+        "description": "Company Profile, Business Settings and Organization Management"
+      },
+      {
+        "name": "Client",
+        "description": "Client Management, Contact Information and Client Relationships"
+      },
+      {
+        "name": "Product",
+        "description": "Product Catalog, Inventory Management and Pricing Configuration"
+      },
+      {
+        "name": "Invoice",
+        "description": "Invoice Creation, Management, Payment Processing and PDF Generation"
+      },
+      {
+        "name": "Transactions",
+        "description": "Payment Transactions, Financial Records and Transaction History"
+      },
+      {
+        "name": "Analytics",
+        "description": "Business Intelligence, Financial Analytics and Performance Metrics Dashboard"
+      },
+      {
+        "name": "Activities",
+        "description": "System Activity Logs, Audit Trail and User Action History"
+      },
+      {
+        "name": "Notifications",
+        "description": "Push Notifications, Email Alerts and Communication Preferences"
+      },
+      {
+        "name": "Webhooks",
+        "description": "Payment Gateway Integration, Webhook Handlers and External System Events"
+      }
+    ],
+    "servers": [],
+    "components": {
+      "securitySchemes": {
+        "bearer": {
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "type": "http"
+        }
+      },
+      "schemas": {
+        "CreateClientDto": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string",
+              "description": "First name of the client",
+              "example": "John"
+            },
+            "lastName": {
+              "type": "string",
+              "description": "Last name of the client",
+              "example": "Snow"
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the client",
+              "example": "john.snow@example.com"
+            },
+            "phoneNumber": {
+              "type": "string",
+              "description": "Primary phone number",
+              "example": "+2349012345678"
+            },
+            "mobileNumber": {
+              "type": "string",
+              "description": "Alternative mobile number",
+              "example": "+2348012345678"
+            },
+            "address": {
+              "type": "string",
+              "description": "Physical address of the client",
+              "example": "No 3 Peaceville estate, Badore, Ajah, Lagos"
+            }
+          },
+          "required": [
+            "firstName",
+            "lastName",
+            "email",
+            "phoneNumber",
+            "mobileNumber",
+            "address"
+          ]
+        },
+        "Client": {
+          "type": "object",
+          "properties": {}
+        },
+        "Company": {
+          "type": "object",
+          "properties": {}
+        },
+        "InvoiceItem": {
+          "type": "object",
+          "properties": {}
+        },
+        "Invoice": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Unique identifier of the invoice"
+            },
+            "invoiceNumber": {
+              "type": "string",
+              "description": "Invoice number"
+            },
+            "dueDate": {
+              "format": "date-time",
+              "type": "string",
+              "description": "Due date of the invoice"
+            },
+            "status": {
+              "type": "string",
+              "description": "Current status of the invoice",
+              "enum": [
+                "paid",
+                "unpaid",
+                "overdue",
+                "draft",
+                "cancelled"
+              ]
+            },
+            "totalAmount": {
+              "type": "number",
+              "description": "Total amount of the invoice"
+            },
+            "paymentLink": {
+              "type": "string",
+              "description": "Payment link for the invoice"
+            },
+            "transactionRef": {
+              "type": "string",
+              "description": "Transaction reference"
+            },
+            "paidAt": {
+              "format": "date-time",
+              "type": "string",
+              "description": "Date when the invoice was paid"
+            },
+            "company": {
+              "$ref": "#/components/schemas/Company"
+            },
+            "client": {
+              "$ref": "#/components/schemas/Client"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/InvoiceItem"
+              }
+            },
+            "squadTransactionRef": {
+              "type": "string",
+              "description": "Squad transaction reference"
+            }
+          },
+          "required": [
+            "id",
+            "invoiceNumber",
+            "dueDate",
+            "status",
+            "totalAmount",
+            "company",
+            "client",
+            "items"
+          ]
+        },
+        "ClientDetailsDto": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Unique identifier of the client",
+              "example": 1
+            },
+            "firstName": {
+              "type": "string",
+              "description": "First name of the client",
+              "example": "John"
+            },
+            "lastName": {
+              "type": "string",
+              "description": "Last name of the client",
+              "example": "Snow"
+            },
+            "email": {
+              "type": "string",
+              "description": "Email address of the client",
+              "example": "john.snow@example.com"
+            },
+            "phoneNumber": {
+              "type": "string",
+              "description": "Primary phone number of the client",
+              "example": "+2349012345678"
+            },
+            "mobileNumber": {
+              "type": "string",
+              "description": "Alternative mobile number of the client",
+              "example": "+2348012345678"
+            },
+            "address": {
+              "type": "string",
+              "description": "Physical address of the client",
+              "example": "No 3 Peaceville estate, Badore, Ajah, Lagos"
+            },
+            "totalOverdueAmount": {
+              "type": "number",
+              "description": "Total amount from overdue invoices",
+              "example": 150000
+            },
+            "totalDraftedAmount": {
+              "type": "number",
+              "description": "Total amount from drafted invoices",
+              "example": 50000
+            },
+            "totalPaidAmount": {
+              "type": "number",
+              "description": "Total amount paid by the client",
+              "example": 500000
+            },
+            "invoices": {
+              "description": "List of all invoices associated with the client",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Invoice"
+              }
+            },
+            "totalInvoicesSent": {
+              "type": "number",
+              "description": "Total number of invoices sent to the client",
+              "example": 15
+            },
+            "totalInvoicesDrafted": {
+              "type": "number",
+              "description": "Total number of drafted invoices for the client",
+              "example": 3
+            }
+          },
+          "required": [
+            "id",
+            "firstName",
+            "lastName",
+            "email",
+            "phoneNumber",
+            "mobileNumber",
+            "address",
+            "totalOverdueAmount",
+            "totalDraftedAmount",
+            "totalPaidAmount",
+            "invoices",
+            "totalInvoicesSent",
+            "totalInvoicesDrafted"
+          ]
+        },
+        "UpdateClientDto": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "phoneNumber": {
+              "type": "string"
+            },
+            "mobileNumber": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            }
+          }
+        },
+        "CreateCompanyDto": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "description"
+          ]
+        },
+        "UpdateCompanyDto": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        },
+        "Activity": {
+          "type": "object",
+          "properties": {}
+        },
+        "RegisterDeviceDto": {
+          "type": "object",
+          "properties": {}
+        },
+        "UpdateUserDto": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "phoneNumber": {
+              "type": "string"
+            }
+          }
+        },
+        "OnboardUserDto": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "phoneNumber": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "firstName",
+            "lastName",
+            "location",
+            "phoneNumber"
+          ]
+        },
+        "SurveyResponseDto": {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source"
+          ]
+        },
+        "InvoiceItemDto": {
+          "type": "object",
+          "properties": {
+            "productId": {
+              "type": "number",
+              "example": 35,
+              "description": "ID of the product being invoiced"
+            },
+            "quantity": {
+              "type": "number",
+              "example": 4,
+              "description": "Quantity of the product",
+              "minimum": 1,
+              "maximum": 999999
+            }
+          },
+          "required": [
+            "productId",
+            "quantity"
+          ]
+        },
+        "CreateInvoiceDto": {
+          "type": "object",
+          "properties": {
+            "clientId": {
+              "type": "number",
+              "example": 33,
+              "description": "ID of the client being billed"
+            },
+            "companyId": {
+              "type": "number",
+              "example": 3,
+              "description": "ID of the company creating the invoice"
+            },
+            "dueDate": {
+              "format": "date-time",
+              "type": "string",
+              "example": "2025-01-08T09:52:29.830Z",
+              "description": "Due date for the invoice payment"
+            },
+            "items": {
+              "example": [
+                {
+                  "productId": 35,
+                  "quantity": 4
+                },
+                {
+                  "productId": 34,
+                  "quantity": 2
+                }
+              ],
+              "description": "List of items to be included in the invoice",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/InvoiceItemDto"
+              }
+            }
+          },
+          "required": [
+            "clientId",
+            "companyId",
+            "dueDate",
+            "items"
+          ]
+        },
+        "UpdateInvoiceDto": {
+          "type": "object",
+          "properties": {
+            "invoiceNumber": {
+              "type": "string"
+            },
+            "dueDate": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "companyId": {
+              "type": "number"
+            },
+            "clientId": {
+              "type": "number"
+            }
+          }
+        },
+        "Transaction": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "number"
+            },
+            "paymentType": {
+              "type": "string",
+              "enum": [
+                "GATEWAY",
+                "MANUAL"
+              ]
+            },
+            "paymentReference": {
+              "type": "string"
+            },
+            "createdAt": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "amount",
+            "paymentType",
+            "createdAt"
+          ]
+        },
+        "LoginDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "User email"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123",
+              "description": "User password"
+            }
+          },
+          "required": [
+            "email",
+            "password"
+          ]
+        },
+        "UserDto": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "example": "user-uuid",
+              "description": "Unique identifier of the user"
+            },
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "Email address of the user"
+            }
+          },
+          "required": [
+            "id",
+            "email"
+          ]
+        },
+        "LoginResponseDto": {
+          "type": "object",
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "description": "JWT access token"
+            },
+            "refresh_token": {
+              "type": "string",
+              "example": "uuid-v4-refresh-token",
+              "description": "Refresh token for obtaining new access tokens"
+            },
+            "user": {
+              "description": "User information",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              ]
+            }
+          },
+          "required": [
+            "access_token",
+            "refresh_token",
+            "user"
+          ]
+        },
+        "ErrorResponseDto": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Invalid credentials",
+              "description": "Error message"
+            },
+            "statusCode": {
+              "type": "number",
+              "example": 400,
+              "description": "HTTP status code"
+            }
+          },
+          "required": [
+            "message",
+            "statusCode"
+          ]
+        },
+        "SignupDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "User email"
+            },
+            "password": {
+              "type": "string",
+              "example": "password123",
+              "description": "User password"
+            }
+          },
+          "required": [
+            "email",
+            "password"
+          ]
+        },
+        "SignupResponseDto": {
+          "type": "object",
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "description": "JWT access token"
+            },
+            "user": {
+              "description": "User information",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              ]
+            },
+            "message": {
+              "type": "string",
+              "example": "Please check your email for verification instructions",
+              "description": "Success message"
+            }
+          },
+          "required": [
+            "access_token",
+            "user",
+            "message"
+          ]
+        },
+        "ValidateTokenResponseDto": {
+          "type": "object",
+          "properties": {
+            "user": {
+              "description": "User details including roles and company",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              ]
+            },
+            "message": {
+              "type": "string",
+              "example": "Token is valid",
+              "description": "Success message"
+            }
+          },
+          "required": [
+            "user",
+            "message"
+          ]
+        },
+        "OAuthResponseDto": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "example": "https://accounts.google.com/o/oauth2/auth?...",
+              "description": "OAuth URL"
+            },
+            "message": {
+              "type": "string",
+              "example": "Google OAuth URL generated successfully",
+              "description": "Success message"
+            }
+          },
+          "required": [
+            "url",
+            "message"
+          ]
+        },
+        "AppleOAuthResponseDto": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "example": "https://accounts.google.com/o/oauth2/auth?...",
+              "description": "OAuth URL"
+            },
+            "message": {
+              "type": "string",
+              "example": "Google OAuth URL generated successfully",
+              "description": "Success message"
+            },
+            "provider": {
+              "type": "string",
+              "example": "apple",
+              "description": "OAuth provider"
+            }
+          },
+          "required": [
+            "url",
+            "message",
+            "provider"
+          ]
+        },
+        "ForgotPasswordDto": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "example": "user@example.com",
+              "description": "Email address for password reset"
+            }
+          },
+          "required": [
+            "email"
+          ]
+        },
+        "ForgotPasswordResponseDto": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Password reset email sent successfully",
+              "description": "Success message"
+            }
+          },
+          "required": [
+            "message"
+          ]
+        },
+        "EmailVerificationResponseDto": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Email verified successfully",
+              "description": "Success message"
+            },
+            "statusCode": {
+              "type": "number",
+              "example": 200,
+              "description": "Status code"
+            }
+          },
+          "required": [
+            "message",
+            "statusCode"
+          ]
+        },
+        "RefreshTokenResponseDto": {
+          "type": "object",
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "description": "New JWT access token"
+            },
+            "refresh_token": {
+              "type": "string",
+              "example": "uuid-v4-token",
+              "description": "New refresh token"
+            },
+            "user": {
+              "type": "object",
+              "example": {
+                "id": "user_id",
+                "email": "user@example.com"
+              },
+              "description": "User information"
+            }
+          },
+          "required": [
+            "access_token",
+            "refresh_token",
+            "user"
+          ]
+        },
+        "OAuthCallbackResponseDto": {
+          "type": "object",
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+              "description": "JWT access token"
+            },
+            "refresh_token": {
+              "type": "string",
+              "example": "uuid-v4-refresh-token",
+              "description": "Refresh token for obtaining new access tokens"
+            },
+            "user": {
+              "description": "User information",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              ]
+            }
+          },
+          "required": [
+            "access_token",
+            "refresh_token",
+            "user"
+          ]
+        },
+        "LogoutResponseDto": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "Logged out successfully",
+              "description": "Success message"
+            },
+            "statusCode": {
+              "type": "number",
+              "example": 200,
+              "description": "Status code"
+            }
+          },
+          "required": [
+            "message",
+            "statusCode"
+          ]
+        },
+        "PaymentsByMonth": {
+          "type": "object",
+          "properties": {
+            "month": {
+              "type": "string"
+            },
+            "amount": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "month",
+            "amount"
+          ]
+        },
+        "InvoiceStats": {
+          "type": "object",
+          "properties": {
+            "totalInvoiced": {
+              "type": "number"
+            },
+            "paid": {
+              "type": "number"
+            },
+            "unpaid": {
+              "type": "number"
+            },
+            "drafted": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "totalInvoiced",
+            "paid",
+            "unpaid",
+            "drafted"
+          ]
+        },
+        "TopClient": {
+          "type": "object",
+          "properties": {
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "totalPaid": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "firstName",
+            "lastName",
+            "totalPaid"
+          ]
+        },
+        "TopProduct": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "totalAmount": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "name",
+            "totalAmount"
+          ]
+        },
+        "DashboardAnalyticsDto": {
+          "type": "object",
+          "properties": {
+            "paymentsTimeline": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/PaymentsByMonth"
+              }
+            },
+            "invoiceStats": {
+              "$ref": "#/components/schemas/InvoiceStats"
+            },
+            "topPayingClients": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TopClient"
+              }
+            },
+            "topSellingProducts": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/TopProduct"
+              }
+            }
+          },
+          "required": [
+            "paymentsTimeline",
+            "invoiceStats",
+            "topPayingClients",
+            "topSellingProducts"
+          ]
+        }
+      }
+    }
+  }

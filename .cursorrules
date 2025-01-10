@@ -130,3 +130,145 @@ Generate code, corrections, and refactorings that comply with the basic principl
 - Use integration tests for each api module.
     
 
+### logger
+
+
+2. Use appropriate log levels:
+- `debug`: Development-only debugging information
+  ```dart
+  LoggerService.debug('Making API request', {'endpoint': '/users'});
+  ```
+
+- `info`: General information about application flow
+  ```dart
+  LoggerService.info('User navigated to home screen');
+  ```
+
+- `warning`: Potential issues that don't stop execution
+  ```dart
+  LoggerService.warning('Form validation failed');
+  ```
+
+- `error`: Actual errors with stack traces
+  ```dart
+  LoggerService.error('API request failed', error: e, stackTrace: stackTrace);
+  ```
+
+- `success`: Successful operations
+  ```dart
+  LoggerService.success('User registration completed', {'userId': '123'});
+  ```
+
+- `auth`: Authentication-related events
+  ```dart
+  LoggerService.auth('User login attempt', {'email': 'user@example.com'});
+  ```
+
+## Best Practices
+
+1. **Error Handling**:
+   ```dart
+   try {
+     await apiCall();
+   } catch (e, stackTrace) {
+     LoggerService.error('Operation failed', error: e, stackTrace: stackTrace);
+   }
+   ```
+
+2. **User Actions**:
+   ```dart
+   void handleSubmit() {
+     LoggerService.info('Form submission started', {
+       'formType': 'registration',
+       'timestamp': DateTime.now(),
+     });
+   }
+   ```
+
+3. **Authentication Flow**:
+   ```dart
+   Future<void> login() async {
+     LoggerService.auth('Login attempt', {'method': 'email'});
+     try {
+       await authService.login();
+       LoggerService.success('Login successful');
+     } catch (e) {
+       LoggerService.error('Login failed', error: e);
+     }
+   }
+   ```
+
+4. **API Calls**:
+   ```dart
+   Future<void> fetchData() async {
+     LoggerService.debug('API call started', {
+       'endpoint': '/data',
+       'method': 'GET'
+     });
+     // ... API call
+   }
+   ```
+
+5. **Navigation Events**:
+   ```dart
+   void navigateToHome() {
+     LoggerService.info('Navigation requested', {
+       'destination': 'HomeScreen',
+       'params': {'userId': '123'}
+     });
+   }
+   ```
+
+## Log Message Format
+
+1. **Be Descriptive**:
+   - ✅ `"User authentication failed due to invalid credentials"`
+   - ❌ `"Auth error"`
+
+2. **Include Context**:
+   ```dart
+   LoggerService.error(
+     'Payment processing failed',
+     error: error,
+     stackTrace: stackTrace
+   );
+   ```
+
+3. **Structured Data**:
+   ```dart
+   LoggerService.info('Order created', {
+     'orderId': '12345',
+     'amount': 99.99,
+     'currency': 'USD'
+   });
+   ```
+
+## Security Considerations
+
+1. Never log sensitive information:
+   - Passwords
+   - API keys
+   - Personal identification data
+   - Financial information
+
+2. Mask sensitive data:
+   ```dart
+   LoggerService.info('User registered', {
+     'email': 'u***@example.com',
+     'timestamp': DateTime.now()
+   });
+   ```
+
+## Production vs Development
+
+1. Debug logs only appear in development:
+   ```dart
+   LoggerService.debug('Debug info'); // Only shows in dev
+   ```
+
+2. Configure log levels based on environment:
+   ```dart
+   if (kDebugMode) {
+     // Detailed logging
+   }
+   ```

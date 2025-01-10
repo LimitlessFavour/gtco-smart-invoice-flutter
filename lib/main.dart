@@ -2,19 +2,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gtco_smart_invoice_flutter/firebase_options.dart';
+import 'package:provider/provider.dart' as provider;
+import 'package:supabase_flutter/supabase_flutter.dart';
+import './firebase_options.dart';
+import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/auth_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/client_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
 import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:gtco_smart_invoice_flutter/services/api_client.dart';
+import 'package:gtco_smart_invoice_flutter/services/dio_client.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 Future<void> main() async {
@@ -28,6 +32,11 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  await Supabase.initialize(
+    url: const String.fromEnvironment('SUPABASE_URL'),
+    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+  );
+
   runApp(const AppRoot());
 }
 
@@ -36,42 +45,52 @@ class AppRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return provider.MultiProvider(
       providers: _createProviders(),
       child: const SmartInvoiceApp(),
     );
   }
 
   List<SingleChildWidget> _createProviders() {
+    final dioClient = DioClient(
+      baseUrl: const String.fromEnvironment('API_BASE_URL'),
+    );
+    final authRepository = AuthRepository(dioClient);
+
     return [
-      ChangeNotifierProvider(create: (_) => NavigationService()),
-      Provider(
-        create: (_) => ApiClient(baseUrl: 'https://api.example.com'),
+      provider.ChangeNotifierProvider(create: (_) => NavigationService()),
+      provider.ChangeNotifierProvider(
+        create: (_) => AuthProvider(authRepository),
       ),
-      Provider(
+      provider.Provider(
+        create: (_) => ApiClient(
+          baseUrl: const String.fromEnvironment('API_BASE_URL'),
+        ),
+      ),
+      provider.Provider(
         create: (context) => InvoiceRepository(
           context.read<ApiClient>(),
         ),
       ),
-      ChangeNotifierProvider(
+      provider.ChangeNotifierProvider(
         create: (context) => InvoiceProvider(
           context.read<InvoiceRepository>(),
         ),
       ),
-      Provider(
+      provider.Provider(
         create: (context) => ProductRepository(
           context.read<ApiClient>(),
         ),
       ),
-      ChangeNotifierProvider(
+      provider.ChangeNotifierProvider(
         create: (context) => ProductProvider(
           context.read<ProductRepository>(),
         ),
       ),
-      Provider(
+      provider.Provider(
         create: (context) => ClientRepository(context.read<ApiClient>()),
       ),
-      ChangeNotifierProvider(
+      provider.ChangeNotifierProvider(
         create: (context) => ClientProvider(context.read<ClientRepository>()),
       ),
     ];
