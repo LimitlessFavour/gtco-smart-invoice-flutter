@@ -18,31 +18,51 @@ class AuthRepository {
       final response =
           await _client.post('/auth/login', data: loginDto.toJson());
 
-      if (response.statusCode == 200) {
-        LoggerService.success('Login request successful');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        LoggerService.debug('Login response data', {'data': response.data});
+
         final authResponse = AuthResponse.fromJson(response.data);
-        _client.setAuthToken(AuthToken.fromJson(response.data));
+        _client.setAuthToken(AuthToken.fromJson({
+          'access_token': authResponse.accessToken,
+          'refresh_token': authResponse.refreshToken,
+        }));
+
+        LoggerService.success('Login request successful', {
+          'userId': authResponse.user['id'],
+          'email': authResponse.user['email'],
+        });
+
         return authResponse;
       }
 
       final errorResponse = ErrorResponse.fromJson(response.data);
-      LoggerService.error('Login request failed', error: errorResponse.message);
+      LoggerService.error(
+        'Login request failed',
+        error: {
+          'status': response.statusCode,
+          'message': errorResponse.message,
+          'data': response.data,
+        },
+      );
       throw AuthException(errorResponse.message);
     } catch (e, stackTrace) {
-      if (e is AuthException) {
-        rethrow;
-      }
-
-      final errorMessage = e.toString().contains('SocketException')
-          ? 'Network connection error'
-          : 'Authentication failed. Please try again.';
+      if (e is AuthException) rethrow;
 
       LoggerService.error(
         'Login request error',
-        error: errorMessage,
+        error: e,
         stackTrace: stackTrace,
       );
-      throw AuthException(errorMessage);
+
+      if (e.toString().contains('type \'Null\'')) {
+        throw AuthException('Server response format error. Please try again.');
+      }
+
+      final message = e.toString().contains('SocketException')
+          ? 'Network connection error'
+          : 'Authentication failed. Please try again.';
+
+      throw AuthException(message);
     }
   }
 
