@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import '../services/navigation_service.dart';
 import '../widgets/mobile/navigation_drawer.dart';
 import '../screens/dashboard/mobile/dashboard_mobile.dart';
 import 'package:provider/provider.dart';
+import '../widgets/common/user_profile_section.dart';
 
 class MobileLayout extends StatelessWidget {
   const MobileLayout({super.key});
@@ -19,40 +21,44 @@ class MobileLayout extends StatelessWidget {
                 icon: const Icon(Icons.notifications_outlined),
                 onPressed: () {}, // TODO: Implement notifications
               ),
+              const UserProfileSection(isMobile: true),
               const SizedBox(width: 8),
             ],
           ),
           drawer: const AppNavigationDrawer(),
           body: _buildContent(navigation.currentScreen),
-          // body: Container(),
-          // body: DashboardMobile(),
         );
       },
     );
   }
 
   Widget _buildTitle(AppScreen screen) {
+    String title;
     switch (screen) {
       case AppScreen.dashboard:
-        return const Text('Dashboard');
+        title = 'Dashboard';
       case AppScreen.invoice:
-        return const Text('Invoices');
+        title = 'Invoices';
       case AppScreen.product:
-        return const Text('Products');
+        title = 'Products';
       case AppScreen.client:
-        return const Text('Clients');
+        title = 'Clients';
       case AppScreen.settings:
-        return const Text('Settings');
+        title = 'Settings';
       case AppScreen.helpCenter:
-        return const Text('Help Center');
+        title = 'Help Center';
     }
+    return AppText(
+      title,
+      weight: FontWeight.w600,
+      size: 24,
+      color: Colors.black,
+    );
   }
 
   Widget _buildContent(AppScreen screen) {
     switch (screen) {
       case AppScreen.dashboard:
-        return const DashboardMobile();
-      default:
         return const DashboardMobile();
       // case AppScreen.invoice:
       //   return const InvoiceMobile();
@@ -64,6 +70,8 @@ class MobileLayout extends StatelessWidget {
       //   return const SettingsMobile();
       // case AppScreen.helpCenter:
       //   return const HelpCenterMobile();
+      default:
+        return const DashboardMobile();
     }
   }
 }
