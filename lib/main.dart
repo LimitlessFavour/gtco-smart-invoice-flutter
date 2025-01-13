@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './firebase_options.dart';
@@ -66,21 +67,6 @@ Future<void> main() async {
       builder: (context) => AppRoot(navigationService: navigationService),
     ),
   );
-}
-
-//create a  stateless widget with scaffold which
-//contains a centered text saying coming soon
-class ComingSoonScreen extends StatelessWidget {
-  const ComingSoonScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Coming Soon'),
-      ),
-    );
-  }
 }
 
 class AppRoot extends StatelessWidget {
@@ -248,7 +234,8 @@ class _AppInitializationWrapperState extends State<AppInitializationWrapper> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return const LandingScreen();
+          return const MainLayout();
+          // return const LandingScreen();
         }
         return _buildLoadingScreen();
       },

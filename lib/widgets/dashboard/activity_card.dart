@@ -5,22 +5,27 @@ import 'package:gtco_smart_invoice_flutter/constants/styles.dart';
 import '../common/app_text.dart';
 
 class ActivityCard extends StatelessWidget {
-  const ActivityCard({super.key});
+  final bool isMobile;
+
+  const ActivityCard({
+    super.key,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       decoration: AppStyles.cardDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText(
+          AppText(
             'Activity',
-            size: 18,
+            size: isMobile ? 16 : 18,
             weight: FontWeight.w600,
           ),
-          const Gap(24),
+          Gap(isMobile ? 16 : 24),
           Expanded(
             child: Timeline.tileBuilder(
               theme: TimelineThemeData(
@@ -41,11 +46,11 @@ class ActivityCard extends StatelessWidget {
                 indicatorBuilder: (_, index) {
                   final activity = getActivityData()[index];
                   return DotIndicator(
-                    size: 32,
+                    size: isMobile ? 24 : 32,
                     color: activity.color.withOpacity(0.1),
                     child: Icon(
                       activity.icon,
-                      size: 16,
+                      size: isMobile ? 12 : 16,
                       color: activity.color,
                     ),
                   );
@@ -63,10 +68,13 @@ class ActivityCard extends StatelessWidget {
 
   Widget _buildTimelineCard(ActivityItem activity) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, bottom: 24.0),
+      padding: EdgeInsets.only(
+        left: isMobile ? 12.0 : 16.0,
+        bottom: isMobile ? 16.0 : 24.0,
+      ),
       child: Container(
-        margin: const EdgeInsets.only(top: 8),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.only(top: isMobile ? 4 : 8),
+        padding: EdgeInsets.all(isMobile ? 12 : 16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -88,14 +96,15 @@ class ActivityCard extends StatelessWidget {
             AppText(
               activity.title,
               weight: FontWeight.w600,
+              size: isMobile ? 14 : 16,
             ),
-            const Gap(4),
+            Gap(isMobile ? 2 : 4),
             AppText(
               activity.description,
-              size: 14,
+              size: isMobile ? 12 : 14,
               color: Colors.grey[600],
             ),
-            const Gap(8),
+            Gap(isMobile ? 6 : 8),
             Align(
               alignment: Alignment.bottomRight,
               child: Row(
@@ -103,14 +112,14 @@ class ActivityCard extends StatelessWidget {
                 children: [
                   AppText(
                     activity.date,
-                    size: 10,
+                    size: isMobile ? 8 : 10,
                     color: Colors.grey[600],
                     weight: FontWeight.w600,
                   ),
-                  const Gap(6),
+                  Gap(isMobile ? 4 : 6),
                   AppText(
                     activity.time,
-                    size: 10,
+                    size: isMobile ? 8 : 10,
                     color: Colors.grey[600],
                     weight: FontWeight.w600,
                   ),

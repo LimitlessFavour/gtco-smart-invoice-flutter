@@ -5,12 +5,17 @@ import 'package:gap/gap.dart';
 import '../../widgets/common/app_text.dart';
 
 class InvoiceStatsCard extends StatelessWidget {
-  const InvoiceStatsCard({super.key});
+  final bool isMobile;
+
+  const InvoiceStatsCard({
+    super.key,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(isMobile ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -18,20 +23,20 @@ class InvoiceStatsCard extends StatelessWidget {
             children: [
               SvgPicture.asset(
                 'assets/icons/invoice.svg',
-                width: 24,
-                height: 24,
+                width: isMobile ? 20 : 24,
+                height: isMobile ? 20 : 24,
               ),
-              const Gap(12),
-              const AppText(
+              Gap(isMobile ? 8 : 12),
+              AppText(
                 'Invoices',
-                size: 18,
+                size: isMobile ? 16 : 18,
                 weight: FontWeight.w600,
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isMobile ? 8 : 12,
+                  vertical: isMobile ? 4 : 8,
                 ),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey[300]!),
@@ -42,12 +47,13 @@ class InvoiceStatsCard extends StatelessWidget {
                     AppText(
                       'This Month',
                       color: Colors.grey[600],
-                      size: 14,
+                      size: isMobile ? 12 : 14,
                     ),
-                    const Gap(8),
+                    Gap(isMobile ? 4 : 8),
                     Icon(
                       Icons.keyboard_arrow_down,
                       color: Colors.grey[600],
+                      size: isMobile ? 16 : 24,
                     ),
                   ],
                 ),
@@ -60,29 +66,29 @@ class InvoiceStatsCard extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   SizedBox(
-                    width: 160,
-                    height: 160,
+                    width: isMobile ? 120 : 160,
+                    height: isMobile ? 120 : 160,
                     child: PieChart(
                       PieChartData(
                         sectionsSpace: 0,
-                        centerSpaceRadius: 60,
+                        centerSpaceRadius: isMobile ? 45 : 60,
                         sections: [
                           PieChartSectionData(
                             value: 40,
                             color: Colors.green,
-                            radius: 20,
+                            radius: isMobile ? 15 : 20,
                             showTitle: false,
                           ),
                           PieChartSectionData(
                             value: 50,
                             color: const Color(0xFFE04403),
-                            radius: 20,
+                            radius: isMobile ? 15 : 20,
                             showTitle: false,
                           ),
                           PieChartSectionData(
                             value: 10,
                             color: Colors.grey,
-                            radius: 20,
+                            radius: isMobile ? 15 : 20,
                             showTitle: false,
                           ),
                         ],
@@ -92,15 +98,15 @@ class InvoiceStatsCard extends StatelessWidget {
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const AppText(
+                      AppText(
                         '₦500,000',
-                        size: 24,
+                        size: isMobile ? 18 : 24,
                         weight: FontWeight.bold,
                       ),
                       AppText(
                         'Invoiced',
                         color: Colors.grey[600],
-                        size: 14,
+                        size: isMobile ? 12 : 14,
                       ),
                     ],
                   ),
@@ -112,9 +118,9 @@ class InvoiceStatsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildLegendItem('Paid', Colors.green),
-              const Gap(16),
+              Gap(isMobile ? 12 : 16),
               _buildLegendItem('Unpaid', const Color(0xFFE04403)),
-              const Gap(16),
+              Gap(isMobile ? 12 : 16),
               _buildLegendItem('Drafted', Colors.grey),
             ],
           ),
@@ -127,17 +133,17 @@ class InvoiceStatsCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: isMobile ? 8 : 12,
+          height: isMobile ? 8 : 12,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        const Gap(4),
+        Gap(isMobile ? 2 : 4),
         AppText(
           label,
-          size: 14,
+          size: isMobile ? 12 : 14,
           color: Colors.grey[600],
         ),
       ],

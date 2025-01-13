@@ -18,8 +18,8 @@ import '../widgets/common/slide_panel.dart';
 import '../widgets/web/sidebar_menu.dart';
 import '../providers/client_provider.dart';
 
-class WebMainLayout extends StatelessWidget {
-  const WebMainLayout({super.key});
+class DesktopLayout extends StatelessWidget {
+  const DesktopLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -255,10 +255,7 @@ class UserProfileSection extends StatelessWidget {
                 size: 20,
               ),
               const Gap(12),
-              AppText(
-                'Logout',
-                color: theme.primaryColor
-              ),
+              AppText('Logout', color: theme.primaryColor),
             ],
           ),
         ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 
-import '../../widgets/invoice/preview_card.dart';
+import '../../../widgets/invoice/preview_card.dart';
 
 class PreviewInvoiceScreen extends StatelessWidget {
   const PreviewInvoiceScreen({super.key});

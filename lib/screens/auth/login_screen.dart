@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
 import 'package:gtco_smart_invoice_flutter/screens/auth/profile_info_screen.dart';
 import '../../widgets/auth/custom_text_field.dart';
@@ -69,7 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => authProvider.isOnboardingCompleted
-              ? const WebMainLayout()
+              ? const MainLayout()
               : const ProfileInfoScreen(),
         ),
       );
@@ -102,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const WebMainLayout(),
+        builder: (context) => const MainLayout(),
       ),
     );
   }
@@ -124,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const WebMainLayout(),
+        builder: (context) => const MainLayout(),
       ),
     );
   }

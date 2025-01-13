@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
 import 'package:gtco_smart_invoice_flutter/utils/responsive_utils.dart';
 import 'mobile/business_info_mobile.dart';
@@ -45,7 +46,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const WebMainLayout(),
+          builder: (context) => const MainLayout(),
         ),
       );
     }

@@ -17,8 +17,10 @@ run:
 build-web:
 	flutter build web --release $(DART_DEFINES)
 
+# run-web: 
+# 	flutter run -d chrome $(DART_DEFINES)
 run-web: 
-	flutter run -d chrome $(DART_DEFINES)
+	flutter run -d chrome --dart-define-from-file=.env
 
 
 serve-web: build-web
