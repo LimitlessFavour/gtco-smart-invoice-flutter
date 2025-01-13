@@ -1,7 +1,12 @@
-import 'dart:html' if (dart.library.html) 'dart:html' as html;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart'
+    if (dart.library.io) 'package:flutter/material.dart' as plugins;
+import 'package:gtco_smart_invoice_flutter/services/mobile_navigation.dart';
+
+// Conditional import for web functionality
+import 'web_navigation.dart' if (dart.library.io) 'mobile_navigation.dart'
+    as platform_navigation;
 
 enum AppScreen {
   dashboard,
@@ -39,6 +44,7 @@ enum SettingsScreen {
 }
 
 class NavigationService extends ChangeNotifier {
+  final NavigationPlatform _platform;
   AppScreen _currentScreen = AppScreen.dashboard;
   InvoiceScreen _currentInvoiceScreen = InvoiceScreen.list;
   String? _currentInvoiceId;
@@ -47,10 +53,9 @@ class NavigationService extends ChangeNotifier {
   SettingsScreen _currentSettingsScreen = SettingsScreen.list;
   String? _currentClientId;
 
-  NavigationService() {
-    if (html.window != null) {
-      // Initialize state based on current URL
-      _handleUrlChange();
+  NavigationService() : _platform = createNavigationPlatform() {
+    if (kIsWeb) {
+      _platform.initializeHistory(handleUrlChange: _handleUrlChange);
     }
   }
 
@@ -60,19 +65,20 @@ class NavigationService extends ChangeNotifier {
   ProductScreen get currentProductScreen => _currentProductScreen;
   ClientScreen get currentClientScreen => _currentClientScreen;
   SettingsScreen get currentSettingsScreen => _currentSettingsScreen;
+
   String? get currentClientId => _currentClientId;
 
   bool canGoBack() {
     switch (_currentScreen) {
       case AppScreen.invoice:
-        return _currentInvoiceScreen == InvoiceScreen.create || 
-               _currentInvoiceScreen == InvoiceScreen.view;
+        return _currentInvoiceScreen == InvoiceScreen.create ||
+            _currentInvoiceScreen == InvoiceScreen.view;
       case AppScreen.product:
         return _currentProductScreen == ProductScreen.create;
       case AppScreen.client:
-        return _currentClientScreen == ClientScreen.create || 
-               _currentClientScreen == ClientScreen.view ||
-               _currentClientScreen == ClientScreen.edit;
+        return _currentClientScreen == ClientScreen.create ||
+            _currentClientScreen == ClientScreen.view ||
+            _currentClientScreen == ClientScreen.edit;
       case AppScreen.settings:
         return _currentSettingsScreen != SettingsScreen.list;
       default:
@@ -81,63 +87,23 @@ class NavigationService extends ChangeNotifier {
   }
 
   void initializeHistory() {
-    html.window.onPopState.listen((event) {
-      _handleUrlChange();
-    });
+    if (kIsWeb) {
+      _platform.initializeHistory(handleUrlChange: _handleUrlChange);
+    }
   }
 
   void _handleUrlChange() {
-    final path = html.window.location.pathname ?? '/';
-    
-    if (path == '/') {
-      _currentScreen = AppScreen.dashboard;
-      _currentInvoiceId = null;
-    } else if (path.startsWith('/invoice')) {
-      _currentScreen = AppScreen.invoice;
-      
-      if (path == '/invoice/create') {
-        _currentInvoiceScreen = InvoiceScreen.create;
-        _currentInvoiceId = null;
-      } else if (path == '/invoice') {
-        _currentInvoiceScreen = InvoiceScreen.list;
-        _currentInvoiceId = null;
-      } else {
-        // Handle /invoice/{id} pattern
-        final invoiceId = path.split('/').last;
-        _currentInvoiceScreen = InvoiceScreen.view;
-        _currentInvoiceId = invoiceId;
-      }
-    } else if (path.startsWith('/product')) {
-      _currentScreen = AppScreen.product;
-      _currentProductScreen = path == '/product/create' 
-          ? ProductScreen.create 
-          : ProductScreen.list;
-    } else if (path.startsWith('/client')) {
-      _currentScreen = AppScreen.client;
-      
-      if (path == '/client/create') {
-        _currentClientScreen = ClientScreen.create;
-        _currentClientId = null;
-      } else if (path == '/client') {
-        _currentClientScreen = ClientScreen.list;
-        _currentClientId = null;
-      } else if (path.contains('/edit/')) {
-        final clientId = path.split('/').last;
-        _currentClientScreen = ClientScreen.edit;
-        _currentClientId = clientId;
-      } else {
-        final clientId = path.split('/').last;
-        _currentClientScreen = ClientScreen.view;
-        _currentClientId = clientId;
-      }
-    }
-    
-    notifyListeners();
+    if (!kIsWeb) return;
+
+    final path = _platform.getCurrentPath();
+    _updateNavigationState(path);
   }
 
   void _updateBrowserUrl(String path) {
-    html.window.history.pushState(null, '', path);
-    _handleUrlChange(); // Add this line to ensure state is updated
+    if (kIsWeb) {
+      _platform.updateBrowserUrl(path);
+      _handleUrlChange();
+    }
   }
 
   bool handleBackPress() {
@@ -145,7 +111,7 @@ class NavigationService extends ChangeNotifier {
 
     switch (_currentScreen) {
       case AppScreen.invoice:
-        if (_currentInvoiceScreen == InvoiceScreen.create || 
+        if (_currentInvoiceScreen == InvoiceScreen.create ||
             _currentInvoiceScreen == InvoiceScreen.view) {
           _currentInvoiceScreen = InvoiceScreen.list;
           _currentInvoiceId = null;
@@ -163,7 +129,7 @@ class NavigationService extends ChangeNotifier {
         }
         return false;
       case AppScreen.client:
-        if (_currentClientScreen == ClientScreen.create || 
+        if (_currentClientScreen == ClientScreen.create ||
             _currentClientScreen == ClientScreen.view ||
             _currentClientScreen == ClientScreen.edit) {
           _currentClientScreen = ClientScreen.list;
@@ -190,14 +156,14 @@ class NavigationService extends ChangeNotifier {
     _currentInvoiceScreen = screen;
     _currentScreen = AppScreen.invoice;
     _currentInvoiceId = invoiceId;
-    
+
     String path = '/invoice';
     if (screen == InvoiceScreen.create) {
       path = '$path/create';
     } else if (screen == InvoiceScreen.view && invoiceId != null) {
       path = '$path/$invoiceId';
     }
-    
+
     _updateBrowserUrl(path);
     notifyListeners();
   }
@@ -205,7 +171,8 @@ class NavigationService extends ChangeNotifier {
   void navigateToProductScreen(ProductScreen screen) {
     _currentProductScreen = screen;
     _currentScreen = AppScreen.product;
-    _updateBrowserUrl('/product${screen == ProductScreen.create ? '/create' : ''}');
+    _updateBrowserUrl(
+        '/product${screen == ProductScreen.create ? '/create' : ''}');
     notifyListeners();
   }
 
@@ -213,15 +180,15 @@ class NavigationService extends ChangeNotifier {
     _currentClientScreen = screen;
     _currentScreen = AppScreen.client;
     _currentClientId = clientId;
-    
+
     String path = '/client';
     if (screen == ClientScreen.create) {
       path = '$path/create';
-    } else if ((screen == ClientScreen.view || screen == ClientScreen.edit) && 
-               clientId != null) {
+    } else if ((screen == ClientScreen.view || screen == ClientScreen.edit) &&
+        clientId != null) {
       path = '$path/${screen == ClientScreen.edit ? 'edit/' : ''}$clientId';
     }
-    
+
     _updateBrowserUrl(path);
     notifyListeners();
   }
@@ -229,13 +196,71 @@ class NavigationService extends ChangeNotifier {
   void navigateToSettingsScreen(SettingsScreen screen) {
     _currentSettingsScreen = screen;
     _currentScreen = AppScreen.settings;
-    _updateBrowserUrl('/settings${screen == SettingsScreen.list ? '' : '/${screen.toString().split('.').last}'}');
+    _updateBrowserUrl(
+        '/settings${screen == SettingsScreen.list ? '' : '/${screen.toString().split('.').last}'}');
     notifyListeners();
   }
 
   void navigateTo(AppScreen screen) {
     _currentScreen = screen;
     _updateBrowserUrl('/${screen.toString().split('.').last.toLowerCase()}');
+    notifyListeners();
+  }
+
+  void _updateNavigationState(String path) {
+    if (path == '/') {
+      _currentScreen = AppScreen.dashboard;
+      _currentInvoiceId = null;
+    } else if (path.startsWith('/invoice')) {
+      _currentScreen = AppScreen.invoice;
+
+      if (path == '/invoice/create') {
+        _currentInvoiceScreen = InvoiceScreen.create;
+        _currentInvoiceId = null;
+      } else if (path == '/invoice') {
+        _currentInvoiceScreen = InvoiceScreen.list;
+        _currentInvoiceId = null;
+      } else {
+        final invoiceId = path.split('/').last;
+        _currentInvoiceScreen = InvoiceScreen.view;
+        _currentInvoiceId = invoiceId;
+      }
+    } else if (path.startsWith('/product')) {
+      _currentScreen = AppScreen.product;
+      _currentProductScreen =
+          path == '/product/create' ? ProductScreen.create : ProductScreen.list;
+    } else if (path.startsWith('/client')) {
+      _currentScreen = AppScreen.client;
+
+      if (path == '/client/create') {
+        _currentClientScreen = ClientScreen.create;
+        _currentClientId = null;
+      } else if (path == '/client') {
+        _currentClientScreen = ClientScreen.list;
+        _currentClientId = null;
+      } else if (path.contains('/edit/')) {
+        final clientId = path.split('/').last;
+        _currentClientScreen = ClientScreen.edit;
+        _currentClientId = clientId;
+      } else {
+        final clientId = path.split('/').last;
+        _currentClientScreen = ClientScreen.view;
+        _currentClientId = clientId;
+      }
+    } else if (path.startsWith('/settings')) {
+      _currentScreen = AppScreen.settings;
+      if (path == '/settings') {
+        _currentSettingsScreen = SettingsScreen.list;
+      } else {
+        final screenName = path.split('/').last;
+        _currentSettingsScreen = SettingsScreen.values.firstWhere(
+          (screen) =>
+              screen.toString().split('.').last.toLowerCase() == screenName,
+          orElse: () => SettingsScreen.list,
+        );
+      }
+    }
+
     notifyListeners();
   }
 }

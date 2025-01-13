@@ -20,12 +20,15 @@ import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:device_preview_plus/device_preview_plus.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final navigationService = NavigationService();
+
   if (kIsWeb) {
-    NavigationService().initializeHistory();
+    navigationService.initializeHistory();
   }
 
   await Firebase.initializeApp(
@@ -37,11 +40,41 @@ Future<void> main() async {
     anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
   );
 
-  runApp(const AppRoot());
+  runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      // builder: (context) => const ComingSoonScreen(),
+      builder: (context) => AppRoot(navigationService: navigationService),
+      // builder: (context) => AppRoot(navigationService: navigationService),
+    ),
+  );
+
+  // runApp(const ComingSoonScreen());
 }
 
+//create a  stateless widget with scaffold which
+//contains a centered text saying coming soon
+class ComingSoonScreen extends StatelessWidget {
+  const ComingSoonScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text('Coming Soon'),
+      ),
+    );
+  }
+}
+
+
 class AppRoot extends StatelessWidget {
-  const AppRoot({super.key});
+  final NavigationService navigationService;
+
+  const AppRoot({
+    required this.navigationService,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +91,8 @@ class AppRoot extends StatelessWidget {
     final authRepository = AuthRepository(dioClient);
 
     return [
-      provider.ChangeNotifierProvider(create: (_) => NavigationService()),
+      provider.ChangeNotifierProvider<NavigationService>.value(
+          value: navigationService),
       provider.ChangeNotifierProvider(
         create: (_) => AuthProvider(authRepository),
       ),

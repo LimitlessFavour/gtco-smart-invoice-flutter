@@ -1,4 +1,5 @@
 import 'package:gtco_smart_invoice_flutter/services/logger_service.dart';
+import 'package:gtco_smart_invoice_flutter/models/auth/user.dart';
 
 class LoginDto {
   final String email;
@@ -15,19 +16,31 @@ class LoginDto {
 class SignupDto {
   final String email;
   final String password;
+  final String firstName;
+  final String lastName;
+  final String companyName;
 
-  SignupDto({required this.email, required this.password});
+  SignupDto({
+    required this.email,
+    required this.password,
+    required this.firstName,
+    required this.lastName,
+    required this.companyName,
+  });
 
   Map<String, dynamic> toJson() => {
         'email': email,
         'password': password,
+        'firstName': firstName,
+        'lastName': lastName,
+        'companyName': companyName,
       };
 }
 
 class AuthResponse {
   final String accessToken;
   final String refreshToken;
-  final Map<String, dynamic> user;
+  final User user;
 
   AuthResponse({
     required this.accessToken,
@@ -40,27 +53,18 @@ class AuthResponse {
 
     try {
       return AuthResponse(
-        accessToken: json['accessToken'] ?? json['access_token'] as String,
-        refreshToken: json['refreshToken'] ?? json['refresh_token'] as String,
-        user: json['user'] as Map<String, dynamic>,
+        accessToken: json['access_token'] as String,
+        refreshToken: json['refresh_token'] as String,
+        user: User.fromJson(json['user'] as Map<String, dynamic>),
       );
-    } catch (e, stackTrace) {
+    } catch (e) {
       LoggerService.error(
         'Error parsing AuthResponse',
-        error: {
-          'error': e.toString(),
-          'json': json,
-        },
+        error: {'error': e.toString(), 'json': json},
       );
       rethrow;
     }
   }
-
-  Map<String, dynamic> toJson() => {
-        'access_token': accessToken,
-        'refresh_token': refreshToken,
-        'user': user,
-      };
 }
 
 class ErrorResponse {
@@ -83,13 +87,5 @@ class ErrorResponse {
       error: json['error'] as String?,
       errors: (json['errors'] as List?)?.cast<String>(),
     );
-  }
-
-  @override
-  String toString() {
-    if (errors?.isNotEmpty ?? false) {
-      return '${errors!.join(', ')} (Status: $statusCode)';
-    }
-    return '$message (Status: $statusCode)';
   }
 }

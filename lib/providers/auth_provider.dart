@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:gtco_smart_invoice_flutter/models/auth/user.dart';
 import '../models/auth/auth_token.dart';
 import '../models/auth/auth_dtos.dart';
 import '../repositories/auth_repository.dart';
@@ -10,15 +11,15 @@ class AuthProvider extends ChangeNotifier {
   AuthToken? _token;
   bool _isLoading = false;
   String? _error;
-  Map<String, dynamic>? _user;
+  User? _user;
 
   AuthProvider(this._repository);
 
-  bool get isAuthenticated =>
-      _token != null && !_token!.accessTokenExpiry.isBefore(DateTime.now());
+  bool get isAuthenticated => _token != null && !_token!.isAccessTokenExpired;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  Map<String, dynamic>? get user => _user;
+  User? get user => _user;
+  bool get isOnboardingCompleted => _user?.onboardingCompleted ?? false;
 
   void _startLoading() {
     _isLoading = true;
@@ -43,8 +44,9 @@ class AuthProvider extends ChangeNotifier {
     });
     _user = response.user;
     LoggerService.success('Authentication successful', {
-      'user': response.user['email'],
-      'tokenExpiry': _token?.accessTokenExpiry,
+      'user': response.user.email,
+      'onboardingCompleted': response.user.onboardingCompleted,
+      'tokenExpiry': _token?.accessTokenExpiry.toIso8601String(),
     });
   }
 
@@ -61,22 +63,44 @@ class AuthProvider extends ChangeNotifier {
     } on AuthException catch (e) {
       _stopLoading(e.toString());
     } catch (e, stackTrace) {
-      LoggerService.error('Unexpected login error',
-          error: e, stackTrace: stackTrace);
+      LoggerService.error(
+        'Unexpected login error',
+        error: e,
+        stackTrace: stackTrace,
+      );
       _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 
-  Future<void> signup(String email, String password) async {
+  Future<void> signup({
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String companyName,
+  }) async {
     try {
       _startLoading();
       final response = await _repository.signup(
-        SignupDto(email: email, password: password),
+        SignupDto(
+          email: email,
+          password: password,
+          firstName: firstName,
+          lastName: lastName,
+          companyName: companyName,
+        ),
       );
       _handleAuthResponse(response);
       _stopLoading(null);
-    } catch (e) {
+    } on AuthException catch (e) {
       _stopLoading(e.toString());
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Unexpected signup error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 
@@ -86,8 +110,15 @@ class AuthProvider extends ChangeNotifier {
       final response = await _repository.signInWithGoogle();
       _handleAuthResponse(response);
       _stopLoading(null);
-    } catch (e) {
+    } on AuthException catch (e) {
       _stopLoading(e.toString());
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Unexpected Google sign-in error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 
@@ -97,8 +128,15 @@ class AuthProvider extends ChangeNotifier {
       final response = await _repository.signInWithApple();
       _handleAuthResponse(response);
       _stopLoading(null);
-    } catch (e) {
+    } on AuthException catch (e) {
       _stopLoading(e.toString());
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Unexpected Apple sign-in error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 
@@ -109,8 +147,15 @@ class AuthProvider extends ChangeNotifier {
       _token = null;
       _user = null;
       _stopLoading(null);
-    } catch (e) {
+    } on AuthException catch (e) {
       _stopLoading(e.toString());
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Unexpected logout error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 
@@ -119,8 +164,15 @@ class AuthProvider extends ChangeNotifier {
       _startLoading();
       await _repository.resetPassword(email);
       _stopLoading(null);
-    } catch (e) {
+    } on AuthException catch (e) {
       _stopLoading(e.toString());
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Unexpected password reset error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 
@@ -129,8 +181,15 @@ class AuthProvider extends ChangeNotifier {
       _startLoading();
       await _repository.verifyEmail(token);
       _stopLoading(null);
-    } catch (e) {
+    } on AuthException catch (e) {
       _stopLoading(e.toString());
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Unexpected email verification error',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      _stopLoading('An unexpected error occurred. Please try again.');
     }
   }
 }

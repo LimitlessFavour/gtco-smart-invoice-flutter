@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/screens/auth/profile_info_screen.dart';
 import '../../widgets/auth/custom_text_field.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/auth/auth_background.dart';
@@ -10,6 +11,8 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/loading_overlay.dart';
 import '../../services/logger_service.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io' show Platform;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,36 +46,43 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      LoggerService.warning('Login form validation failed');
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final authProvider = context.read<AuthProvider>();
 
-    LoggerService.info('Initiating login process', {
-      'email': _emailController.text.trim(),
-    });
+    try {
+      await authProvider.login(
+        _emailController.text.trim(),
+        _passwordController.text,
+      );
 
-    await authProvider.login(
-      _emailController.text.trim(),
-      _passwordController.text,
-    );
+      if (!mounted) return;
 
-    if (!mounted) return;
+      if (authProvider.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authProvider.error!)),
+        );
+        return;
+      }
 
-    if (authProvider.error != null) {
-      _showErrorSnackBar(authProvider.error!);
-      return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => authProvider.isOnboardingCompleted
+              ? const WebMainLayout()
+              : const ProfileInfoScreen(),
+        ),
+      );
+    } catch (e) {
+      LoggerService.error('Login error', error: e);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An error occurred during login. Please try again.'),
+        ),
+      );
     }
-
-    LoggerService.success('Login successful - Navigating to main layout');
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const WebMainLayout(),
-      ),
-    );
   }
 
   void _handleGoogleSignIn() async {
@@ -116,6 +126,44 @@ class _LoginScreenState extends State<LoginScreen> {
       MaterialPageRoute(
         builder: (context) => const WebMainLayout(),
       ),
+    );
+  }
+
+  Widget _buildSocialLoginButtons() {
+    return Column(
+      children: [
+        OutlinedButton.icon(
+          onPressed: _handleGoogleSignIn,
+          icon: Image.asset('assets/images/google.png', height: 24),
+          label: const AppText(
+            'Continue with Google',
+            color: Colors.black,
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        if (kIsWeb || Platform.isIOS) ...[
+          const Gap(16),
+          OutlinedButton.icon(
+            onPressed: _handleAppleSignIn,
+            icon: const Icon(Icons.apple, color: Colors.black),
+            label: const AppText(
+              'Continue with Apple',
+              color: Colors.black,
+            ),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -163,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     CustomTextField(
                       label: 'Password',
                       hint: 'Enter your password',
-                      isPassword: true,
+                      isPassword: _obscureText,
                       controller: _passwordController,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -240,35 +288,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const Gap(24),
-                    OutlinedButton.icon(
-                      onPressed: _handleGoogleSignIn,
-                      icon: Image.asset('assets/images/google.png', height: 24),
-                      label: const AppText(
-                        'Continue with Google',
-                        color: Colors.black,
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const Gap(16),
-                    OutlinedButton.icon(
-                      onPressed: _handleAppleSignIn,
-                      icon: const Icon(Icons.apple, color: Colors.black),
-                      label: const AppText(
-                        'Continue with Apple',
-                        color: Colors.black,
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 48),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+                    _buildSocialLoginButtons(),
                     const Gap(24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

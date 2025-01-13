@@ -13,8 +13,8 @@ class AuthToken {
 
   factory AuthToken.fromJson(Map<String, dynamic> json) {
     return AuthToken(
-      accessToken: json['access_token'],
-      refreshToken: json['refresh_token'],
+      accessToken: json['access_token'] as String,
+      refreshToken: json['refresh_token'] as String,
       accessTokenExpiry: DateTime.now().add(const Duration(hours: 1)),
       refreshTokenExpiry: DateTime.now().add(const Duration(days: 7)),
     );
@@ -24,4 +24,8 @@ class AuthToken {
         'access_token': accessToken,
         'refresh_token': refreshToken,
       };
+
+  bool get isAccessTokenExpired => DateTime.now().isAfter(accessTokenExpiry);
+
+  bool get isRefreshTokenExpired => DateTime.now().isAfter(refreshTokenExpiry);
 }

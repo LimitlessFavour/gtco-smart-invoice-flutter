@@ -128,7 +128,14 @@ Generate code, corrections, and refactorings that comply with the basic principl
 
 - Use the standard widget testing for flutter
 - Use integration tests for each api module.
-    
+
+
+### API Integration
+
+- Use Dio
+- Follow the api_schema.json file for the api documentation. All implemented api endpoints should follow
+the doccumnetation in this file.
+
 
 ### logger
 
