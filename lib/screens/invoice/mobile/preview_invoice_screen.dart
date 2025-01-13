@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
-
+import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/screens/invoice/mobile/invoice_mobile.dart';
+import '../../../utils/invoice_actions.dart';
+import '../../../widgets/common/custom_scroll_view.dart';
 import '../../../widgets/invoice/preview_card.dart';
 
-class PreviewInvoiceScreen extends StatelessWidget {
+class PreviewInvoiceScreen extends StatelessWidget with InvoiceActions {
   const PreviewInvoiceScreen({super.key});
 
   @override
@@ -55,9 +57,16 @@ class PreviewInvoiceScreen extends StatelessWidget {
                   const Gap(16),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle send invoice
-                      },
+                      onPressed: () => showSendConfirmation(
+                        context,
+                        onSuccess: (context) {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => const MainLayout(),
+                            ),
+                          );
+                        },
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE04403),
                         padding: const EdgeInsets.symmetric(vertical: 16),

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_list_content.dart';
 import '../common/app_text.dart';
 
 class InvoiceEmptyState extends StatelessWidget {
-  const InvoiceEmptyState({super.key});
+  final bool isMobile;
+
+  const InvoiceEmptyState({
+    super.key,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,23 +20,23 @@ class InvoiceEmptyState extends StatelessWidget {
         children: [
           Image.asset(
             'assets/images/empty_invoice.png',
-            height: 160,
-            width: 120,
-            // width: 200,
+            height: isMobile ? 120 : 160,
+            width: isMobile ? 90 : 120,
           ),
-          const Spacer(),
-          const AppText(
+          Gap(isMobile ? 16 : 24),
+          AppText(
             'Create your first invoice!',
-            size: 24,
+            size: isMobile ? 20 : 24,
             weight: FontWeight.w600,
           ),
-          const Spacer(),
-          const Center(
-            child: SizedBox(
-              width: 200,
-              child: CreateInvoiceButton(),
+          Gap(isMobile ? 16 : 24),
+          if (!isMobile)
+            const Center(
+              child: SizedBox(
+                width: 200,
+                child: CreateInvoiceButton(),
+              ),
             ),
-          ),
         ],
       ),
     );

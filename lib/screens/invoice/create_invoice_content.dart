@@ -11,6 +11,7 @@ import '../../providers/invoice_provider.dart';
 import '../../widgets/dialogs/success_dialog.dart';
 import '../../widgets/common/loading_overlay.dart';
 import '../../widgets/dialogs/basic_confirmation_dialog.dart';
+import '../../utils/invoice_actions.dart';
 
 class CreateInvoiceContent extends StatefulWidget {
   const CreateInvoiceContent({super.key});
@@ -19,8 +20,8 @@ class CreateInvoiceContent extends StatefulWidget {
   State<CreateInvoiceContent> createState() => _CreateInvoiceContentState();
 }
 
-class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
-
+class _CreateInvoiceContentState extends State<CreateInvoiceContent>
+    with InvoiceActions {
   BuildContext? _dialogContext;
 
   @override
@@ -40,7 +41,8 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
             children: [
               // Header with actions
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 16.0),
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: const BoxDecoration(
                   color: Color(0xFFF2F2F2),
@@ -86,7 +88,15 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                         ),
                         const Gap(16),
                         ElevatedButton(
-                          onPressed: () => _showSendConfirmation(context),
+                          onPressed: () => showSendConfirmation(
+                            context,
+                            clientName: 'John Doe',
+                            onSuccess: (context) {
+                              context
+                                  .read<NavigationService>()
+                                  .navigateToInvoiceScreen(InvoiceScreen.list);
+                            },
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFE04403),
                           ),
@@ -185,61 +195,5 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
         );
       },
     );
-  }
-
-  void _showSendConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => BasicConfirmationDialog(
-        title: 'Confirm Send',
-        message: 'Are you sure you want to send the invoice to John Doe?',
-        confirmText: 'Send',
-        onConfirm: () => _handleSendInvoice(context),
-      ),
-    );
-  }
-
-  Future<void> _handleSendInvoice(BuildContext context) async {
-    final invoiceProvider = context.read<InvoiceProvider>();
-    final navigationService = context.read<NavigationService>();
-    
-    final success = await invoiceProvider.sendInvoice(
-      Invoice(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        companyId: '1',
-        clientId: '1',
-        invoiceNumber: 'INV-${DateTime.now().millisecondsSinceEpoch}',
-        dueDate: DateTime.now().add(const Duration(days: 30)),
-        status: 'unpaid',
-        totalAmount: 1500.0,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        items: [],
-        client: Client(
-          id: '1',
-          companyId: '1',
-          firstName: 'John',
-          lastName: 'Snow',
-          email: 'john@example.com',
-          phoneNumber: '1234567890',
-          address: '123 Street',
-        ),
-      ),
-    );
-
-    if (success) {
-    // if (success && context.mounted) {
-      // Show success dialog
-      await showDialog(
-        context: _dialogContext!,
-        barrierDismissible: false,
-        builder: (context) => const SuccessDialog(message: 'Invoice sent successfully',),
-      );
-      
-      // if (context.mounted) {
-        // Navigate back to invoice list
-        navigationService.navigateToInvoiceScreen(InvoiceScreen.list);
-      // }
-    }
   }
 }

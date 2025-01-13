@@ -23,21 +23,20 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:device_preview_plus/device_preview_plus.dart';
 
+// Define constants for environment variables
+const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Debug environment variables
   if (kDebugMode) {
-    const envVars = [
-      'API_BASE_URL',
-      'SUPABASE_URL',
-      'SUPABASE_ANON_KEY',
-    ];
-
     print('\nEnvironment Variables:');
-    for (final key in envVars) {
-      print('$key: ${String.fromEnvironment(key)}');
-    }
+    print('API_BASE_URL: $apiBaseUrl');
+    print('SUPABASE_URL: $supabaseUrl');
+    print('SUPABASE_ANON_KEY: $supabaseAnonKey');
     print(''); // Empty line for readability
   }
 
@@ -52,14 +51,13 @@ Future<void> main() async {
   );
 
   await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+    url: supabaseUrl,
+    anonKey: supabaseAnonKey,
   );
 
-  debugPrint('API_BASE_URL: ${const String.fromEnvironment('API_BASE_URL')}');
-  debugPrint('SUPABASE_URL: ${const String.fromEnvironment('SUPABASE_URL')}');
-  debugPrint(
-      'SUPABASE_ANON_KEY: ${const String.fromEnvironment('SUPABASE_ANON_KEY')}');
+  debugPrint('API_BASE_URL: $apiBaseUrl');
+  debugPrint('SUPABASE_URL: $supabaseUrl');
+  debugPrint('SUPABASE_ANON_KEY: $supabaseAnonKey');
 
   runApp(
     DevicePreview(
@@ -86,9 +84,7 @@ class AppRoot extends StatelessWidget {
   }
 
   List<SingleChildWidget> _createProviders() {
-    final dioClient = DioClient(
-      baseUrl: const String.fromEnvironment('API_BASE_URL'),
-    );
+    final dioClient = DioClient(baseUrl: apiBaseUrl);
     final authRepository = AuthRepository(dioClient);
 
     return [
@@ -98,9 +94,7 @@ class AppRoot extends StatelessWidget {
         create: (_) => AuthProvider(authRepository),
       ),
       provider.Provider(
-        create: (_) => ApiClient(
-          baseUrl: const String.fromEnvironment('API_BASE_URL'),
-        ),
+        create: (_) => ApiClient(baseUrl: apiBaseUrl),
       ),
       provider.Provider(
         create: (context) => InvoiceRepository(

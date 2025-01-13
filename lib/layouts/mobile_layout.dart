@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/screens/invoice/mobile/invoice_mobile.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import '../services/navigation_service.dart';
 import '../widgets/mobile/navigation_drawer.dart';
@@ -60,8 +61,8 @@ class MobileLayout extends StatelessWidget {
     switch (screen) {
       case AppScreen.dashboard:
         return const DashboardMobile();
-      // case AppScreen.invoice:
-      //   return const InvoiceMobile();
+      case AppScreen.invoice:
+        return const InvoiceMobile();
       // case AppScreen.product:
       //   return const ProductMobile();
       // case AppScreen.client:
