@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/screens/client/mobile/client_mobile.dart';
+import 'package:gtco_smart_invoice_flutter/screens/help_center/mobile/help_center_mobile.dart';
 import 'package:gtco_smart_invoice_flutter/screens/invoice/mobile/invoice_mobile.dart';
+import 'package:gtco_smart_invoice_flutter/screens/product/mobile/product_mobile.dart';
+import 'package:gtco_smart_invoice_flutter/screens/settings/mobile/settings_mobile.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import '../services/navigation_service.dart';
 import '../widgets/mobile/navigation_drawer.dart';
@@ -63,14 +67,14 @@ class MobileLayout extends StatelessWidget {
         return const DashboardMobile();
       case AppScreen.invoice:
         return const InvoiceMobile();
-      // case AppScreen.product:
-      //   return const ProductMobile();
-      // case AppScreen.client:
-      //   return const ClientMobile();
-      // case AppScreen.settings:
-      //   return const SettingsMobile();
-      // case AppScreen.helpCenter:
-      //   return const HelpCenterMobile();
+      case AppScreen.product:
+        return const ProductMobile();
+      case AppScreen.client:
+        return const ClientMobile();
+      case AppScreen.settings:
+        return const SettingsMobile();
+      case AppScreen.helpCenter:
+        return const HelpCenterMobile();
       default:
         return const DashboardMobile();
     }

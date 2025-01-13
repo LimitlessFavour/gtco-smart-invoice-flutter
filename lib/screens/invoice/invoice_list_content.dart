@@ -41,7 +41,7 @@ class InvoiceListContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: const Color(0xFFC6C1C1)),
                   ),
-                  child:  Column(
+                  child: Column(
                     children: [
                       // Search and Filter Row
                       const SearchAndFilterRow(),
@@ -261,6 +261,21 @@ class SearchAndFilterRow extends StatefulWidget {
 
 class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
   String selectedFilter = 'All invoices';
+  String selectedSort = 'Newest First';
+
+  final List<String> sortOptions = [
+    'Newest First',
+    'Oldest First',
+    'Highest Amount',
+    'Lowest Amount',
+  ];
+
+  // Sample counter data (replace with actual data from your provider)
+  final Map<String, int> filterCounts = {
+    'All invoices': 30,
+    'Unpaid': 30,
+    'Draft': 2,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -268,12 +283,13 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
       children: [
         // Search Field
         SizedBox(
-          width: 252, // Fixed width as per design
+          width: 252,
           child: Container(
-            height: 32, // Height as per design
+            height: 32,
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE0E0E0)),
             ),
             child: TextField(
               decoration: InputDecoration(
@@ -281,13 +297,17 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
                 hintStyle: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
                 prefixIcon: Icon(
                   Icons.search,
                   color: Colors.grey[600],
                   size: 20,
                 ),
-                border: InputBorder.none,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
@@ -300,10 +320,10 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
 
         // Filter Tabs
         Container(
-          height: 32, // Match search bar height
+          height: 32,
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE0E0E0)),
           ),
           child: Row(
@@ -323,7 +343,7 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE0E0E0)),
           ),
           child: Row(
@@ -331,13 +351,11 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
             children: [
               Icon(Icons.filter_list, size: 20, color: Colors.grey[800]),
               const Gap(8),
-              Text(
+              AppText(
                 'Filter',
-                style: TextStyle(
-                  color: Colors.grey[800],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                size: 14,
+                weight: FontWeight.w600,
+                color: Colors.grey[800],
               ),
             ],
           ),
@@ -345,30 +363,49 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
         const Gap(24),
 
         // Sort Dropdown
-        Container(
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Newest First',
-                style: TextStyle(
+        PopupMenuButton<String>(
+          offset: const Offset(0, 40),
+          child: Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE0E0E0)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppText(
+                  selectedSort,
+                  size: 14,
+                  weight: FontWeight.w600,
                   color: Colors.grey[800],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
                 ),
-              ),
-              const Gap(8),
-              Icon(Icons.keyboard_arrow_down,
-                  size: 20, color: Colors.grey[800]),
-            ],
+                const Gap(8),
+                Icon(Icons.keyboard_arrow_down,
+                    size: 20, color: Colors.grey[800]),
+              ],
+            ),
           ),
+          itemBuilder: (context) => sortOptions
+              .map(
+                (option) => PopupMenuItem<String>(
+                  value: option,
+                  child: AppText(
+                    option,
+                    size: 14,
+                    weight: FontWeight.w500,
+                  ),
+                ),
+              )
+              .toList(),
+          onSelected: (value) {
+            setState(() {
+              selectedSort = value;
+              // TODO: Implement sorting logic
+            });
+          },
         ),
       ],
     );
@@ -376,11 +413,13 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
 
   Widget _buildFilterTab(String label) {
     final bool isSelected = selectedFilter == label;
+    final int count = filterCounts[label] ?? 0;
 
     return InkWell(
       onTap: () {
         setState(() {
           selectedFilter = label;
+          // TODO: Implement filtering logic based on selected filter
         });
       },
       child: Container(
@@ -388,17 +427,32 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFF5F5F5) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppText(
+              label,
+              size: 14,
+              weight: FontWeight.w600,
               color: Colors.grey[800],
-              fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
             ),
-          ),
+            const Gap(8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFFE04403) : Colors.grey[300],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: AppText(
+                count.toString(),
+                size: 12,
+                weight: FontWeight.w600,
+                color: isSelected ? Colors.white : Colors.grey[800],
+              ),
+            ),
+          ],
         ),
       ),
     );

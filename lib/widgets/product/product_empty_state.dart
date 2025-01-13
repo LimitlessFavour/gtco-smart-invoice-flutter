@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/screens/product/product_content.dart';
+import '../../screens/product/product_content.dart';
 import '../common/app_text.dart';
 
 class ProductEmptyState extends StatelessWidget {
-  const ProductEmptyState({super.key});
+  final bool isMobile;
+
+  const ProductEmptyState({
+    super.key,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,23 +20,24 @@ class ProductEmptyState extends StatelessWidget {
         children: [
           Image.asset(
             'assets/images/empty_product.png',
-            height: 160,
-            width: 120,
+            height: isMobile ? 120 : 160,
+            width: isMobile ? 90 : 120,
           ),
-          const Gap(24),
-          const AppText(
+          Gap(isMobile ? 16 : 24),
+          AppText(
             'Add your products and services to save time\ncreating your next invoice',
-            size: 24,
+            size: isMobile ? 18 : 24,
             weight: FontWeight.w600,
             textAlign: TextAlign.center,
           ),
-          const Gap(24),
-          const Center(
-            child: SizedBox(
-              width: 200,
-              child: CreateProductButton(),
+          Gap(isMobile ? 16 : 24),
+          if (!isMobile)
+            const Center(
+              child: SizedBox(
+                width: 200,
+                child: CreateProductButton(),
+              ),
             ),
-          ),
         ],
       ),
     );
