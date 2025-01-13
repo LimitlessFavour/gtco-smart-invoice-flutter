@@ -47,7 +47,8 @@ class _PaymentChartState extends State<PaymentChart>
           return const Center(child: Text('No data available'));
         }
 
-        if (provider.shouldAnimatePayments && !_animationController.isAnimating) {
+        if (provider.shouldAnimatePayments &&
+            !_animationController.isAnimating) {
           _animationController.reset();
           _animationController.forward();
         }

@@ -2,7 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart'
     if (dart.library.io) 'package:flutter/material.dart' as plugins;
+import 'package:gtco_smart_invoice_flutter/main.dart';
 import 'package:gtco_smart_invoice_flutter/services/mobile_navigation.dart';
+import 'package:provider/provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
 
 // Conditional import for web functionality
 import 'web_navigation.dart' if (dart.library.io) 'mobile_navigation.dart'
@@ -202,8 +205,20 @@ class NavigationService extends ChangeNotifier {
   }
 
   void navigateTo(AppScreen screen) {
+    final shouldAnimateCharts =
+        screen == AppScreen.dashboard && _currentScreen != AppScreen.dashboard;
+
     _currentScreen = screen;
     _updateBrowserUrl('/${screen.toString().split('.').last.toLowerCase()}');
+
+    if (shouldAnimateCharts) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        Provider.of<DashboardProvider>(navigatorKey.currentContext!,
+                listen: false)
+            .onTabChanged();
+      });
+    }
+
     notifyListeners();
   }
 

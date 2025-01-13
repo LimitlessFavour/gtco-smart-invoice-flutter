@@ -32,14 +32,16 @@ class DashboardProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      final paymentsData = await _repository.getPaymentsAnalytics(_paymentsTimeline);
-      final invoicesData = await _repository.getInvoiceAnalytics(_invoicesTimeline);
-      
+      final paymentsData =
+          await _repository.getPaymentsAnalytics(_paymentsTimeline);
+      final invoicesData =
+          await _repository.getInvoiceAnalytics(_invoicesTimeline);
+
       _analytics = DashboardAnalytics(
         paymentsTimeline: paymentsData,
         invoiceStats: invoicesData,
-        topPayingClients: [], 
-        topSellingProducts: [], 
+        topPayingClients: [],
+        topSellingProducts: [],
       );
 
       _isLoading = false;
@@ -109,5 +111,13 @@ class DashboardProvider extends ChangeNotifier {
     final topProducts = await _repository.getTopProducts();
     _analytics = _analytics?.copyWith(topSellingProducts: topProducts);
     notifyListeners();
+  }
+
+  void onTabChanged() {
+    if (_analytics != null) {
+      _shouldAnimatePayments = true;
+      _shouldAnimateInvoices = true;
+      notifyListeners();
+    }
   }
 }

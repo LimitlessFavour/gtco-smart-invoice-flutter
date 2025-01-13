@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 import '../../../widgets/auth/custom_text_field.dart';
 import '../../../widgets/auth/gtco_logo.dart';
 import '../../../widgets/common/app_text.dart';
@@ -131,75 +132,77 @@ class BusinessInfoDesktop extends StatelessWidget {
               padding: const EdgeInsets.all(48),
               child: Form(
                 key: formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Gap(32),
-                    const GtcoLogo(forceLarge: true),
-                    const Gap(48),
-                    AppText.heading(
-                      'Tell us about your business',
-                      size: 32,
-                    ),
-                    const Gap(8),
-                    const AppText(
-                      'so we can tailor your experience',
-                      size: 24,
-                    ),
-                    const Gap(48),
-                    CustomTextField(
-                      label: "What is your company's name?",
-                      hint: 'Enter company name',
-                      controller: companyNameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your company name';
-                        }
-                        return null;
-                      },
-                    ),
-                    const Gap(32),
-                    _buildDropdown(
-                      'Where are you located?',
-                      selectedIndustry,
-                      industries,
-                      onIndustryChanged,
-                    ),
-                    const Gap(32),
-                    _buildDropdown(
-                      'How would you describe your business?',
-                      selectedBusinessType,
-                      businessTypes,
-                      onBusinessTypeChanged,
-                    ),
-                    const Gap(32),
-                    _buildDropdown(
-                      'Upload your business logo',
-                      selectedLogoOption,
-                      ['Take a photo', 'Choose from gallery'],
-                      onLogoOptionChanged,
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const AppText(
-                            'Back',
-                            color: Colors.black,
-                            size: 20,
-                            weight: FontWeight.w500,
+                child: CustomScrollWrapper(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Gap(32),
+                      const GtcoLogo(forceLarge: true),
+                      const Gap(48),
+                      AppText.heading(
+                        'Tell us about your business',
+                        size: 32,
+                      ),
+                      const Gap(8),
+                      const AppText(
+                        'so we can tailor your experience',
+                        size: 24,
+                      ),
+                      const Gap(48),
+                      CustomTextField(
+                        label: "What is your company's name?",
+                        hint: 'Enter company name',
+                        controller: companyNameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your company name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const Gap(32),
+                      _buildDropdown(
+                        'Where are you located?',
+                        selectedIndustry,
+                        industries,
+                        onIndustryChanged,
+                      ),
+                      const Gap(32),
+                      _buildDropdown(
+                        'How would you describe your business?',
+                        selectedBusinessType,
+                        businessTypes,
+                        onBusinessTypeChanged,
+                      ),
+                      const Gap(32),
+                      _buildDropdown(
+                        'Upload your business logo',
+                        selectedLogoOption,
+                        ['Take a photo', 'Choose from gallery'],
+                        onLogoOptionChanged,
+                      ),
+                      const Gap(48),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const AppText(
+                              'Back',
+                              color: Colors.black,
+                              size: 20,
+                              weight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        const Gap(16),
-                        AppButtonContained(
-                          text: 'Save and Finish',
-                          onPressed: onSubmit,
-                        ),
-                      ],
-                    ),
-                  ],
+                          const Gap(16),
+                          AppButtonContained(
+                            text: 'Save and Finish',
+                            onPressed: onSubmit,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -30,6 +30,8 @@ const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -143,6 +145,7 @@ class SmartInvoiceApp extends StatelessWidget {
       theme: _buildAppTheme(context),
       debugShowCheckedModeBanner: false,
       home: const AppInitializationWrapper(),
+      navigatorKey: navigatorKey,
     );
   }
 
@@ -235,8 +238,8 @@ class _AppInitializationWrapperState extends State<AppInitializationWrapper> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return const MainLayout();
-          // return const LandingScreen();
+          // return const MainLayout();
+          return const LandingScreen();
         }
         return _buildLoadingScreen();
       },

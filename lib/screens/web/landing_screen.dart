@@ -72,9 +72,11 @@ class LandingScreen extends StatelessWidget {
     final buttonSpacing = (20.0 * scaleFactor).clamp(16.0, 20.0);
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 48,
-        vertical: 16,
+      padding: EdgeInsets.only(
+        left: isSmallScreen ? 8 : 48,
+        right: isSmallScreen ? 8 : 48,
+        top: isSmallScreen ? 48 : 16,
+        bottom: 16,
       ),
       constraints: const BoxConstraints(maxWidth: 1440),
       child: Row(
@@ -129,10 +131,11 @@ class LandingScreen extends StatelessWidget {
                 ),
               ),
               const Gap(22),
-              ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignupScreen()),
+              if (!isSmallScreen)
+                ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignupScreen()),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE04403),
