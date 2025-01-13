@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/dashboard_repository.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './firebase_options.dart';
@@ -22,6 +23,7 @@ import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:device_preview_plus/device_preview_plus.dart';
+import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
 
 // Define constants for environment variables
 const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
@@ -121,6 +123,11 @@ class AppRoot extends StatelessWidget {
       ),
       provider.ChangeNotifierProvider(
         create: (context) => ClientProvider(context.read<ClientRepository>()),
+      ),
+      provider.ChangeNotifierProvider(
+        create: (context) => DashboardProvider(
+          DashboardRepository(),
+        ),
       ),
     ];
   }

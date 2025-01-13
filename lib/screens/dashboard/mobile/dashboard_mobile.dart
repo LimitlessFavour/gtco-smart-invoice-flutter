@@ -6,6 +6,7 @@ import '../../../widgets/dashboard/activity_card.dart';
 import '../../../widgets/dashboard/invoice_stats_card.dart';
 import '../../../widgets/dashboard/payment_chart.dart';
 import '../../../widgets/dashboard/top_list_card.dart';
+import '../../../widgets/dashboard/timeline_selector.dart';
 
 class DashboardMobile extends StatelessWidget {
   const DashboardMobile({super.key});
@@ -34,38 +35,17 @@ class DashboardMobile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const AppText(
+                      AppText(
                         'Payments',
                         size: 16,
                         weight: FontWeight.w600,
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            AppText(
-                              'Last 9 Month',
-                              color: Colors.grey[600],
-                              size: 12,
-                            ),
-                            const Gap(4),
-                            Icon(
-                              Icons.keyboard_arrow_down,
-                              color: Colors.grey[600],
-                              size: 16,
-                            ),
-                          ],
-                        ),
+                      TimelineSelector(
+                        isMobile: true,
+                        type: TimelineType.payments,
                       ),
                     ],
                   ),

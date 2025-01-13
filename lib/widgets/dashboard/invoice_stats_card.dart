@@ -1,10 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
-import '../../widgets/common/app_text.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../../providers/dashboard_provider.dart';
+import '../common/app_text.dart';
+import 'timeline_selector.dart';
 
-class InvoiceStatsCard extends StatelessWidget {
+class InvoiceStatsCard extends StatefulWidget {
   final bool isMobile;
 
   const InvoiceStatsCard({
@@ -13,119 +16,142 @@ class InvoiceStatsCard extends StatelessWidget {
   });
 
   @override
+  State<InvoiceStatsCard> createState() => _InvoiceStatsCardState();
+}
+
+class _InvoiceStatsCardState extends State<InvoiceStatsCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _animation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(isMobile ? 16 : 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Consumer<DashboardProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading && !provider.initialLoadComplete) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final analytics = provider.analytics;
+        if (analytics == null) {
+          return const Center(child: Text('No data available'));
+        }
+
+        if (provider.shouldAnimateInvoices &&
+            !_animationController.isAnimating) {
+          _animationController.reset();
+          _animationController.forward();
+        }
+
+        return Padding(
+          padding: EdgeInsets.all(widget.isMobile ? 16 : 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SvgPicture.asset(
-                'assets/icons/invoice.svg',
-                width: isMobile ? 20 : 24,
-                height: isMobile ? 20 : 24,
+              Row(
+                children: [
+                  const AppText(
+                    'Invoices',
+                    size: 18,
+                    weight: FontWeight.w600,
+                  ),
+                  const Spacer(),
+                  TimelineSelector(
+                    isMobile: widget.isMobile,
+                    type: TimelineType.invoices,
+                  ),
+                ],
               ),
-              Gap(isMobile ? 8 : 12),
-              AppText(
-                'Invoices',
-                size: isMobile ? 16 : 18,
-                weight: FontWeight.w600,
-              ),
-              const Spacer(),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: isMobile ? 8 : 12,
-                  vertical: isMobile ? 4 : 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    AppText(
-                      'This Month',
-                      color: Colors.grey[600],
-                      size: isMobile ? 12 : 14,
+                    AnimatedBuilder(
+                      animation: _animation,
+                      builder: (context, child) {
+                        return PieChart(
+                          PieChartData(
+                            sectionsSpace: 0,
+                            centerSpaceRadius: widget.isMobile ? 45 : 60,
+                            sections: [
+                              PieChartSectionData(
+                                value: analytics.invoiceStats.paid *
+                                    _animation.value,
+                                color: Colors.green,
+                                radius: widget.isMobile ? 15 : 20,
+                                showTitle: false,
+                              ),
+                              PieChartSectionData(
+                                value: analytics.invoiceStats.unpaid *
+                                    _animation.value,
+                                color: const Color(0xFFE04403),
+                                radius: widget.isMobile ? 15 : 20,
+                                showTitle: false,
+                              ),
+                              PieChartSectionData(
+                                value: analytics.invoiceStats.drafted *
+                                    _animation.value,
+                                color: Colors.grey,
+                                radius: widget.isMobile ? 15 : 20,
+                                showTitle: false,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    Gap(isMobile ? 4 : 8),
-                    Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.grey[600],
-                      size: isMobile ? 16 : 24,
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        AppText(
+                          '₦${NumberFormat("#,##0").format(analytics.invoiceStats.totalAmount)}',
+                          size: widget.isMobile ? 18 : 24,
+                          weight: FontWeight.w600,
+                        ),
+                        const Gap(4),
+                        AppText(
+                          'Total',
+                          size: widget.isMobile ? 12 : 14,
+                          color: Colors.grey[600],
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          Expanded(
-            child: Center(
-              child: Stack(
-                alignment: Alignment.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    width: isMobile ? 120 : 160,
-                    height: isMobile ? 120 : 160,
-                    child: PieChart(
-                      PieChartData(
-                        sectionsSpace: 0,
-                        centerSpaceRadius: isMobile ? 45 : 60,
-                        sections: [
-                          PieChartSectionData(
-                            value: 40,
-                            color: Colors.green,
-                            radius: isMobile ? 15 : 20,
-                            showTitle: false,
-                          ),
-                          PieChartSectionData(
-                            value: 50,
-                            color: const Color(0xFFE04403),
-                            radius: isMobile ? 15 : 20,
-                            showTitle: false,
-                          ),
-                          PieChartSectionData(
-                            value: 10,
-                            color: Colors.grey,
-                            radius: isMobile ? 15 : 20,
-                            showTitle: false,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppText(
-                        '₦500,000',
-                        size: isMobile ? 18 : 24,
-                        weight: FontWeight.bold,
-                      ),
-                      AppText(
-                        'Invoiced',
-                        color: Colors.grey[600],
-                        size: isMobile ? 12 : 14,
-                      ),
-                    ],
-                  ),
+                  _buildLegendItem('Paid', Colors.green),
+                  Gap(widget.isMobile ? 12 : 16),
+                  _buildLegendItem('Unpaid', const Color(0xFFE04403)),
+                  Gap(widget.isMobile ? 12 : 16),
+                  _buildLegendItem('Drafted', Colors.grey),
                 ],
               ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildLegendItem('Paid', Colors.green),
-              Gap(isMobile ? 12 : 16),
-              _buildLegendItem('Unpaid', const Color(0xFFE04403)),
-              Gap(isMobile ? 12 : 16),
-              _buildLegendItem('Drafted', Colors.grey),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -133,17 +159,17 @@ class InvoiceStatsCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: isMobile ? 8 : 12,
-          height: isMobile ? 8 : 12,
+          width: 8,
+          height: 8,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        Gap(isMobile ? 2 : 4),
+        const Gap(4),
         AppText(
           label,
-          size: isMobile ? 12 : 14,
+          size: widget.isMobile ? 12 : 14,
           color: Colors.grey[600],
         ),
       ],

@@ -7,9 +7,7 @@ import 'package:gtco_smart_invoice_flutter/screens/help_center/help_center_conte
 import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/product/product_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/settings/settings_content.dart';
-import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/client/create_client_form.dart';
-import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/user_profile_section.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_form.dart';
 import 'package:provider/provider.dart';
