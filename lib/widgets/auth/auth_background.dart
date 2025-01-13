@@ -31,9 +31,11 @@ class AuthBackground extends StatelessWidget {
                 height: isLargeScreen ? null : 804,
                 width: isLargeScreen ? 600 : 400,
                 constraints: BoxConstraints(
-                  maxWidth: isLargeScreen ? 600 : 400,
+                  maxWidth: isLargeScreen ? 600 : 450,
+                  maxHeight: isLargeScreen ? 1000 : 750,
                 ),
-                margin: const EdgeInsets.symmetric(vertical: 24),
+                margin:
+                    const EdgeInsets.symmetric(vertical: 24, horizontal: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -46,7 +48,7 @@ class AuthBackground extends StatelessWidget {
                   ],
                 ),
                 child: CustomScrollWrapper(
-                  child: Padding(
+                  child: Container(
                     padding: const EdgeInsets.only(
                       left: 24.0,
                       right: 24.0,

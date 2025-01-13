@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_button.dart';
 import '../../widgets/auth/custom_text_field.dart';
 import '../../widgets/auth/gtco_logo.dart';
 import '../../widgets/auth/auth_background.dart';
@@ -104,25 +105,16 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                 },
               ),
               const Gap(48),
-              ElevatedButton(
+              AppButton(
+                text: 'Next',
                 onPressed: () {
-                  // if (_formKey.currentState!.validate()) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const WebMainLayout(),
-                      ),
-                    );
-                  // }
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const WebMainLayout(),
+                    ),
+                  );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  minimumSize: const Size(double.infinity, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                child: AppText.button('Next'),
               ),
             ],
           ),

@@ -162,15 +162,14 @@ class _ProfileInfoScreenState extends State<ProfileInfoScreen> {
               AppButton(
                 text: 'Next',
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const BusinessInfoScreen(),
-                    ),
-                  );
-                  // if (_formKey.currentState!.validate()) {
-                  // Handle form submission
-                  // }
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BusinessInfoScreen(),
+                      ),
+                    );
+                  }
                 },
               ),
             ],

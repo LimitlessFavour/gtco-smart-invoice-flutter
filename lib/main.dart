@@ -25,6 +25,21 @@ import 'package:device_preview_plus/device_preview_plus.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Debug environment variables
+  if (kDebugMode) {
+    const envVars = [
+      'API_BASE_URL',
+      'SUPABASE_URL',
+      'SUPABASE_ANON_KEY',
+    ];
+
+    print('\nEnvironment Variables:');
+    for (final key in envVars) {
+      print('$key: ${String.fromEnvironment(key)}');
+    }
+    print(''); // Empty line for readability
+  }
+
   final navigationService = NavigationService();
 
   if (kIsWeb) {
@@ -40,16 +55,17 @@ Future<void> main() async {
     anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
   );
 
+  debugPrint('API_BASE_URL: ${const String.fromEnvironment('API_BASE_URL')}');
+  debugPrint('SUPABASE_URL: ${const String.fromEnvironment('SUPABASE_URL')}');
+  debugPrint(
+      'SUPABASE_ANON_KEY: ${const String.fromEnvironment('SUPABASE_ANON_KEY')}');
+
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
-      // builder: (context) => const ComingSoonScreen(),
       builder: (context) => AppRoot(navigationService: navigationService),
-      // builder: (context) => AppRoot(navigationService: navigationService),
     ),
   );
-
-  // runApp(const ComingSoonScreen());
 }
 
 //create a  stateless widget with scaffold which
@@ -66,7 +82,6 @@ class ComingSoonScreen extends StatelessWidget {
     );
   }
 }
-
 
 class AppRoot extends StatelessWidget {
   final NavigationService navigationService;
@@ -210,12 +225,16 @@ class AppInitializationWrapper extends StatefulWidget {
 }
 
 class _AppInitializationWrapperState extends State<AppInitializationWrapper> {
-  late final Future<void> _initFuture;
+  late Future<void> _initFuture;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    _initFuture = _initializeApp();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      _initFuture = _initializeApp();
+    }
   }
 
   Future<void> _initializeApp() async {

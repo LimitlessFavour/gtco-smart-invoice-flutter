@@ -28,6 +28,9 @@ serve-web: build-web
 build-ios:
 	flutter build ios --release $(DART_DEFINES)
 
+build-ios-simulator:
+	flutter build ios $(DART_DEFINES)
+
 # Android
 build-apk:
 	flutter build apk --release $(DART_DEFINES)
