@@ -144,19 +144,20 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     try {
       _startLoading();
-      await _repository.logout();
+      
+      if (_token?.refreshToken != null) {
+        await _repository.logout(_token!.refreshToken);
+      }
+      
       _token = null;
       _user = null;
+      
+      LoggerService.success('User logged out successfully');
       _stopLoading(null);
-    } on AuthException catch (e) {
-      _stopLoading(e.toString());
-    } catch (e, stackTrace) {
-      LoggerService.error(
-        'Unexpected logout error',
-        error: e,
-        stackTrace: stackTrace,
-      );
-      _stopLoading('An unexpected error occurred. Please try again.');
+    } catch (e) {
+      LoggerService.error('Logout failed', error: e);
+      _stopLoading('Failed to logout');
+      rethrow;
     }
   }
 

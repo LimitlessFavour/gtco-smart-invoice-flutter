@@ -207,18 +207,28 @@ class AuthRepository {
     return authResponse;
   }
 
-  Future<void> logout() async {
+  Future<void> logout(String refreshToken) async {
     try {
-      LoggerService.debug('Logging out user');
-      await Future.wait([
-        _client.post('/auth/logout'),
-        _supabase.auth.signOut(),
-      ]);
-      _client.setAuthToken(null);
-      LoggerService.success('Logout successful');
-    } catch (e, stackTrace) {
-      LoggerService.error('Logout error', error: e, stackTrace: stackTrace);
-      throw AuthException('Logout failed. Please try again.');
+      LoggerService.debug('Attempting to logout');
+
+      //await 2 seconds
+      await Future.delayed(const Duration(seconds: 2));
+
+      final response = await _client.post(
+      '/auth/logout',
+        data: {
+          'refresh_token': refreshToken,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        LoggerService.success('Logout successful');
+      } else {
+        throw AuthException('Logout failed');
+      }
+    } catch (e) {
+      LoggerService.error('Logout error', error: e);
+      throw AuthException('Failed to logout');
     }
   }
 

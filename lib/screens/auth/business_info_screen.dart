@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
-import 'package:gtco_smart_invoice_flutter/layouts/web_main_layout.dart';
-import 'package:gtco_smart_invoice_flutter/services/logger_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/responsive_utils.dart';
-import 'mobile/business_info_mobile.dart';
-import 'desktop/business_info_desktop.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import 'package:provider/provider.dart';
+
 import '../../../providers/onboarding_provider.dart';
+import 'desktop/business_info_desktop.dart';
+import 'mobile/business_info_mobile.dart';
 
 class BusinessInfoScreen extends StatefulWidget {
   final String firstName;
@@ -126,39 +126,42 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                 await _handleSubmit();
               };
 
-        return ResponsiveUtils.isMobileScreen(context)
-            ? BusinessInfoMobile(
-                formKey: _formKey,
-                companyNameController: _companyNameController,
-                selectedIndustry: _selectedIndustry,
-                selectedBusinessType: _selectedBusinessType,
-                selectedLogoOption: _selectedLogoOption,
-                industries: _industries,
-                businessTypes: _businessTypes,
-                onIndustryChanged: (value) =>
-                    setState(() => _selectedIndustry = value),
-                onBusinessTypeChanged: (value) =>
-                    setState(() => _selectedBusinessType = value),
-                onLogoOptionChanged: (path) =>
-                    setState(() => _selectedLogoPath = path),
-                onSubmit: submitHandler,
-              )
-            : BusinessInfoDesktop(
-                formKey: _formKey,
-                companyNameController: _companyNameController,
-                selectedIndustry: _selectedIndustry,
-                selectedBusinessType: _selectedBusinessType,
-                selectedLogoOption: _selectedLogoOption,
-                industries: _industries,
-                businessTypes: _businessTypes,
-                onIndustryChanged: (value) =>
-                    setState(() => _selectedIndustry = value),
-                onBusinessTypeChanged: (value) =>
-                    setState(() => _selectedBusinessType = value),
-                onLogoOptionChanged: (path) =>
-                    setState(() => _selectedLogoPath = path),
-                onSubmit: submitHandler,
-              );
+        return LoadingOverlay(
+          isLoading: provider.isLoading,
+          child: ResponsiveUtils.isMobileScreen(context)
+              ? BusinessInfoMobile(
+                  formKey: _formKey,
+                  companyNameController: _companyNameController,
+                  selectedIndustry: _selectedIndustry,
+                  selectedBusinessType: _selectedBusinessType,
+                  selectedLogoOption: _selectedLogoOption,
+                  industries: _industries,
+                  businessTypes: _businessTypes,
+                  onIndustryChanged: (value) =>
+                      setState(() => _selectedIndustry = value),
+                  onBusinessTypeChanged: (value) =>
+                      setState(() => _selectedBusinessType = value),
+                  onLogoOptionChanged: (path) =>
+                      setState(() => _selectedLogoPath = path),
+                  onSubmit: submitHandler,
+                )
+              : BusinessInfoDesktop(
+                  formKey: _formKey,
+                  companyNameController: _companyNameController,
+                  selectedIndustry: _selectedIndustry,
+                  selectedBusinessType: _selectedBusinessType,
+                  selectedLogoOption: _selectedLogoOption,
+                  industries: _industries,
+                  businessTypes: _businessTypes,
+                  onIndustryChanged: (value) =>
+                      setState(() => _selectedIndustry = value),
+                  onBusinessTypeChanged: (value) =>
+                      setState(() => _selectedBusinessType = value),
+                  onLogoOptionChanged: (path) =>
+                      setState(() => _selectedLogoPath = path),
+                  onSubmit: submitHandler,
+                ),
+        );
       },
     );
   }

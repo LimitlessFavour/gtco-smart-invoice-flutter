@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:provider/provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/navigation_service.dart';
 import '../common/app_text.dart';
+import '../../screens/web/landing_screen.dart';
 
 class UserProfileSection extends StatelessWidget {
   final bool isMobile;
@@ -36,21 +37,43 @@ class UserProfileSection extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const LandingScreen()),
-        (route) => false,
-      );
+      try {
+        await context.read<AuthProvider>().logout();
+
+        if (!context.mounted) return;
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LandingScreen()),
+          (route) => false,
+        );
+      } catch (e) {
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = context.watch<AuthProvider>().user;
 
     if (isMobile) {
       return IconButton(
-        icon: const CircleAvatar(
-          backgroundImage: AssetImage('assets/images/avatar_placeholder.png'),
+        icon: CircleAvatar(
+          // backgroundImage: user?.profileImage != null
+          //     ? NetworkImage(user!.profileImage!)
+          //     : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
+          backgroundImage:
+              const AssetImage('assets/images/avatar_placeholder.png')
+                  as ImageProvider,
           radius: 16,
         ),
         onPressed: () {
@@ -67,7 +90,8 @@ class UserProfileSection extends StatelessWidget {
                       children: [
                         CircleAvatar(
                           backgroundImage: AssetImage(
-                              'assets/images/avatar_placeholder.png'),
+                            'assets/images/avatar_placeholder.png',
+                          ),
                           radius: 32,
                         ),
                         Gap(12),
@@ -122,7 +146,12 @@ class UserProfileSection extends StatelessWidget {
       child: Row(
         children: [
           const CircleAvatar(
-            backgroundImage: AssetImage('assets/images/avatar_placeholder.png'),
+            // backgroundImage: user?.profileImage != null
+            //     ? NetworkImage(user!.profileImage!)
+            //     : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
+            backgroundImage: AssetImage('assets/images/avatar_placeholder.png')
+                as ImageProvider,
+            radius: 16,
           ),
           const Gap(12),
           Column(
@@ -130,11 +159,14 @@ class UserProfileSection extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               AppText(
-                'Bee Daisy Hair & Merchandise',
+                '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim().isEmpty
+                    ? 'User'
+                    : '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
                 weight: FontWeight.w600,
                 size: 16,
               ),
               AppText(
+                // 'Merchant',
                 'Sales Admin',
                 color: Colors.grey[600],
                 size: 14,
