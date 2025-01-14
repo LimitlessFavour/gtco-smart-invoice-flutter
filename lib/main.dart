@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/providers/onboarding_provider.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/dashboard_repository.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/onboarding_repository.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import './firebase_options.dart';
@@ -88,14 +90,26 @@ class AppRoot extends StatelessWidget {
   }
 
   List<SingleChildWidget> _createProviders() {
-    final dioClient = DioClient(baseUrl: apiBaseUrl);
+    // First create DioClient without the callback
+    final dioClient = DioClient(
+      baseUrl: apiBaseUrl,
+    );
+
+    // Then create AuthRepository and AuthProvider
     final authRepository = AuthRepository(dioClient);
+    final authProvider = AuthProvider(authRepository);
+
+    // Now set the callback
+    dioClient.setTokenRefreshCallback(authProvider.handleTokenRefresh);
+    
+    final onboardingRepository = OnboardingRepository(dioClient, authProvider);
 
     return [
       provider.ChangeNotifierProvider<NavigationService>.value(
           value: navigationService),
+      provider.ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
       provider.ChangeNotifierProvider(
-        create: (_) => AuthProvider(authRepository),
+        create: (_) => OnboardingProvider(onboardingRepository),
       ),
       provider.Provider(
         create: (_) => ApiClient(baseUrl: apiBaseUrl),
@@ -109,6 +123,9 @@ class AppRoot extends StatelessWidget {
         create: (context) => InvoiceProvider(
           context.read<InvoiceRepository>(),
         ),
+      ),
+      provider.ChangeNotifierProvider(
+        create: (_) => OnboardingProvider(onboardingRepository),
       ),
       provider.Provider(
         create: (context) => ProductRepository(

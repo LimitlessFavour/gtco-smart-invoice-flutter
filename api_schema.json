@@ -712,7 +712,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Returns the user profile"
+            "description": "Returns the user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -740,7 +747,14 @@
         },
         "responses": {
           "200": {
-            "description": "Profile updated successfully"
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -770,7 +784,14 @@
         },
         "responses": {
           "201": {
-            "description": "User onboarding completed"
+            "description": "User onboarding completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -842,7 +863,14 @@
         },
         "responses": {
           "201": {
-            "description": "Survey response recorded"
+            "description": "Survey response recorded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyResponseOutputDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -862,7 +890,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Returns the company details"
+            "description": "Returns the company details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -882,7 +917,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Returns the onboarding status"
+            "description": "Returns the onboarding status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingStatusResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2323,6 +2365,36 @@
         ]
       }
     },
+    "/mock-data/generate": {
+      "post": {
+        "operationId": "MockDataController_generateMockData",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Mock data generated successfully"
+          }
+        },
+        "summary": "Generate mock data for testing",
+        "tags": [
+          "mock-data"
+        ]
+      }
+    },
+    "/mock-data/clear": {
+      "delete": {
+        "operationId": "MockDataController_clearMockData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Mock data cleared successfully"
+          }
+        },
+        "summary": "Clear all mock data",
+        "tags": [
+          "mock-data"
+        ]
+      }
+    },
     "/schema": {
       "get": {
         "tags": [
@@ -2425,6 +2497,10 @@
     {
       "name": "Webhooks",
       "description": "Payment Gateway Integration, Webhook Handlers and External System Events"
+    },
+    {
+      "name": "mock-data",
+      "description": "Endpoints for generating and managing mock data"
     }
   ],
   "servers": [],
@@ -2708,6 +2784,96 @@
         "type": "object",
         "properties": {}
       },
+      "CompanyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "logo": {
+            "type": "string"
+          },
+          "totalRevenue": {
+            "type": "number"
+          },
+          "withdrawableRevenue": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "totalRevenue",
+          "withdrawableRevenue",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "onboardingStep": {
+            "type": "number"
+          },
+          "onboardingCompleted": {
+            "type": "boolean"
+          },
+          "company": {
+            "$ref": "#/components/schemas/CompanyResponseDto"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "onboardingStep",
+          "onboardingCompleted",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
       "UpdateUserDto": {
         "type": "object",
         "properties": {
@@ -2754,6 +2920,45 @@
         },
         "required": [
           "source"
+        ]
+      },
+      "SurveyResponseOutputDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "source",
+          "createdAt"
+        ]
+      },
+      "OnboardingStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "type": "number"
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "step",
+          "completed"
         ]
       },
       "InvoiceItemDto": {

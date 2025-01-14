@@ -5,6 +5,7 @@ import '../../../widgets/auth/custom_text_field.dart';
 import '../../../widgets/auth/gtco_logo.dart';
 import '../../../widgets/common/app_text.dart';
 import '../../../widgets/common/app_button_contained.dart';
+import '../../../widgets/common/image_upload_widget.dart';
 
 class BusinessInfoDesktop extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -17,7 +18,7 @@ class BusinessInfoDesktop extends StatelessWidget {
   final Function(String?) onIndustryChanged;
   final Function(String?) onBusinessTypeChanged;
   final Function(String?) onLogoOptionChanged;
-  final VoidCallback onSubmit;
+  final VoidCallback? onSubmit;
 
   const BusinessInfoDesktop({
     super.key,
@@ -31,7 +32,7 @@ class BusinessInfoDesktop extends StatelessWidget {
     required this.onIndustryChanged,
     required this.onBusinessTypeChanged,
     required this.onLogoOptionChanged,
-    required this.onSubmit,
+    this.onSubmit,
   });
 
   Widget _buildProgressStep({
@@ -175,11 +176,10 @@ class BusinessInfoDesktop extends StatelessWidget {
                         onBusinessTypeChanged,
                       ),
                       const Gap(32),
-                      _buildDropdown(
-                        'Upload your business logo',
-                        selectedLogoOption,
-                        ['Take a photo', 'Choose from gallery'],
-                        onLogoOptionChanged,
+                      const Gap(32),
+                      ImageUploadWidget(
+                        onImageSelected: onLogoOptionChanged,
+                        isMobile: false,
                       ),
                       const Gap(48),
                       Row(

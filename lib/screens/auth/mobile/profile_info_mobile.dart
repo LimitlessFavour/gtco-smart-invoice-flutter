@@ -17,7 +17,7 @@ class ProfileInfoMobile extends StatefulWidget {
   final List<String> sources;
   final Function(String?) onLocationChanged;
   final Function(String?) onSourceChanged;
-  final VoidCallback onSubmit;
+  final VoidCallback? onSubmit;
 
   const ProfileInfoMobile({
     super.key,
@@ -31,7 +31,7 @@ class ProfileInfoMobile extends StatefulWidget {
     required this.sources,
     required this.onLocationChanged,
     required this.onSourceChanged,
-    required this.onSubmit,
+    this.onSubmit,
   });
 
   @override

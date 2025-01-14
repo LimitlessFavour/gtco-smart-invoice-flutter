@@ -20,6 +20,7 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
   User? get user => _user;
   bool get isOnboardingCompleted => _user?.onboardingCompleted ?? false;
+  AuthToken? get token => _token;
 
   void _startLoading() {
     _isLoading = true;
@@ -191,5 +192,23 @@ class AuthProvider extends ChangeNotifier {
       );
       _stopLoading('An unexpected error occurred. Please try again.');
     }
+  }
+
+  void updateUser(User user) {
+    _user = user;
+    LoggerService.success('User updated', {
+      'email': user.email,
+      'onboardingCompleted': user.onboardingCompleted,
+    });
+    notifyListeners();
+  }
+
+  void handleTokenRefresh(AuthToken? newToken) {
+    _token = newToken;
+    if (newToken == null) {
+      // Token refresh failed, log out user
+      logout();
+    }
+    notifyListeners();
   }
 }

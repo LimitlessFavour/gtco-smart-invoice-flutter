@@ -18,7 +18,7 @@ class ProfileInfoDesktop extends StatelessWidget {
   final List<String> sources;
   final Function(String?) onLocationChanged;
   final Function(String?) onSourceChanged;
-  final VoidCallback onSubmit;
+  final VoidCallback? onSubmit;
 
   const ProfileInfoDesktop({
     super.key,
@@ -32,7 +32,7 @@ class ProfileInfoDesktop extends StatelessWidget {
     required this.sources,
     required this.onLocationChanged,
     required this.onSourceChanged,
-    required this.onSubmit,
+    this.onSubmit,
   });
 
   Widget _buildProgressStep({

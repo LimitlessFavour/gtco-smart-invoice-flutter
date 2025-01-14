@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:gtco_smart_invoice_flutter/exceptions/auth_exception.dart';
 import '../models/auth/auth_token.dart';
 import '../services/logger_service.dart';
 
@@ -6,11 +7,10 @@ class DioClient {
   late Dio _dio;
   final String baseUrl;
   AuthToken? _authToken;
-  final void Function(AuthToken?)? onTokenRefreshed;
+  void Function(AuthToken?)? onTokenRefreshed;
 
   DioClient({
     required this.baseUrl,
-    this.onTokenRefreshed,
   }) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
@@ -108,12 +108,14 @@ class DioClient {
 
     if (err.response?.statusCode == 401 && _authToken != null) {
       try {
-        final newToken = await _refreshToken();
-        if (newToken != null) {
-          // Retry the original request with new token
-          final opts = err.requestOptions;
-          opts.headers['Authorization'] = 'Bearer ${newToken.accessToken}';
-          final response = await _dio.fetch(opts);
+        // Try to refresh the token
+        final refreshResponse = await _refreshToken();
+        if (refreshResponse.statusCode == 200) {
+          // Update the original request with new token
+          err.requestOptions.headers['Authorization'] =
+              'Bearer ${_authToken?.accessToken}';
+          // Retry the original request
+          final response = await _retryRequest(err.requestOptions);
           return handler.resolve(response);
         }
       } catch (e) {
@@ -124,30 +126,49 @@ class DioClient {
     return handler.next(err);
   }
 
-  Future<AuthToken?> _refreshToken() async {
+  Future<Response<dynamic>> _refreshToken() async {
     try {
       LoggerService.debug('Attempting to refresh token');
 
-      final response = await _dio.post('/auth/refresh-token', data: {
-        'refresh_token': _authToken?.refreshToken,
-      });
+      if (_authToken?.refreshToken == null) {
+        throw AuthException('No refresh token available');
+      }
+
+      final response = await _dio.post(
+        '/auth/refresh',
+        data: {
+          'refresh_token': _authToken?.refreshToken,
+        },
+      );
 
       if (response.statusCode == 200) {
         final newToken = AuthToken.fromJson(response.data);
         _authToken = newToken;
         onTokenRefreshed?.call(newToken);
         LoggerService.success('Token refreshed successfully');
-        return newToken;
+        return response;
       }
 
-      LoggerService.error(
-        'Token refresh failed',
-        error: {'statusCode': response.statusCode, 'data': response.data},
-      );
+      throw AuthException('Failed to refresh token');
     } catch (e) {
-      LoggerService.error('Token refresh error', error: e);
+      LoggerService.error('Token refresh failed', error: e);
+      onTokenRefreshed?.call(null);
+      throw AuthException('Token refresh failed');
     }
-    return null;
+  }
+
+  Future<Response> _retryRequest(RequestOptions requestOptions) async {
+    final options = Options(
+      method: requestOptions.method,
+      headers: requestOptions.headers,
+    );
+
+    return _dio.request<dynamic>(
+      requestOptions.path,
+      data: requestOptions.data,
+      queryParameters: requestOptions.queryParameters,
+      options: options,
+    );
   }
 
   Map<String, dynamic> _formatResponseData(dynamic data) {
@@ -176,8 +197,8 @@ class DioClient {
     return _dio.get(path, queryParameters: queryParameters);
   }
 
-  Future<Response> post(String path, {dynamic data}) async {
-    return _dio.post(path, data: data);
+  Future<Response> post(String path, {dynamic data, Options? options}) async {
+    return _dio.post(path, data: data, options: options);
   }
 
   Future<Response> put(String path, {dynamic data}) async {
@@ -190,5 +211,9 @@ class DioClient {
 
   Future<Response> patch(String path, {dynamic data}) async {
     return _dio.patch(path, data: data);
+  }
+
+  void setTokenRefreshCallback(void Function(AuthToken?) callback) {
+    onTokenRefreshed = callback;
   }
 }

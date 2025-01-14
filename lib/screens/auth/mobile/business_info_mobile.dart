@@ -6,6 +6,7 @@ import '../../../widgets/auth/custom_text_field.dart';
 import '../../../widgets/auth/gtco_logo.dart';
 import '../../../widgets/auth/auth_background.dart';
 import '../../../widgets/common/app_text.dart';
+import '../../../widgets/common/image_upload_widget.dart';
 
 class BusinessInfoMobile extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -18,7 +19,7 @@ class BusinessInfoMobile extends StatefulWidget {
   final Function(String?) onIndustryChanged;
   final Function(String?) onBusinessTypeChanged;
   final Function(String?) onLogoOptionChanged;
-  final VoidCallback onSubmit;
+  final VoidCallback? onSubmit;
 
   const BusinessInfoMobile({
     super.key,
@@ -32,7 +33,7 @@ class BusinessInfoMobile extends StatefulWidget {
     required this.onIndustryChanged,
     required this.onBusinessTypeChanged,
     required this.onLogoOptionChanged,
-    required this.onSubmit,
+    this.onSubmit,
   });
 
   @override
@@ -129,11 +130,9 @@ class _BusinessInfoMobileState extends State<BusinessInfoMobile> {
                 widget.onBusinessTypeChanged,
               ),
               const Gap(24),
-              _buildDropdown(
-                'Upload your business logo',
-                widget.selectedLogoOption,
-                ['Take a photo', 'Choose from gallery'],
-                widget.onLogoOptionChanged,
+              ImageUploadWidget(
+                onImageSelected: widget.onLogoOptionChanged,
+                isMobile: true,
               ),
               const Gap(48),
               AppButton(
