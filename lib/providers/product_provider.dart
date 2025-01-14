@@ -45,6 +45,15 @@ class ProductProvider extends ChangeNotifier {
 
   Future<Product?> getProductById(String id) async {
     try {
+      // First check if the product exists in our local list
+      final localProduct = _products.where((p) => p.id == id).firstOrNull;
+
+      if (localProduct != null) {
+        debugPrint('Product found in local cache: ${localProduct.productName}');
+        return localProduct;
+      }
+
+      debugPrint('Product not found locally, fetching from API...');
       _isLoading = true;
       _error = null;
       notifyListeners();

@@ -6,6 +6,7 @@ import '../../providers/product_provider.dart';
 import '../dialogs/confirmation_dialog.dart';
 import '../dialogs/success_dialog.dart';
 import 'package:intl/intl.dart';
+import '../../services/navigation_service.dart';
 
 class ProductTile extends StatelessWidget {
   final Product product;
@@ -53,7 +54,12 @@ class ProductTile extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
-                    onPressed: onEdit,
+                    onPressed: () => context
+                        .read<NavigationService>()
+                        .navigateToProductScreen(
+                          ProductScreen.edit,
+                          productId: product.id,
+                        ),
                     color: const Color(0xFF667085),
                   ),
                   IconButton(

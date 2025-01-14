@@ -76,25 +76,29 @@ class ProductRepository {
     required CreateProduct product,
   }) async {
     try {
-      final formData = FormData.fromMap({
-        'product_name': product.productName,
+      Map<String, dynamic> formData = {
+        'productName': product.productName,
         'description': product.description,
-        'category': product.category,
+        'category': product.category.name,
         'price': product.price,
-        'default_quantity': product.defaultQuantity,
-        'vat_category': product.vatCategory,
-        if (product.sku != null) 'sku': product.sku,
-      });
+        'defaultQuantity': product.defaultQuantity,
+        'vatCategory': product.vatCategory.value,
+      };
 
-      if (product.image != null) {
-        formData.files.add(
-          MapEntry(
-            'image',
-            await MultipartFile.fromFile(product.image!),
-          ),
-        );
+      if (product.sku != null) {
+        formData['sku'] = product.sku;
       }
 
+      if (product.image != null) {
+        final form = FormData.fromMap({
+          ...formData,
+          'image': await MultipartFile.fromFile(product.image!),
+        });
+        final response = await _dioClient.put('/product/$id', data: form);
+        return Product.fromJson(response.data);
+      }
+
+      // If no image, send regular JSON
       final response = await _dioClient.put('/product/$id', data: formData);
       return Product.fromJson(response.data);
     } catch (e) {

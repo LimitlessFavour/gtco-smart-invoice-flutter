@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/models/product_enums.dart';
+import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_button.dart';
+import 'package:provider/provider.dart';
 import '../common/app_text.dart';
 import '../common/image_upload.dart';
 
 class CreateProductForm extends StatefulWidget {
   final bool isEdit;
+  final String? productId;
   final VoidCallback onCancel;
 
   const CreateProductForm({
     super.key,
     this.isEdit = false,
+    this.productId,
     required this.onCancel,
   });
 
@@ -29,6 +33,77 @@ class _CreateProductFormState extends State<CreateProductForm> {
   ProductCategory _selectedCategory = ProductCategory.Other;
   VatCategory _selectedVatCategory = VatCategory.none;
   String? _selectedImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _maybeLoadProductData();
+  }
+
+  @override
+  void didUpdateWidget(CreateProductForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    debugPrint('=== didUpdateWidget ===');
+    debugPrint('oldIsEdit: ${oldWidget.isEdit}, newIsEdit: ${widget.isEdit}');
+    debugPrint(
+        'oldProductId: ${oldWidget.productId}, newProductId: ${widget.productId}');
+
+    if (widget.isEdit &&
+        widget.productId != null &&
+        (oldWidget.productId != widget.productId || !oldWidget.isEdit)) {
+      _maybeLoadProductData();
+    }
+  }
+
+  void _maybeLoadProductData() {
+    debugPrint('=== _maybeLoadProductData ===');
+    debugPrint('isEdit: ${widget.isEdit}');
+    debugPrint('productId: ${widget.productId}');
+
+    if (widget.isEdit && widget.productId != null) {
+      debugPrint('Calling _loadProductData...');
+      _loadProductData();
+    }
+  }
+
+  Future<void> _loadProductData() async {
+    debugPrint('=== Starting _loadProductData ===');
+    try {
+      debugPrint('Fetching product with ID: ${widget.productId}');
+      final provider = context.read<ProductProvider>();
+      final product = await provider.getProductById(widget.productId!);
+      debugPrint('Product fetched: ${product}');
+
+      if (product != null) {
+        debugPrint('Updating form fields...');
+        setState(() {
+          _nameController.text = product.productName;
+          _descriptionController.text = product.description;
+          _priceController.text = product.price.toString();
+          _quantityController.text = product.defaultQuantity.toString();
+          _selectedCategory = ProductCategory.values.firstWhere(
+            (c) => c.name == product.category,
+            orElse: () => ProductCategory.Other,
+          );
+          _selectedVatCategory = VatCategory.fromValue(
+            product.vatCategory is num
+                ? product.vatCategory as num
+                : double.parse(
+                    product.vatCategory.toString().replaceAll('%', '')),
+          );
+          _selectedImagePath = product.image;
+        });
+        debugPrint('Form fields updated successfully');
+      }
+    } catch (e) {
+      debugPrint('Error in _loadProductData: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load product: $e')),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -135,6 +210,7 @@ class _CreateProductFormState extends State<CreateProductForm> {
                         const Gap(16),
                         ProductActionButton(
                           isEdit: widget.isEdit,
+                          productId: widget.productId,
                           formKey: _formKey,
                           formData: {
                             'productName': _nameController.text,

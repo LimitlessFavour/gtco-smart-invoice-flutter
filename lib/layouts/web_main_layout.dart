@@ -86,13 +86,29 @@ class DesktopLayout extends StatelessWidget {
                     // Product Create Panel
                     SlidePanel(
                       isOpen: navigation.currentScreen == AppScreen.product &&
-                          navigation.currentProductScreen ==
-                              ProductScreen.create,
+                          (navigation.currentProductScreen ==
+                                  ProductScreen.create ||
+                              navigation.currentProductScreen ==
+                                  ProductScreen.edit),
                       onClose: () => navigation
                           .navigateToProductScreen(ProductScreen.list),
-                      child: CreateProductForm(
-                        onCancel: () => navigation
-                            .navigateToProductScreen(ProductScreen.list),
+                      child: Builder(
+                        builder: (context) {
+                          debugPrint('=== SlidePanel Builder ===');
+                          debugPrint(
+                              'currentProductScreen: ${navigation.currentProductScreen}');
+                          debugPrint(
+                              'currentProductId: ${navigation.currentProductId}');
+                          debugPrint('========================');
+
+                          return CreateProductForm(
+                            isEdit: navigation.currentProductScreen ==
+                                ProductScreen.edit,
+                            productId: navigation.currentProductId,
+                            onCancel: () => navigation
+                                .navigateToProductScreen(ProductScreen.list),
+                          );
+                        },
                       ),
                     ),
                   ],

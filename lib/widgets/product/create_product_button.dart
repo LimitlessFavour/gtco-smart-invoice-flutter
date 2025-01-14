@@ -15,6 +15,7 @@ class ProductActionButton extends StatefulWidget {
   final VoidCallback? onCancel;
   final GlobalKey<FormState> formKey;
   final VoidCallback? onSuccess;
+  final String? productId;
 
   const ProductActionButton({
     super.key,
@@ -23,6 +24,7 @@ class ProductActionButton extends StatefulWidget {
     this.onCancel,
     required this.formKey,
     this.onSuccess,
+    this.productId,
   });
 
   @override
@@ -87,32 +89,32 @@ class _ProductActionButtonState extends State<ProductActionButton> {
 
       final success = widget.isEdit
           ? await provider.updateProduct(
-              id: widget.formData['id'],
+              id: widget.productId!,
               product: createProduct,
             )
           : await provider.createProduct(createProduct);
 
-      if (success && mounted) {
+      if (success && context.mounted) {
         widget.onSuccess?.call();
-        widget.onCancel?.call(); // Dismiss slide-in first
+        widget.onCancel?.call();
         await showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => SuccessDialog(
             message: widget.isEdit
-                ? 'Product has been updated successfully'
-                : 'Product has been created successfully',
+                ? 'Product updated successfully'
+                : 'Product created successfully',
           ),
         );
-        navigationService.navigateToProductScreen(ProductScreen.list);
+        if (context.mounted) {
+          widget.onSuccess?.call();
+          navigationService.navigateToProductScreen(ProductScreen.list);
+        }
       }
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: AppText(e.toString())),
         );
       }
     } finally {

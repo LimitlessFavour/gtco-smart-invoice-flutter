@@ -29,6 +29,7 @@ enum InvoiceScreen {
 enum ProductScreen {
   list,
   create,
+  edit,
 }
 
 enum ClientScreen {
@@ -55,6 +56,7 @@ class NavigationService extends ChangeNotifier {
   ClientScreen _currentClientScreen = ClientScreen.list;
   SettingsScreen _currentSettingsScreen = SettingsScreen.list;
   String? _currentClientId;
+  String? _currentProductId;
 
   NavigationService() : _platform = createNavigationPlatform() {
     if (kIsWeb) {
@@ -70,6 +72,7 @@ class NavigationService extends ChangeNotifier {
   SettingsScreen get currentSettingsScreen => _currentSettingsScreen;
 
   String? get currentClientId => _currentClientId;
+  String? get currentProductId => _currentProductId;
 
   bool canGoBack() {
     switch (_currentScreen) {
@@ -171,11 +174,19 @@ class NavigationService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void navigateToProductScreen(ProductScreen screen) {
+  void navigateToProductScreen(ProductScreen screen, {String? productId}) {
     _currentProductScreen = screen;
     _currentScreen = AppScreen.product;
-    _updateBrowserUrl(
-        '/product${screen == ProductScreen.create ? '/create' : ''}');
+    _currentProductId = productId;
+
+    String path = '/product';
+    if (screen == ProductScreen.create) {
+      path = '$path/create';
+    } else if (screen == ProductScreen.edit && productId != null) {
+      path = '$path/edit/$productId';
+    }
+
+    _updateBrowserUrl(path);
     notifyListeners();
   }
 
@@ -242,8 +253,17 @@ class NavigationService extends ChangeNotifier {
       }
     } else if (path.startsWith('/product')) {
       _currentScreen = AppScreen.product;
-      _currentProductScreen =
-          path == '/product/create' ? ProductScreen.create : ProductScreen.list;
+
+      if (path == '/product/create') {
+        _currentProductScreen = ProductScreen.create;
+        _currentProductId = null;
+      } else if (path.contains('/edit/')) {
+        _currentProductScreen = ProductScreen.edit;
+        _currentProductId = path.split('/').last;
+      } else {
+        _currentProductScreen = ProductScreen.list;
+        _currentProductId = null;
+      }
     } else if (path.startsWith('/client')) {
       _currentScreen = AppScreen.client;
 
