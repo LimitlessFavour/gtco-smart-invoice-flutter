@@ -572,7 +572,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "number"
+              "type": "string"
             }
           },
           {
@@ -1003,7 +1003,14 @@
         },
         "responses": {
           "201": {
-            "description": "Product created successfully"
+            "description": "Product created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1021,7 +1028,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "List of all products"
+            "description": "List of all products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductListResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1051,7 +1065,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Product details"
+            "description": "Product details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           },
           "404": {
             "description": "Product not found"
@@ -1135,7 +1156,14 @@
         },
         "responses": {
           "200": {
-            "description": "Product updated successfully"
+            "description": "Product updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1163,7 +1191,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Product deleted successfully"
+            "description": "Product deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -2959,6 +2994,105 @@
         "required": [
           "step",
           "completed"
+        ]
+      },
+      "ProductResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "productName": {
+            "type": "string",
+            "example": "iPhone 12"
+          },
+          "description": {
+            "type": "string",
+            "example": "Latest iPhone model with A14 Bionic chip"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "Electronics",
+              "Clothing",
+              "Food & Beverage",
+              "Health & Beauty",
+              "Home & Furniture",
+              "Services",
+              "Software",
+              "Books",
+              "Other"
+            ],
+            "example": "Electronics"
+          },
+          "price": {
+            "type": "number",
+            "example": 999.99
+          },
+          "defaultQuantity": {
+            "type": "number",
+            "example": 1
+          },
+          "vatCategory": {
+            "type": "number",
+            "enum": [
+              5,
+              7.5,
+              0
+            ],
+            "example": 5
+          },
+          "sku": {
+            "type": "string",
+            "example": "IPH-1-1234"
+          },
+          "image": {
+            "type": "string",
+            "example": "https://example.com/images/iphone12.jpg"
+          },
+          "companyId": {
+            "type": "number",
+            "example": 1
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-14T08:25:00.923Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-01-14T08:25:00.923Z"
+          }
+        },
+        "required": [
+          "id",
+          "productName",
+          "description",
+          "category",
+          "price",
+          "defaultQuantity",
+          "vatCategory",
+          "sku",
+          "image",
+          "companyId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ProductListResponseDto": {
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductResponseDto"
+            }
+          }
+        },
+        "required": [
+          "products"
         ]
       },
       "InvoiceItemDto": {

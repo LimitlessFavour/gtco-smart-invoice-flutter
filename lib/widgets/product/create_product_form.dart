@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/models/product_enums.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_button.dart';
 import '../common/app_text.dart';
+import '../common/image_upload.dart';
 
 class CreateProductForm extends StatefulWidget {
   final bool isEdit;
@@ -21,19 +23,31 @@ class _CreateProductFormState extends State<CreateProductForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
-  String? _selectedVatCategory;
+  ProductCategory _selectedCategory = ProductCategory.Other;
+  VatCategory _selectedVatCategory = VatCategory.none;
+  String? _selectedImagePath;
 
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _categoryController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
     super.dispose();
+  }
+
+  void _clearForm() {
+    _nameController.clear();
+    _descriptionController.clear();
+    _priceController.clear();
+    _quantityController.text = '1';
+    setState(() {
+      _selectedCategory = ProductCategory.Other;
+      _selectedVatCategory = VatCategory.none;
+      _selectedImagePath = null;
+    });
   }
 
   @override
@@ -55,7 +69,10 @@ class _CreateProductFormState extends State<CreateProductForm> {
                   weight: FontWeight.w600,
                 ),
                 IconButton(
-                  onPressed: widget.onCancel,
+                  onPressed: () {
+                    _clearForm();
+                    widget.onCancel();
+                  },
                   icon: const Icon(Icons.close),
                 ),
               ],
@@ -80,10 +97,7 @@ class _CreateProductFormState extends State<CreateProductForm> {
                     maxLines: 3,
                   ),
                   const Gap(16),
-                  _buildTextField(
-                    label: 'Category',
-                    controller: _categoryController,
-                  ),
+                  _buildCategoryDropdown(),
                   const Gap(16),
                   _buildTextField(
                     label: 'Price',
@@ -99,16 +113,7 @@ class _CreateProductFormState extends State<CreateProductForm> {
                     keyboardType: TextInputType.number,
                   ),
                   const Gap(16),
-                  _buildDropdown(
-                    label: 'VAT Category',
-                    value: _selectedVatCategory,
-                    items: const ['None', '7.5%', '5%'],
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedVatCategory = value;
-                      });
-                    },
-                  ),
+                  _buildVatDropdown(),
                   const Gap(24),
                   _buildImageUpload(),
                   // Actions
@@ -119,19 +124,24 @@ class _CreateProductFormState extends State<CreateProductForm> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         TextButton(
-                          onPressed: widget.onCancel,
+                          onPressed: () {
+                            _clearForm();
+                            widget.onCancel();
+                          },
                           child: const Text('Cancel'),
                         ),
                         const Gap(16),
                         ProductActionButton(
                           isEdit: widget.isEdit,
+                          formKey: _formKey,
                           formData: {
                             'productName': _nameController.text,
                             'description': _descriptionController.text,
-                            'category': _categoryController.text,
+                            'category': _selectedCategory,
                             'price': _priceController.text,
                             'quantity': _quantityController.text,
                             'vatCategory': _selectedVatCategory,
+                            'image': _selectedImagePath,
                           },
                           onCancel: widget.onCancel,
                         ),
@@ -187,30 +197,62 @@ class _CreateProductFormState extends State<CreateProductForm> {
     );
   }
 
-  Widget _buildDropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required void Function(String?) onChanged,
-  }) {
+  Widget _buildCategoryDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        AppText(
-          label,
+        const AppText(
+          'Category',
           size: 14,
           weight: FontWeight.w500,
         ),
         const Gap(8),
-        DropdownButtonFormField<String>(
-          value: value,
-          items: items
-              .map((item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(item),
-                  ))
-              .toList(),
-          onChanged: onChanged,
+        DropdownButtonFormField<ProductCategory>(
+          value: _selectedCategory,
+          items: ProductCategory.values.map((category) {
+            return DropdownMenuItem(
+              value: category,
+              child: Text(category.display),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedCategory = value ?? ProductCategory.Other;
+            });
+          },
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVatDropdown() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const AppText(
+          'VAT Category',
+          size: 14,
+          weight: FontWeight.w500,
+        ),
+        const Gap(8),
+        DropdownButtonFormField<VatCategory>(
+          value: _selectedVatCategory,
+          items: VatCategory.values.map((category) {
+            return DropdownMenuItem(
+              value: category,
+              child: Text(category.display),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedVatCategory = value ?? VatCategory.none;
+            });
+          },
           decoration: InputDecoration(
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -222,30 +264,13 @@ class _CreateProductFormState extends State<CreateProductForm> {
   }
 
   Widget _buildImageUpload() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const AppText(
-          'Upload Product Image',
-          size: 14,
-          weight: FontWeight.w500,
-        ),
-        const Gap(8),
-        Container(
-          height: 120,
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child: Icon(
-              Icons.add_photo_alternate_outlined,
-              size: 40,
-              color: Colors.grey[400],
-            ),
-          ),
-        ),
-      ],
+    return ImageUpload(
+      onImageSelected: (String? path) {
+        setState(() {
+          _selectedImagePath = path;
+        });
+      },
+      isMobile: false,
     );
   }
 

@@ -1,6 +1,6 @@
 class Product {
   final String id;
-  final String companyId;
+  final int companyId;
   final String productName;
   final String description;
   final double price;
@@ -8,7 +8,10 @@ class Product {
   final String? image;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final int quantity; // For tracking inventory
+  final int quantity;
+  final String category;
+  final String vatCategory;
+  final int defaultQuantity;
 
   Product({
     required this.id,
@@ -20,21 +23,38 @@ class Product {
     this.image,
     required this.createdAt,
     required this.updatedAt,
-    this.quantity = 0,
+    required this.quantity,
+    required this.category,
+    required this.vatCategory,
+    required this.defaultQuantity,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
+    // Convert vatCategory to double for consistent handling
+    double vatValue;
+    var rawVat = json['vatCategory'];
+    if (rawVat is int) {
+      vatValue = rawVat.toDouble();
+    } else if (rawVat is String) {
+      vatValue = double.parse(rawVat.replaceAll('%', ''));
+    } else {
+      vatValue = 0.0;
+    }
+
     return Product(
-      id: json['product_id'].toString(),
-      companyId: json['company_id'].toString(),
-      productName: json['product_name'],
-      description: json['description'],
-      price: (json['price'] as num).toDouble(),
-      sku: json['sku'],
+      id: json['id'].toString(),
+      companyId: json['companyId'] as int,
+      productName: json['productName'] as String,
+      description: json['description'] as String,
+      price: double.parse(json['price'].toString()),
+      sku: json['sku'] as String,
       image: json['image'],
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
-      quantity: json['quantity'] ?? 0,
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+      quantity: json['defaultQuantity'] as int,
+      category: json['category'] as String,
+      vatCategory: '${vatValue.toString()}%',
+      defaultQuantity: json['defaultQuantity'] as int,
     );
   }
-} 
+}

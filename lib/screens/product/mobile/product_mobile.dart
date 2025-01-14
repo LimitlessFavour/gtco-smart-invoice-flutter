@@ -3,14 +3,27 @@ import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/product/mobile/create_product_mobile.dart';
 import 'package:gtco_smart_invoice_flutter/screens/product/mobile/product_mobile_card.dart';
 import 'package:provider/provider.dart';
+
 import '../../../providers/product_provider.dart';
 import '../../../widgets/common/app_text.dart';
 import '../../../widgets/common/loading_overlay.dart';
 import '../../../widgets/product/product_empty_state.dart';
-import '../../../services/navigation_service.dart';
 
-class ProductMobile extends StatelessWidget {
+class ProductMobile extends StatefulWidget {
   const ProductMobile({super.key});
+
+  @override
+  State<ProductMobile> createState() => _ProductMobileState();
+}
+
+class _ProductMobileState extends State<ProductMobile> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().loadProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,25 +37,20 @@ class ProductMobile extends StatelessWidget {
                 // Search Section
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search products...',
-                          prefixIcon: const Icon(Icons.search),
-                          filled: true,
-                          fillColor: const Color(0xFFF5F5F5),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
-                        ),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search products...',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: const Color(0xFFF5F5F5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
                       ),
-                    ],
+                    ),
+                    onChanged: (value) {
+                      provider.searchProducts(value);
+                    },
                   ),
                 ),
 

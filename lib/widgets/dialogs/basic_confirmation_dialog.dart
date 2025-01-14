@@ -21,12 +21,12 @@ class BasicConfirmationDialog extends StatelessWidget {
       content: Text(message),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, false),
           child: const Text('Cancel'),
         ),
         FilledButton(
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
             onConfirm();
           },
           child: Text(confirmText),

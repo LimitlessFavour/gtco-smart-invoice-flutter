@@ -5,7 +5,7 @@ import '../../../widgets/auth/custom_text_field.dart';
 import '../../../widgets/auth/gtco_logo.dart';
 import '../../../widgets/common/app_text.dart';
 import '../../../widgets/common/app_button_contained.dart';
-import '../../../widgets/common/image_upload_widget.dart';
+import '../../../widgets/common/image_upload.dart';
 
 class BusinessInfoDesktop extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -177,7 +177,7 @@ class BusinessInfoDesktop extends StatelessWidget {
                       ),
                       const Gap(32),
                       const Gap(32),
-                      ImageUploadWidget(
+                      ImageUpload(
                         onImageSelected: onLogoOptionChanged,
                         isMobile: false,
                       ),

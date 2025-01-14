@@ -6,7 +6,7 @@ import '../../../widgets/auth/custom_text_field.dart';
 import '../../../widgets/auth/gtco_logo.dart';
 import '../../../widgets/auth/auth_background.dart';
 import '../../../widgets/common/app_text.dart';
-import '../../../widgets/common/image_upload_widget.dart';
+import '../../../widgets/common/image_upload.dart';
 
 class BusinessInfoMobile extends StatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -130,7 +130,7 @@ class _BusinessInfoMobileState extends State<BusinessInfoMobile> {
                 widget.onBusinessTypeChanged,
               ),
               const Gap(24),
-              ImageUploadWidget(
+              ImageUpload(
                 onImageSelected: widget.onLogoOptionChanged,
                 isMobile: true,
               ),

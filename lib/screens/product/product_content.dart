@@ -8,8 +8,21 @@ import '../../widgets/common/loading_overlay.dart';
 import '../../widgets/product/product_empty_state.dart';
 import '../../widgets/product/product_tile.dart';
 
-class ProductContent extends StatelessWidget {
+class ProductContent extends StatefulWidget {
   const ProductContent({super.key});
+
+  @override
+  State<ProductContent> createState() => _ProductContentState();
+}
+
+class _ProductContentState extends State<ProductContent> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProductProvider>().loadProducts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +167,7 @@ class SearchBox extends StatelessWidget {
           ),
         ),
         onChanged: (value) {
-          // context.read<ProductProvider>().searchProducts(value);
+          context.read<ProductProvider>().searchProducts(value);
         },
       ),
     );

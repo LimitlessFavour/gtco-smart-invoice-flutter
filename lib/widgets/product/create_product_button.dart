@@ -1,106 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/models/product_enums.dart';
 import 'package:provider/provider.dart';
-import '../common/app_text.dart';
-import '../dialogs/confirmation_dialog.dart';
-import '../dialogs/success_dialog.dart';
-import '../../models/product.dart';
+
+import '../../models/create_product.dart';
 import '../../providers/product_provider.dart';
 import '../../services/navigation_service.dart';
-import '../dialogs/basic_confirmation_dialog.dart';
+import '../common/app_text.dart';
+import '../dialogs/success_dialog.dart';
 
-class ProductActionButton extends StatelessWidget {
+class ProductActionButton extends StatefulWidget {
   final bool isEdit;
   final Map<String, dynamic> formData;
   final VoidCallback? onCancel;
+  final GlobalKey<FormState> formKey;
 
   const ProductActionButton({
     super.key,
     this.isEdit = false,
     required this.formData,
     this.onCancel,
+    required this.formKey,
   });
 
   @override
+  State<ProductActionButton> createState() => _ProductActionButtonState();
+}
+
+class _ProductActionButtonState extends State<ProductActionButton> {
+  bool _isLoading = false;
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => _showConfirmation(context),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF4CAF50),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AppText(
-              isEdit ? 'Save Changes' : 'Save Product',
-              color: Colors.white,
-              weight: FontWeight.w500,
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _handleSubmit,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFFE04403),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: _isLoading
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppText(
+                  widget.isEdit ? 'Save Changes' : 'Create Product',
+                  color: Colors.white,
+                  weight: FontWeight.w500,
+                ),
+                const Gap(4),
+                const Icon(Icons.check, color: Colors.white, size: 20),
+              ],
             ),
-            const Gap(4),
-            const Icon(Icons.check, color: Colors.white),
-          ],
-        ),
-      ),
     );
   }
 
-  void _showConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => BasicConfirmationDialog(
-        title: isEdit ? 'Update Product' : 'Create Product',
-        message: isEdit
-            ? 'Are you sure you want to update this product?'
-            : 'Are you sure you want to create this product?',
-        confirmText: isEdit ? 'Update' : 'Create',
-        onConfirm: () => _handleSubmit(context),
-      ),
-    );
-  }
+  Future<void> _handleSubmit() async {
+    if (!widget.formKey.currentState!.validate() || _isLoading) return;
 
-  Future<void> _handleSubmit(BuildContext context) async {
-    final provider = context.read<ProductProvider>();
-    final navigationService = context.read<NavigationService>();
+    setState(() => _isLoading = true);
 
-    final product = Product(
-      id: isEdit
-          ? formData['id']
-          : DateTime.now().millisecondsSinceEpoch.toString(),
-      companyId: '1',
-      productName: formData['productName'],
-      description: formData['description'] ?? '',
-      price: double.parse(formData['price'].toString()),
-      sku: formData['sku'] ?? 'SKU-${DateTime.now().millisecondsSinceEpoch}',
-      quantity: int.parse(formData['quantity']?.toString() ?? '0'),
-      image: formData['image'],
-      createdAt:
-          isEdit ? DateTime.parse(formData['createdAt']) : DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
+    try {
+      final provider = context.read<ProductProvider>();
+      final navigationService = context.read<NavigationService>();
 
-    final success = isEdit
-        ? await provider.updateProduct(product)
-        : await provider.createProduct(product);
-
-    if (success && context.mounted) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => SuccessDialog(
-          message: isEdit
-              ? 'Product has been updated successfully'
-              : 'Product has been created successfully',
-        ),
+      final createProduct = CreateProduct(
+        productName: widget.formData['productName'],
+        description: widget.formData['description'] ?? '',
+        category: widget.formData['category'] as ProductCategory,
+        price: double.parse(widget.formData['price'].toString()),
+        defaultQuantity:
+            int.parse(widget.formData['quantity']?.toString() ?? '0'),
+        vatCategory: widget.formData['vatCategory'] as VatCategory,
+        image: widget.formData['image'],
       );
 
-      if (context.mounted) {
+      final success = widget.isEdit
+          ? await provider.updateProduct(
+              id: widget.formData['id'],
+              product: createProduct,
+            )
+          : await provider.createProduct(createProduct);
+
+      if (success && mounted) {
+        widget.onCancel?.call(); // Dismiss slide-in first
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => SuccessDialog(
+            message: widget.isEdit
+                ? 'Product has been updated successfully'
+                : 'Product has been created successfully',
+          ),
+        );
         navigationService.navigateToProductScreen(ProductScreen.list);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
       }
     }
   }

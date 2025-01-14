@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import '../../../widgets/common/app_text.dart';
+import 'package:gtco_smart_invoice_flutter/models/create_product.dart';
+import 'package:gtco_smart_invoice_flutter/models/product_enums.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/image_upload.dart';
+import 'package:provider/provider.dart';
+
 import '../../../providers/product_provider.dart';
+import '../../../widgets/common/app_text.dart';
 import '../../../widgets/common/loading_overlay.dart';
 import '../../../widgets/dialogs/success_dialog.dart';
-import 'package:provider/provider.dart';
 
 class ProductMobileForm extends StatefulWidget {
   final bool isEdit;
+  final String? productId;
 
   const ProductMobileForm({
     super.key,
     this.isEdit = false,
+    this.productId,
   });
 
   @override
@@ -22,16 +28,16 @@ class _ProductMobileFormState extends State<ProductMobileForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController(text: '1');
-  String? _selectedVatCategory;
+  ProductCategory _selectedCategory = ProductCategory.Other;
+  VatCategory _selectedVatCategory = VatCategory.none;
+  String? _selectedImagePath;
 
   @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
-    _categoryController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
     super.dispose();
@@ -60,10 +66,7 @@ class _ProductMobileFormState extends State<ProductMobileForm> {
                   maxLines: 3,
                 ),
                 const Gap(16),
-                _buildTextField(
-                  label: 'Category',
-                  controller: _categoryController,
-                ),
+                _buildCategoryDropdown(),
                 const Gap(16),
                 _buildTextField(
                   label: 'Price',
@@ -79,16 +82,7 @@ class _ProductMobileFormState extends State<ProductMobileForm> {
                   keyboardType: TextInputType.number,
                 ),
                 const Gap(16),
-                _buildDropdown(
-                  label: 'VAT Category',
-                  value: _selectedVatCategory,
-                  items: const ['None', '7.5%', '5%'],
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedVatCategory = value;
-                    });
-                  },
-                ),
+                _buildVatDropdown(),
                 const Gap(16),
                 _buildImageUpload(),
                 const Gap(24),
@@ -162,85 +156,101 @@ class _ProductMobileFormState extends State<ProductMobileForm> {
     );
   }
 
-  Widget _buildDropdown({
-    required String label,
-    required String? value,
-    required List<String> items,
-    required void Function(String?) onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AppText(
-          label,
-          size: 14,
-          weight: FontWeight.w500,
-        ),
-        const Gap(8),
-        DropdownButtonFormField<String>(
-          value: value,
-          items: items
-              .map((item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(item),
-                  ))
-              .toList(),
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
-            ),
-          ),
-        ),
-      ],
+  Widget _buildCategoryDropdown() {
+    return DropdownButtonFormField<ProductCategory>(
+      value: _selectedCategory,
+      decoration: const InputDecoration(
+        labelText: 'Category',
+        border: OutlineInputBorder(),
+      ),
+      items: ProductCategory.values.map((category) {
+        return DropdownMenuItem(
+          value: category,
+          child: Text(category.display),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedCategory = value ?? ProductCategory.Other;
+        });
+      },
+    );
+  }
+
+  Widget _buildVatDropdown() {
+    return DropdownButtonFormField<VatCategory>(
+      value: _selectedVatCategory,
+      decoration: const InputDecoration(
+        labelText: 'VAT Category',
+        border: OutlineInputBorder(),
+      ),
+      items: VatCategory.values.map((category) {
+        return DropdownMenuItem(
+          value: category,
+          child: Text(category.display),
+        );
+      }).toList(),
+      onChanged: (value) {
+        setState(() {
+          _selectedVatCategory = value ?? VatCategory.none;
+        });
+      },
     );
   }
 
   Widget _buildImageUpload() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const AppText(
-          'Upload Product Image',
-          size: 14,
-          weight: FontWeight.w500,
-        ),
-        const Gap(8),
-        Container(
-          height: 120,
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Center(
-            child: Icon(
-              Icons.add_photo_alternate_outlined,
-              size: 40,
-              color: Colors.grey[400],
-            ),
-          ),
-        ),
-      ],
+    return ImageUpload(
+      onImageSelected: (String? imagePath) {
+        // Handle the image path
+        setState(() {
+          _selectedImagePath = imagePath;
+        });
+      },
     );
   }
 
   void _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Implement product creation/update logic
-      if (context.mounted) {
-        await showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const SuccessDialog(
-            message: 'Product created successfully',
-          ),
+      final provider = context.read<ProductProvider>();
+
+      try {
+        // Set loading state
+        setState(() => provider.setLoading(true));
+
+        final createProduct = CreateProduct(
+          productName: _nameController.text,
+          description: _descriptionController.text,
+          category: _selectedCategory,
+          price: double.parse(_priceController.text),
+          defaultQuantity: int.parse(_quantityController.text),
+          vatCategory: _selectedVatCategory,
+          image: _selectedImagePath,
         );
-        if (context.mounted) {
-          Navigator.pop(context);
+
+        final success = widget.isEdit
+            ? await provider.updateProduct(
+                id: widget.productId ?? '',
+                product: createProduct,
+              )
+            : await provider.createProduct(createProduct);
+
+        if (success && context.mounted) {
+          await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => SuccessDialog(
+              message: widget.isEdit
+                  ? 'Product updated successfully'
+                  : 'Product created successfully',
+            ),
+          );
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
+        }
+      } finally {
+        if (mounted) {
+          provider.setLoading(false);
         }
       }
     }
