@@ -160,6 +160,7 @@ class _ClientMobileFormState extends State<ClientMobileForm> {
         lastName: _nameController.text.split(' ').skip(1).join(' '),
         email: _emailController.text,
         phoneNumber: _phoneController.text,
+        mobileNumber: _phoneController.text,
         address: _addressController.text,
       );
 

@@ -45,6 +45,7 @@ mixin InvoiceActions {
                 lastName: 'Snow',
                 email: 'john@example.com',
                 phoneNumber: '1234567890',
+                mobileNumber: '1234567890',
                 address: '123 Street',
               ),
             ),

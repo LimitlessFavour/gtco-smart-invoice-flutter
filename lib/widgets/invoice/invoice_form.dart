@@ -16,6 +16,7 @@ class _InvoiceFormState extends State<InvoiceForm> {
   final _customerNameController = TextEditingController();
   final _customerEmailController = TextEditingController();
   final _customerPhoneController = TextEditingController();
+  final _customerAddressController = TextEditingController();
   final _itemNameController = TextEditingController();
   final _itemDescriptionController = TextEditingController();
   final _quantityController = TextEditingController();
@@ -28,6 +29,7 @@ class _InvoiceFormState extends State<InvoiceForm> {
     _customerNameController.dispose();
     _customerEmailController.dispose();
     _customerPhoneController.dispose();
+    _customerAddressController.dispose();
     _itemNameController.dispose();
     _itemDescriptionController.dispose();
     _quantityController.dispose();
@@ -42,36 +44,6 @@ class _InvoiceFormState extends State<InvoiceForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText(
-            'Customer Information',
-            size: 18,
-            weight: FontWeight.w600,
-          ),
-          const Gap(16),
-          CustomTextField(
-            label: 'Customer Name',
-            hint: 'Enter customer name',
-            controller: _customerNameController,
-          ),
-          const Gap(16),
-          CustomTextField(
-            label: 'Customer Email',
-            hint: 'Enter customer email',
-            controller: _customerEmailController,
-          ),
-          const Gap(16),
-          CustomTextField(
-            label: 'Customer Phone',
-            hint: 'Enter customer phone',
-            controller: _customerPhoneController,
-          ),
-          const Gap(24),
-          const AppText(
-            'Invoice Details',
-            size: 18,
-            weight: FontWeight.w600,
-          ),
-          const Gap(16),
           Row(
             children: [
               Expanded(
@@ -86,6 +58,38 @@ class _InvoiceFormState extends State<InvoiceForm> {
                 child: _buildDatePicker(),
               ),
             ],
+          ),
+          const Gap(16),
+          CustomTextField(
+            label: 'Bill to *',
+            hint: 'Enter customer name',
+            controller: _customerNameController,
+          ),
+          const Gap(16),
+          Row(
+            children: [
+              Expanded(
+                child: CustomTextField(
+                  label: 'Phone Number',
+                  hint: 'Enter customer phone',
+                  controller: _customerPhoneController,
+                ),
+              ),
+              const Gap(16),
+              Expanded(
+                child: CustomTextField(
+                  label: 'Email',
+                  hint: 'Enter customer email',
+                  controller: _customerEmailController,
+                ),
+              ),
+            ],
+          ),
+          const Gap(16),
+          CustomTextField(
+            label: 'Address',
+            hint: 'Enter address',
+            controller: _customerAddressController,
           ),
           const Gap(24),
           _buildItemsList(),
@@ -167,6 +171,12 @@ class _InvoiceFormState extends State<InvoiceForm> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const AppText(
+          'Invoice items',
+          size: 24,
+          weight: FontWeight.w600,
+        ),
+        const Gap(10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -232,4 +242,80 @@ class _InvoiceFormState extends State<InvoiceForm> {
       ],
     );
   }
+
+  // Widget _buildItemsList() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       const AppText(
+  //         'Invoice items',
+  //         size: 24,
+  //         weight: FontWeight.w600,
+  //       ),
+  //       const Gap(10),
+  //       Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           const AppText(
+  //             'Items',
+  //             size: 18,
+  //             weight: FontWeight.w600,
+  //           ),
+  //           TextButton.icon(
+  //             onPressed: () {
+  //               // Add new item
+  //             },
+  //             icon: const Icon(Icons.add),
+  //             label: const Text('Add Item'),
+  //           ),
+  //         ],
+  //       ),
+  //       const Gap(16),
+  //       Card(
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(16),
+  //           child: Column(
+  //             children: [
+  //               CustomTextField(
+  //                 label: 'Item Name',
+  //                 hint: 'Enter item name',
+  //                 controller: _itemNameController,
+  //               ),
+  //               const Gap(16),
+  //               CustomTextField(
+  //                 label: 'Description',
+  //                 hint: 'Enter item description',
+  //                 controller: _itemDescriptionController,
+  //                 maxLines: 3,
+  //               ),
+  //               const Gap(16),
+  //               Row(
+  //                 children: [
+  //                   Expanded(
+  //                     child: CustomTextField(
+  //                       label: 'Quantity',
+  //                       hint: 'Enter quantity',
+  //                       controller: _quantityController,
+  //                       keyboardType: TextInputType.number,
+  //                     ),
+  //                   ),
+  //                   const Gap(16),
+  //                   Expanded(
+  //                     child: CustomTextField(
+  //                       label: 'Price',
+  //                       hint: 'Enter price',
+  //                       controller: _priceController,
+  //                       keyboardType: TextInputType.number,
+  //                       prefixText: '₦ ',
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 }

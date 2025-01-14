@@ -17,16 +17,30 @@ class LoadingOverlay extends StatelessWidget {
       children: [
         child,
         if (isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.1),
-            child: Center(
-              child: LoadingAnimationWidget.threeArchedCircle(
-                color: Theme.of(context).primaryColor,
-                size: 50,
-              ),
-            ),
-          ),
+          const CommonProgressIndicator(size: 50),
       ],
+    );
+  }
+}
+
+class CommonProgressIndicator extends StatelessWidget {
+  const CommonProgressIndicator({
+    super.key,
+    this.size = 50,
+  });
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black.withOpacity(0.1),
+      child: Center(
+        child: LoadingAnimationWidget.threeArchedCircle(
+          color: Theme.of(context).primaryColor,
+          size: size,
+        ),
+      ),
     );
   }
 }

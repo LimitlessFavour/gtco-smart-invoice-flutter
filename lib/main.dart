@@ -137,7 +137,7 @@ class AppRoot extends StatelessWidget {
         ),
       ),
       provider.Provider(
-        create: (context) => ClientRepository(context.read<ApiClient>()),
+        create: (context) => ClientRepository(dioClient),
       ),
       provider.ChangeNotifierProvider(
         create: (context) => ClientProvider(context.read<ClientRepository>()),

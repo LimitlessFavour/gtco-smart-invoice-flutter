@@ -84,7 +84,21 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                           onPressed: () {
                             // TODO: Save as draft functionality
                           },
-                          child: const Text('Save as Draft'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(
+                              color: Color(0xFFF9D9D2),
+                              width: 1,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const AppText(
+                            'Save as Draft',
+                            size: 16,
+                            weight: FontWeight.w600,
+                          ),
                         ),
                         const Gap(16),
                         ElevatedButton(
@@ -98,19 +112,43 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                             },
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE04403),
+                            backgroundColor: const Color(0xffE04826),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'Send Invoice',
-                            style: TextStyle(color: Colors.white),
+                            size: 16,
+                            weight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                         const Gap(16),
-                        OutlinedButton(
-                          onPressed: () {
-                            // TODO: Download invoice functionality
-                          },
-                          child: const Text('Download Invoice'),
+                        ElevatedButton(
+                          onPressed: () => showSendConfirmation(
+                            context,
+                            clientName: 'John Doe',
+                            onSuccess: (context) {
+                              context
+                                  .read<NavigationService>()
+                                  .navigateToInvoiceScreen(InvoiceScreen.list);
+                            },
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffE04826),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const AppText(
+                            'Download Invoice',
+                            size: 16,
+                            weight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
                       ],
                     ),
@@ -137,14 +175,13 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: EdgeInsets.all(24.0),
+                                padding: EdgeInsets.only(top: 24.0, left: 24.0),
                                 child: AppText(
                                   'Invoice Details',
-                                  size: 18,
+                                  size: 24,
                                   weight: FontWeight.w600,
                                 ),
                               ),
-                              Divider(height: 1),
                               Expanded(
                                 child: SingleChildScrollView(
                                   padding: EdgeInsets.all(24.0),
@@ -160,7 +197,7 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: const Color(0xFFF2F2F2),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFC6C1C1)),
                           ),
@@ -168,17 +205,20 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: EdgeInsets.all(24.0),
+                                padding: EdgeInsets.only(top: 24.0, left: 24.0),
                                 child: AppText(
                                   'Preview',
-                                  size: 18,
+                                  size: 24,
                                   weight: FontWeight.w600,
                                 ),
                               ),
-                              Divider(height: 1),
                               Expanded(
                                 child: SingleChildScrollView(
-                                  padding: EdgeInsets.all(24.0),
+                                  padding: EdgeInsets.only(
+                                    top: 24.0,
+                                    left: 24.0,
+                                    right: 24.0,
+                                  ),
                                   child: PreviewCard(),
                                 ),
                               ),

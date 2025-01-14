@@ -75,11 +75,9 @@ class DesktopLayout extends StatelessWidget {
                       child: CreateClientForm(
                         onCancel: () => navigation
                             .navigateToClientScreen(ClientScreen.list),
-                        client:
+                        clientId:
                             navigation.currentClientScreen == ClientScreen.edit
-                                ? context
-                                    .read<ClientProvider>()
-                                    .getClientById(navigation.currentClientId!)
+                                ? navigation.currentClientId
                                 : null,
                       ),
                     ),

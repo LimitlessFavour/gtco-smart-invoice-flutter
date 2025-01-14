@@ -22,7 +22,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Client"
+                  "$ref": "#/components/schemas/CreateClientResponseDto"
                 }
               }
             }
@@ -54,10 +54,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Client"
-                  }
+                  "$ref": "#/components/schemas/ClientListResponseDto"
                 }
               }
             }
@@ -150,7 +147,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Client"
+                  "$ref": "#/components/schemas/UpdateClientResponseDto"
                 }
               }
             }
@@ -191,7 +188,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Client has been successfully deleted"
+            "description": "Client has been successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteClientResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized request"
@@ -2591,11 +2595,95 @@
           "address"
         ]
       },
-      "Client": {
+      "CreateClientResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1,
+            "description": "Unique identifier of the client"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John",
+            "description": "First name of the client"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Snow",
+            "description": "Last name of the client"
+          },
+          "email": {
+            "type": "string",
+            "example": "john.snow@example.com",
+            "description": "Email address of the client"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+2349012345678",
+            "description": "Primary phone number of the client"
+          },
+          "address": {
+            "type": "string",
+            "example": "No 3 Peaceville estate, Badore, Ajah, Lagos",
+            "description": "Physical address of the client"
+          },
+          "companyId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID of the company this client belongs to"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-03-20T10:00:00Z",
+            "description": "Date and time when the client was created"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-03-20T10:00:00Z",
+            "description": "Date and time when the client was last updated"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "phoneNumber",
+          "address",
+          "companyId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ClientListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "List of clients",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateClientResponseDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "example": 10,
+            "description": "Total number of clients"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ]
+      },
+      "Company": {
         "type": "object",
         "properties": {}
       },
-      "Company": {
+      "Client": {
         "type": "object",
         "properties": {}
       },
@@ -2784,6 +2872,47 @@
             "type": "string"
           }
         }
+      },
+      "UpdateClientResponseDto": {
+        "type": "object",
+        "properties": {
+          "client": {
+            "description": "Updated client information",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreateClientResponseDto"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "example": "Client updated successfully",
+            "description": "Success message"
+          }
+        },
+        "required": [
+          "client",
+          "message"
+        ]
+      },
+      "DeleteClientResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Client deleted successfully",
+            "description": "Success message"
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 200,
+            "description": "HTTP status code"
+          }
+        },
+        "required": [
+          "message",
+          "statusCode"
+        ]
       },
       "CreateCompanyDto": {
         "type": "object",
