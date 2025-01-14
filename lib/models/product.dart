@@ -31,14 +31,14 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     // Convert vatCategory to double for consistent handling
-    double vatValue;
+    num vatValue;
     var rawVat = json['vatCategory'];
     if (rawVat is int) {
       vatValue = rawVat.toDouble();
     } else if (rawVat is String) {
       vatValue = double.parse(rawVat.replaceAll('%', ''));
     } else {
-      vatValue = 0.0;
+      vatValue = 0;
     }
 
     return Product(

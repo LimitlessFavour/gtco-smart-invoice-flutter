@@ -113,7 +113,7 @@ class DioClient {
         if (refreshResponse.statusCode == 200) {
           // Update the original request with new token
           err.requestOptions.headers['Authorization'] =
-              'Bearer ${_authToken?.accessToken}';
+              'Bearer ${_authToken!.accessToken}';
           // Retry the original request
           final response = await _retryRequest(err.requestOptions);
           return handler.resolve(response);
@@ -123,7 +123,9 @@ class DioClient {
         onTokenRefreshed?.call(null);
       }
     }
-    return handler.next(err);
+
+    // If we reach here, either it's not a 401 error or token refresh failed
+    return handler.reject(err);
   }
 
   Future<Response<dynamic>> _refreshToken() async {

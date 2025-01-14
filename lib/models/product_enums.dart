@@ -3,10 +3,10 @@ enum VatCategory {
   five(5),
   sevenPointFive(7.5);
 
-  final double value;
+  final num value;
   const VatCategory(this.value);
 
-  static VatCategory fromValue(double value) {
+  static VatCategory fromValue(num value) {
     return VatCategory.values.firstWhere(
       (category) => category.value == value,
       orElse: () => VatCategory.none,

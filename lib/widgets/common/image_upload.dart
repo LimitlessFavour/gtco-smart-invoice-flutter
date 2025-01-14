@@ -8,19 +8,21 @@ class ImageUpload extends StatefulWidget {
   final Function(String?) onImageSelected;
   final bool isMobile;
   final String label;
+  final Key? imageKey;
 
   const ImageUpload({
     super.key,
     required this.onImageSelected,
     this.isMobile = true,
     this.label = 'Upload Product Image',
+    this.imageKey,
   });
 
   @override
-  State<ImageUpload> createState() => _ImageUploadState();
+  State<ImageUpload> createState() => ImageUploadState();
 }
 
-class _ImageUploadState extends State<ImageUpload> {
+class ImageUploadState extends State<ImageUpload> {
   String? _selectedImagePath;
 
   Future<void> _pickImage() async {
@@ -42,6 +44,13 @@ class _ImageUploadState extends State<ImageUpload> {
     } catch (e) {
       debugPrint('Error picking image: $e');
     }
+  }
+
+  void clearImage() {
+    setState(() {
+      _selectedImagePath = null;
+    });
+    widget.onImageSelected(null);
   }
 
   @override
@@ -117,12 +126,7 @@ class _ImageUploadState extends State<ImageUpload> {
                     top: 8,
                     right: 8,
                     child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedImagePath = null;
-                        });
-                        widget.onImageSelected(null);
-                      },
+                      onTap: clearImage,
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(

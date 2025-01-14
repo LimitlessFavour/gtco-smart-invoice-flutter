@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:gtco_smart_invoice_flutter/services/logger_service.dart';
 
 import '../models/create_product.dart';
 import '../models/product.dart';
@@ -12,11 +14,15 @@ class ProductRepository {
   Future<List<Product>> getProducts() async {
     try {
       final response = await _dioClient.get('/product');
+      if (response.data == null || response.data['products'] == null) {
+        throw Exception('Invalid response format');
+      }
       final products = (response.data['products'] as List)
           .map((json) => Product.fromJson(json))
           .toList();
       return products;
     } catch (e) {
+      LoggerService.error('Failed to load products', error: e);
       throw Exception('Failed to load products: $e');
     }
   }
@@ -98,6 +104,10 @@ class ProductRepository {
 
   Future<Product> deleteProduct(String id) async {
     try {
+      //if debug, wait 2 seconds
+      if (kDebugMode) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
       final response = await _dioClient.delete('/product/$id');
       return Product.fromJson(response.data);
     } catch (e) {

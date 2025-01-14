@@ -19,33 +19,29 @@ class ProductProvider extends ChangeNotifier {
             .toLowerCase()
             .contains(_searchQuery.toLowerCase()))
         .toList();
-    print('_products length: ${_products.length}');
-    print('filtered length: ${filtered.length}');
-    print('current search query: "$_searchQuery"');
     return filtered;
   }
-
 
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-Future<void> loadProducts() async {
-  try {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  Future<void> loadProducts() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
 
-    _products = await _repository.getProducts();
-    print('Loaded products count: ${_products.length}');
-    _isLoading = false;
-    notifyListeners();
-  } catch (e) {
-    print('Error loading products: $e');
-    _isLoading = false;
-    _error = e.toString();
-    notifyListeners();
+      _products = await _repository.getProducts();
+      print('Loaded products count: ${_products.length}');
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      print('Error loading products: $e');
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+    }
   }
-}
 
   Future<Product?> getProductById(String id) async {
     try {
@@ -71,8 +67,8 @@ Future<void> loadProducts() async {
       _error = null;
       notifyListeners();
 
-      final createdProduct = await _repository.createProduct(product);
-      _products.insert(0, createdProduct);
+      final newProduct = await _repository.createProduct(product);
+      _products.add(newProduct);
 
       _isLoading = false;
       notifyListeners();
@@ -142,6 +138,11 @@ Future<void> loadProducts() async {
 
   void setLoading(bool value) {
     _isLoading = value;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _error = null;
     notifyListeners();
   }
 }

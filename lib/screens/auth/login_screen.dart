@@ -36,16 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _showErrorSnackBar(String message) {
-    LoggerService.error('Login UI Error', error: message);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
   void _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -61,7 +51,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (authProvider.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authProvider.error!)),
+          SnackBar(
+            content: Text(authProvider.error!),
+            backgroundColor: Colors.red,
+          ),
         );
         return;
       }

@@ -14,6 +14,7 @@ class ProductActionButton extends StatefulWidget {
   final Map<String, dynamic> formData;
   final VoidCallback? onCancel;
   final GlobalKey<FormState> formKey;
+  final VoidCallback? onSuccess;
 
   const ProductActionButton({
     super.key,
@@ -21,6 +22,7 @@ class ProductActionButton extends StatefulWidget {
     required this.formData,
     this.onCancel,
     required this.formKey,
+    this.onSuccess,
   });
 
   @override
@@ -91,6 +93,7 @@ class _ProductActionButtonState extends State<ProductActionButton> {
           : await provider.createProduct(createProduct);
 
       if (success && mounted) {
+        widget.onSuccess?.call();
         widget.onCancel?.call(); // Dismiss slide-in first
         await showDialog(
           context: context,

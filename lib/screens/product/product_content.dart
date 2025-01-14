@@ -28,6 +28,25 @@ class _ProductContentState extends State<ProductContent> {
   Widget build(BuildContext context) {
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
+        // Show error if exists
+        if (provider.error != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: AppText(provider.error!),
+                action: SnackBarAction(
+                  label: 'Dismiss',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    provider.clearError();
+                  },
+                ),
+              ),
+            );
+            provider.clearError(); // Clear error after showing
+          });
+        }
+
         return LoadingOverlay(
           isLoading: provider.isLoading,
           child: Padding(

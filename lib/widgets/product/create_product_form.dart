@@ -21,6 +21,7 @@ class CreateProductForm extends StatefulWidget {
 
 class _CreateProductFormState extends State<CreateProductForm> {
   final _formKey = GlobalKey<FormState>();
+  final _imageUploadKey = GlobalKey<ImageUploadState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
@@ -48,6 +49,7 @@ class _CreateProductFormState extends State<CreateProductForm> {
       _selectedVatCategory = VatCategory.none;
       _selectedImagePath = null;
     });
+    _imageUploadKey.currentState?.clearImage();
   }
 
   @override
@@ -144,6 +146,9 @@ class _CreateProductFormState extends State<CreateProductForm> {
                             'image': _selectedImagePath,
                           },
                           onCancel: widget.onCancel,
+                          onSuccess: () {
+                            _clearForm();
+                          },
                         ),
                       ],
                     ),
@@ -265,6 +270,7 @@ class _CreateProductFormState extends State<CreateProductForm> {
 
   Widget _buildImageUpload() {
     return ImageUpload(
+      key: _imageUploadKey,
       onImageSelected: (String? path) {
         setState(() {
           _selectedImagePath = path;
@@ -272,12 +278,5 @@ class _CreateProductFormState extends State<CreateProductForm> {
       },
       isMobile: false,
     );
-  }
-
-  void _handleSubmit() {
-    if (_formKey.currentState!.validate()) {
-      // TODO: Handle form submission
-      widget.onCancel();
-    }
   }
 }
