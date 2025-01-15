@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/powered_by_gtco.dart';
 import 'package:provider/provider.dart';
 import '../common/app_text.dart';
 import '../common/company_logo.dart';
@@ -86,6 +87,8 @@ class PreviewCard extends StatelessWidget {
                 const Divider(),
                 const Gap(16),
                 _buildTotalSection(provider),
+                const Gap(32),
+                const PoweredByGtco(),
               ],
             ),
           ),

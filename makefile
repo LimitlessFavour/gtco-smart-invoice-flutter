@@ -15,12 +15,14 @@ run:
 
 # Web
 build-web:
-	flutter build web --release $(DART_DEFINES)
+	cp .env.production .env
+	flutter build web --release --dart-define-from-file=.env
+# flutter build web --release $(DART_DEFINES)
 
-# run-web: 
-# 	flutter run -d chrome $(DART_DEFINES)
-run-web: 
+run-web:
+	cp .env.development .env
 	flutter run -d chrome --dart-define-from-file=.env
+#   flutter run -d chrome $(DART_DEFINES)
 
 
 serve-web: build-web
@@ -45,7 +47,7 @@ clean:
 	flutter clean
 	flutter pub get
 
-get: 
+get:
 	flutter pub get
 
 format:
