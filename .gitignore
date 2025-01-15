@@ -45,3 +45,10 @@ app.*.map.json
 /android/app/release
 
 resources/
+procdure.txt
+procdure.sql
+
+# Environment files
+.env
+.env.*
+!.env.example

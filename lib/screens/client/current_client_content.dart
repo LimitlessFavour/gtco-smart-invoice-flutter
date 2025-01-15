@@ -171,7 +171,8 @@ class CurrentClientContent extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const AppText(
                                     'Invoices for John Snow',
@@ -355,23 +356,26 @@ class CurrentClientContent extends StatelessWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final success =
-          await context.read<ClientProvider>().deleteClient(client.id);
+      // Schedule the delete operation for the next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final success =
+            await context.read<ClientProvider>().deleteClient(client.id);
 
-      if (success && context.mounted) {
-        await showDialog(
-          context: context,
-          builder: (context) => const SuccessDialog(
-            message: 'Client deleted successfully',
-          ),
-        );
+        if (success && context.mounted) {
+          await showDialog(
+            context: context,
+            builder: (context) => const SuccessDialog(
+              message: 'Client deleted successfully',
+            ),
+          );
 
-        if (context.mounted) {
-          context
-              .read<NavigationService>()
-              .navigateToClientScreen(ClientScreen.list);
+          if (context.mounted) {
+            context
+                .read<NavigationService>()
+                .navigateToClientScreen(ClientScreen.list);
+          }
         }
-      }
+      });
     }
   }
 
@@ -470,7 +474,8 @@ class CurrentClientContent extends StatelessWidget {
   Widget _buildStatusBadge(String status) {
     Color backgroundColor;
     Color textColor;
-    String displayText = status.substring(0, 1).toUpperCase() + status.substring(1);
+    String displayText =
+        status.substring(0, 1).toUpperCase() + status.substring(1);
 
     switch (status.toLowerCase()) {
       case 'paid':

@@ -1,48 +1,79 @@
 import 'package:gtco_smart_invoice_flutter/models/client.dart';
 import 'package:gtco_smart_invoice_flutter/models/invoice_item.dart';
+import 'package:gtco_smart_invoice_flutter/models/company.dart';
 
 class Invoice {
-  final String id;
-  final String companyId;
-  final String clientId;
+  final int id;
   final String invoiceNumber;
   final DateTime dueDate;
   final String status;
   final double totalAmount;
   final DateTime createdAt;
-  final DateTime updatedAt;
+  final DateTime? updatedAt;
+  final DateTime? paidAt;
+  final String? paymentLink;
+  final String? transactionRef;
+  final String? squadTransactionRef;
   final List<InvoiceItem> items;
   final Client client;
+  final Company company;
 
   Invoice({
     required this.id,
-    required this.companyId,
-    required this.clientId,
     required this.invoiceNumber,
     required this.dueDate,
     required this.status,
     required this.totalAmount,
     required this.createdAt,
-    required this.updatedAt,
+    this.updatedAt,
+    this.paidAt,
+    this.paymentLink,
+    this.transactionRef,
+    this.squadTransactionRef,
     required this.items,
     required this.client,
+    required this.company,
   });
 
   factory Invoice.fromJson(Map<String, dynamic> json) {
     return Invoice(
-      id: json['invoice_id'].toString(),
-      companyId: json['company_id'].toString(),
-      clientId: json['client_id'].toString(),
-      invoiceNumber: json['invoice_number'],
-      dueDate: DateTime.parse(json['due_date']),
+      id: json['id'],
+      invoiceNumber: json['invoiceNumber'],
+      dueDate: DateTime.parse(json['dueDate']),
       status: json['status'],
-      totalAmount: json['total_amount'].toDouble(),
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      // totalAmount: double.parse(json['totalAmount'].toString()),
+      totalAmount: double.tryParse(json['totalAmount']) ?? 0, // Fix here
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt:
+          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      paidAt: json['paidAt'] != null ? DateTime.parse(json['paidAt']) : null,
+      paymentLink: json['paymentLink'],
+      transactionRef: json['transactionRef'],
+      squadTransactionRef: json['squadTransactionRef'],
       items: (json['items'] as List)
           .map((item) => InvoiceItem.fromJson(item))
           .toList(),
       client: Client.fromJson(json['client']),
+      company: Company.fromJson(json['company']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'invoiceNumber': invoiceNumber,
+      'dueDate': dueDate.toIso8601String(),
+      'status': status,
+      'totalAmount': totalAmount,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt?.toIso8601String(),
+      'paidAt': paidAt?.toIso8601String(),
+      'paymentLink': paymentLink,
+      'transactionRef': transactionRef,
+      'squadTransactionRef': squadTransactionRef,
+      'items': items.map((item) => item.toJson()).toList(),
+      'client': client.toJson(),
+      'company': company.toJson(),
+    };
   }
 }

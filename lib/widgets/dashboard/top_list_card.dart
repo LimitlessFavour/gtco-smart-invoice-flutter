@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/constants/styles.dart';
+import '../../constants/styles.dart';
 import '../common/app_text.dart';
 
 class TopListCard extends StatelessWidget {
@@ -27,20 +27,32 @@ class TopListCard extends StatelessWidget {
             weight: FontWeight.w600,
             color: const Color(0xFF6A6A6A),
           ),
-          const Gap(30),
-          ...List.generate(
-            items.length,
-            (index) => Column(
-              children: [
-                _buildListItem(items[index], index + 1),
-                if (index < items.length - 1)
-                   Divider(
-                    height: 24,
-                    thickness: 0.5,
-                    color: const Color(0xFF661F01).withOpacity(0.5),
+          const Gap(16),
+          // Wrap the list in Expanded + SingleChildScrollView
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Gap(14), // To balance the top spacing
+                  ...List.generate(
+                    items.length,
+                    (index) => Column(
+                      children: [
+                        _buildListItem(items[index], index + 1),
+                        if (index < items.length - 1) ...[
+                          const Gap(12),
+                          Divider(
+                            height: 1,
+                            thickness: 0.5,
+                            color: const Color(0xFF661F01).withOpacity(0.5),
+                          ),
+                          const Gap(12),
+                        ],
+                      ],
+                    ),
                   ),
-                  const Gap(30),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -51,33 +63,26 @@ class TopListCard extends StatelessWidget {
   Widget _buildListItem(TopListItem item, int index) {
     return Row(
       children: [
-        // Item number
         AppText(
           '$index.',
           size: 16,
-          color: const Color(0xFF6A6A6A),
           weight: FontWeight.w500,
+          color: const Color(0xFF6A6A6A),
         ),
         const Gap(8),
-        // Title and value
         Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppText(
-                item.title,
-                size: 16,
-                color: const Color(0xFFFF9773),
-                weight: FontWeight.w500,
-              ),
-              AppText(
-                item.value,
-                size: 16,
-                color: const Color(0xFF6A6A6A),
-                weight: FontWeight.w500,
-              ),
-            ],
+          child: AppText(
+            item.title,
+            size: 16,
+            weight: FontWeight.w500,
+            color: const Color(0xFFE04403),
           ),
+        ),
+        AppText(
+          item.value,
+          size: 16,
+          weight: FontWeight.w600,
+          color: const Color(0xFF6A6A6A),
         ),
       ],
     );

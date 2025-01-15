@@ -11,6 +11,8 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLines;
   final String? prefixText;
+  final bool readOnly;
+  final Widget? suffix;
 
   const CustomTextField({
     super.key,
@@ -23,6 +25,8 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.maxLines = 1,
     this.prefixText,
+    this.readOnly = false,
+    this.suffix,
   });
 
   @override
@@ -42,20 +46,26 @@ class CustomTextField extends StatelessWidget {
           validator: validator,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          readOnly: readOnly,
           decoration: InputDecoration(
             hintText: hint,
             prefixText: prefixText,
             suffixIcon: suffixIcon,
+            suffix: suffix,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
+            contentPadding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: suffix != null ? 0 : 12,
+              bottom: suffix != null ? 7 : 0,
             ),
+            filled: readOnly,
+            fillColor: readOnly ? Colors.grey[100] : null,
           ),
         ),
       ],
     );
   }
-} 
+}

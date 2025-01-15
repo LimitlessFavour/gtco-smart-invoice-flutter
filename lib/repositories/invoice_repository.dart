@@ -1,104 +1,49 @@
+import 'package:dio/dio.dart';
 import '../models/invoice.dart';
-import '../models/client.dart';
-import '../services/api_client.dart';
+import '../models/dtos/create_invoice_dto.dart';
+import '../services/dio_client.dart';
+import '../services/logger_service.dart';
 
 class InvoiceRepository {
-  final ApiClient _apiClient;
+  final DioClient _dioClient;
 
-  InvoiceRepository(this._apiClient);
+  InvoiceRepository(this._dioClient);
 
   Future<List<Invoice>> getInvoices() async {
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // When ready for real API:
-      // final response = await _apiClient.get('/invoices');
-      // return (response['data'] as List).map((json) => Invoice.fromJson(json)).toList();
-
-      // Return mock data
-      return [
-        Invoice(
-          id: '1',
-          companyId: '1',
-          clientId: '1',
-          invoiceNumber: 'INV-001',
-          dueDate: DateTime.now().add(const Duration(days: 30)),
-          status: 'unpaid',
-          totalAmount: 1500.0,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          items: [],
-          client: Client(
-            id: '1',
-            companyId: '1',
-            firstName: 'John',
-            lastName: 'Snow',
-            email: 'john@example.com',
-            phoneNumber: '1234567890',
-            address: '123 Street',
-          ),
-        ),
-        Invoice(
-          id: '2',
-          companyId: '1',
-          clientId: '1',
-          invoiceNumber: '1001',
-          dueDate: DateTime.now(),
-          status: 'paid',
-          totalAmount: 80000,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          items: [],
-          client: Client(
-            id: '1',
-            companyId: '1',
-            firstName: 'John',
-            lastName: 'Snow',
-            email: 'john@example.com',
-            phoneNumber: '1234567890',
-            address: '123 Street',
-          ),
-        ),
-        Invoice(
-          id: '3',
-          companyId: '1',
-          clientId: '1',
-          invoiceNumber: '12345',
-          dueDate: DateTime.now(),
-          status: 'drafted',
-          totalAmount: 120000,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          items: [],
-          client: Client(
-            id: '1',
-            companyId: '1',
-            firstName: 'John',
-            lastName: 'Snow',
-            email: 'john@example.com',
-            phoneNumber: '1234567890',
-            address: '123 Street',
-          ),
-        ),
-      ];
-    } catch (e) {
-      throw Exception('Failed to load invoices: $e');
+      final response = await _dioClient.get('/invoice');
+      return (response.data as List)
+          .map((json) => Invoice.fromJson(json))
+          .toList();
+    } on DioException catch (e) {
+      LoggerService.error('Error getting invoices', error: e);
+      throw _handleDioError(e);
     }
   }
 
-  Future<bool> sendInvoice(Invoice invoice) async {
+  Future<Invoice> createInvoice(CreateInvoiceDto dto) async {
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      final response = await _dioClient.post(
+        '/invoice',
+        data: dto.toJson(),
+      );
+      return Invoice.fromJson(response.data);
+    } on DioException catch (e) {
+      LoggerService.error('Error creating invoice', error: e);
+      throw _handleDioError(e);
+    }
+  }
 
-      // When ready for real API:
-      // final response = await _apiClient.post('/invoices/send', invoice.toJson());
-      // return response['success'] ?? false;
-
-      return true;
-    } catch (e) {
-      throw Exception('Failed to send invoice: $e');
+  Exception _handleDioError(DioException e) {
+    switch (e.response?.statusCode) {
+      case 400:
+        return Exception('Invalid invoice data');
+      case 401:
+        return Exception('Unauthorized. Please log in again');
+      case 404:
+        return Exception('Resource not found');
+      default:
+        return Exception('An error occurred: ${e.message}');
     }
   }
 }

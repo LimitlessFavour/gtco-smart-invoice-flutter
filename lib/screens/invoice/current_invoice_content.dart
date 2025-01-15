@@ -284,16 +284,28 @@ class CurrentInvoiceContent extends StatelessWidget {
         children: [
           Expanded(
             flex: 2,
-            child: Text(item.productId),
+            child: AppText(
+              item.productName ?? 'Product',
+              size: 14,
+            ),
           ),
           Expanded(
-            child: Text('₦${item.price.toStringAsFixed(2)}'),
+            child: AppText(
+              '₦${item.price.toStringAsFixed(2)}',
+              size: 14,
+            ),
           ),
           Expanded(
-            child: Text(item.quantity.toString()),
+            child: AppText(
+              item.quantity.toString(),
+              size: 14,
+            ),
           ),
           Expanded(
-            child: Text('₦${(item.price * item.quantity).toStringAsFixed(2)}'),
+            child: AppText(
+              '₦${(item.price * item.quantity).toStringAsFixed(2)}',
+              size: 14,
+            ),
           ),
         ],
       ),

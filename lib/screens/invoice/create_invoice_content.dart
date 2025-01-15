@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/models/client.dart';
-import 'package:gtco_smart_invoice_flutter/models/invoice.dart';
 import 'package:provider/provider.dart';
+
+import '../../providers/invoice_provider.dart';
+import '../../services/navigation_service.dart';
 import '../../widgets/common/app_text.dart';
+import '../../widgets/common/loading_overlay.dart';
+import '../../widgets/dialogs/success_dialog.dart';
 import '../../widgets/invoice/invoice_form.dart';
 import '../../widgets/invoice/preview_card.dart';
-import '../../services/navigation_service.dart';
-import '../../providers/invoice_provider.dart';
-import '../../widgets/dialogs/success_dialog.dart';
-import '../../widgets/common/loading_overlay.dart';
-import '../../widgets/dialogs/basic_confirmation_dialog.dart';
 
 class CreateInvoiceContent extends StatefulWidget {
   const CreateInvoiceContent({super.key});
@@ -20,13 +18,50 @@ class CreateInvoiceContent extends StatefulWidget {
 }
 
 class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
-
   BuildContext? _dialogContext;
 
   @override
   void initState() {
     super.initState();
     _dialogContext = context;
+  }
+
+  Future<void> _handleCreateInvoice() async {
+    final createProvider = context.read<InvoiceProvider>();
+
+    if (!createProvider.isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all required fields'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final invoice = await createProvider.createInvoice();
+
+      if (invoice != null) {
+        await showDialog(
+          context: context,
+          builder: (_) => const SuccessDialog(
+            message: 'Invoice created successfully!',
+          ),
+        );
+        createProvider.createClear();
+        // TODO: Navigate to invoice list screen
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.list);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -40,7 +75,8 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
             children: [
               // Header with actions
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24.0, vertical: 16.0),
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: const BoxDecoration(
                   color: Color(0xFFF2F2F2),
@@ -82,25 +118,68 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                           onPressed: () {
                             // TODO: Save as draft functionality
                           },
-                          child: const Text('Save as Draft'),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(
+                              color: Color(0xFFF9D9D2),
+                              width: 1,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const AppText(
+                            'Save as Draft',
+                            size: 16,
+                            weight: FontWeight.w600,
+                          ),
                         ),
                         const Gap(16),
                         ElevatedButton(
-                          onPressed: () => _showSendConfirmation(context),
+                          onPressed: () {
+                            _handleCreateInvoice();
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE04403),
+                            backgroundColor: const Color(0xffE04826),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'Send Invoice',
-                            style: TextStyle(color: Colors.white),
+                            size: 16,
+                            weight: FontWeight.w600,
+                            color: Colors.white,
                           ),
                         ),
                         const Gap(16),
-                        OutlinedButton(
+                        ElevatedButton(
                           onPressed: () {
-                            // TODO: Download invoice functionality
+                            // showSendConfirmation(
+                            //   context,
+                            //   clientName: 'John Doe',
+                            //   onSuccess: (context) {
+                            //     context
+                            //         .read<NavigationService>()
+                            //         .navigateToInvoiceScreen(
+                            //             InvoiceScreen.list);
+                            //   },
+                            // );
                           },
-                          child: const Text('Download Invoice'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffE04826),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const AppText(
+                            'Download Invoice',
+                            size: 16,
+                            weight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
                         ),
                       ],
                     ),
@@ -127,14 +206,13 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: EdgeInsets.all(24.0),
+                                padding: EdgeInsets.only(top: 24.0, left: 24.0),
                                 child: AppText(
                                   'Invoice Details',
-                                  size: 18,
+                                  size: 24,
                                   weight: FontWeight.w600,
                                 ),
                               ),
-                              Divider(height: 1),
                               Expanded(
                                 child: SingleChildScrollView(
                                   padding: EdgeInsets.all(24.0),
@@ -150,7 +228,7 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: const Color(0xFFF2F2F2),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFC6C1C1)),
                           ),
@@ -158,17 +236,20 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: EdgeInsets.all(24.0),
+                                padding: EdgeInsets.only(top: 24.0, left: 24.0),
                                 child: AppText(
                                   'Preview',
-                                  size: 18,
+                                  size: 24,
                                   weight: FontWeight.w600,
                                 ),
                               ),
-                              Divider(height: 1),
                               Expanded(
                                 child: SingleChildScrollView(
-                                  padding: EdgeInsets.all(24.0),
+                                  padding: EdgeInsets.only(
+                                    top: 24.0,
+                                    left: 24.0,
+                                    right: 24.0,
+                                  ),
                                   child: PreviewCard(),
                                 ),
                               ),
@@ -185,61 +266,5 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
         );
       },
     );
-  }
-
-  void _showSendConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => BasicConfirmationDialog(
-        title: 'Confirm Send',
-        message: 'Are you sure you want to send the invoice to John Doe?',
-        confirmText: 'Send',
-        onConfirm: () => _handleSendInvoice(context),
-      ),
-    );
-  }
-
-  Future<void> _handleSendInvoice(BuildContext context) async {
-    final invoiceProvider = context.read<InvoiceProvider>();
-    final navigationService = context.read<NavigationService>();
-    
-    final success = await invoiceProvider.sendInvoice(
-      Invoice(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        companyId: '1',
-        clientId: '1',
-        invoiceNumber: 'INV-${DateTime.now().millisecondsSinceEpoch}',
-        dueDate: DateTime.now().add(const Duration(days: 30)),
-        status: 'unpaid',
-        totalAmount: 1500.0,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        items: [],
-        client: Client(
-          id: '1',
-          companyId: '1',
-          firstName: 'John',
-          lastName: 'Snow',
-          email: 'john@example.com',
-          phoneNumber: '1234567890',
-          address: '123 Street',
-        ),
-      ),
-    );
-
-    if (success) {
-    // if (success && context.mounted) {
-      // Show success dialog
-      await showDialog(
-        context: _dialogContext!,
-        barrierDismissible: false,
-        builder: (context) => const SuccessDialog(message: 'Invoice sent successfully',),
-      );
-      
-      // if (context.mounted) {
-        // Navigate back to invoice list
-        navigationService.navigateToInvoiceScreen(InvoiceScreen.list);
-      // }
-    }
   }
 }
