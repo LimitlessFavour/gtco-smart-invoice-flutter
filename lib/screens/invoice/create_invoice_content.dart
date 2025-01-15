@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/models/client.dart';
-import 'package:gtco_smart_invoice_flutter/models/invoice.dart';
 import 'package:provider/provider.dart';
+
+import '../../providers/invoice_provider.dart';
+import '../../services/navigation_service.dart';
 import '../../widgets/common/app_text.dart';
+import '../../widgets/common/loading_overlay.dart';
+import '../../widgets/dialogs/success_dialog.dart';
 import '../../widgets/invoice/invoice_form.dart';
 import '../../widgets/invoice/preview_card.dart';
-import '../../services/navigation_service.dart';
-import '../../providers/invoice_provider.dart';
-import '../../widgets/dialogs/success_dialog.dart';
-import '../../widgets/common/loading_overlay.dart';
-import '../../widgets/dialogs/basic_confirmation_dialog.dart';
-import '../../utils/invoice_actions.dart';
 
 class CreateInvoiceContent extends StatefulWidget {
   const CreateInvoiceContent({super.key});
@@ -20,14 +17,51 @@ class CreateInvoiceContent extends StatefulWidget {
   State<CreateInvoiceContent> createState() => _CreateInvoiceContentState();
 }
 
-class _CreateInvoiceContentState extends State<CreateInvoiceContent>
-    with InvoiceActions {
+class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
   BuildContext? _dialogContext;
 
   @override
   void initState() {
     super.initState();
     _dialogContext = context;
+  }
+
+  Future<void> _handleCreateInvoice() async {
+    final createProvider = context.read<InvoiceProvider>();
+
+    if (!createProvider.isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all required fields'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final invoice = await createProvider.createInvoice();
+
+      if (invoice != null) {
+        await showDialog(
+          context: context,
+          builder: (_) => const SuccessDialog(
+            message: 'Invoice created successfully!',
+          ),
+        );
+        createProvider.createClear();
+        // TODO: Navigate to invoice list screen
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.list);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -102,15 +136,9 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                         ),
                         const Gap(16),
                         ElevatedButton(
-                          onPressed: () => showSendConfirmation(
-                            context,
-                            clientName: 'John Doe',
-                            onSuccess: (context) {
-                              context
-                                  .read<NavigationService>()
-                                  .navigateToInvoiceScreen(InvoiceScreen.list);
-                            },
-                          ),
+                          onPressed: () {
+                            _handleCreateInvoice();
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xffE04826),
                             elevation: 0,
@@ -127,15 +155,18 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent>
                         ),
                         const Gap(16),
                         ElevatedButton(
-                          onPressed: () => showSendConfirmation(
-                            context,
-                            clientName: 'John Doe',
-                            onSuccess: (context) {
-                              context
-                                  .read<NavigationService>()
-                                  .navigateToInvoiceScreen(InvoiceScreen.list);
-                            },
-                          ),
+                          onPressed: () {
+                            // showSendConfirmation(
+                            //   context,
+                            //   clientName: 'John Doe',
+                            //   onSuccess: (context) {
+                            //     context
+                            //         .read<NavigationService>()
+                            //         .navigateToInvoiceScreen(
+                            //             InvoiceScreen.list);
+                            //   },
+                            // );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xffE04826),
                             elevation: 0,

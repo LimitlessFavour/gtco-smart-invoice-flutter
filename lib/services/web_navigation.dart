@@ -1,6 +1,6 @@
 import 'dart:html' as html;
 
-import 'package:gtco_smart_invoice_flutter/services/mobile_navigation.dart';
+import 'navigation_platform.dart';
 
 class WebNavigation implements NavigationPlatform {
   @override

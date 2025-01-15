@@ -1,9 +1,15 @@
+import 'package:gtco_smart_invoice_flutter/models/product.dart';
+
 class InvoiceItem {
-  final String id;
-  final String invoiceId;
-  final String productId;
-  final int quantity;
+  final int id;
+  final int invoiceId;
+  final int productId;
+  int quantity;
   final double price;
+  final DateTime createdAt;
+  final String? productName;
+  final String? description;
+  final String? sku;
 
   InvoiceItem({
     required this.id,
@@ -11,15 +17,53 @@ class InvoiceItem {
     required this.productId,
     required this.quantity,
     required this.price,
+    required this.createdAt,
+    this.productName,
+    this.description,
+    this.sku,
   });
 
   factory InvoiceItem.fromJson(Map<String, dynamic> json) {
     return InvoiceItem(
-      id: json['invoice_item_id'].toString(),
-      invoiceId: json['invoice_id'].toString(),
-      productId: json['product_id'].toString(),
+      id: json['id'],
+      invoiceId: json['invoiceId'],
+      productId: json['productId'],
       quantity: json['quantity'],
-      price: json['price'].toDouble(),
+      price: double.tryParse(json['price']) ?? 0,
+      createdAt: DateTime.parse(json['createdAt']),
+      productName: json['productName'],
+      description: json['description'],
+      sku: json['sku'],
     );
   }
-} 
+
+  factory InvoiceItem.fromProduct(Product product) {
+    return InvoiceItem(
+      id: 0,
+      invoiceId: 0,
+      productId: int.tryParse(product.id) ?? 0,
+      quantity: 1,
+      price: product.price,
+      createdAt: DateTime.now(),
+      productName: product.productName,
+      description: product.description,
+      sku: product.sku,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'invoiceId': invoiceId,
+      'productId': productId,
+      'quantity': quantity,
+      'price': price,
+      'createdAt': createdAt.toIso8601String(),
+      'productName': productName,
+      'description': description,
+      'sku': sku,
+    };
+  }
+
+  double get total => quantity * price;
+}

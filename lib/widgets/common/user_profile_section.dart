@@ -68,11 +68,9 @@ class UserProfileSection extends StatelessWidget {
     if (isMobile) {
       return IconButton(
         icon: CircleAvatar(
-          // backgroundImage: user?.profileImage != null
-          //     ? NetworkImage(user!.profileImage!)
-          //     : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
-          backgroundImage:
-              const AssetImage('assets/images/avatar_placeholder.png')
+          backgroundImage: user?.company?.logo != null
+              ? NetworkImage(user!.company!.logo!)
+              : const AssetImage('assets/images/avatar_placeholder.png')
                   as ImageProvider,
           radius: 16,
         ),
@@ -145,12 +143,11 @@ class UserProfileSection extends StatelessWidget {
       color: Colors.white,
       child: Row(
         children: [
-          const CircleAvatar(
-            // backgroundImage: user?.profileImage != null
-            //     ? NetworkImage(user!.profileImage!)
-            //     : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
-            backgroundImage: AssetImage('assets/images/avatar_placeholder.png')
-                as ImageProvider,
+          CircleAvatar(
+            backgroundImage: user?.company?.logo != null
+                ? NetworkImage(user!.company!.logo!)
+                : const AssetImage('assets/images/avatar_placeholder.png')
+                    as ImageProvider,
             radius: 16,
           ),
           const Gap(12),
@@ -159,7 +156,9 @@ class UserProfileSection extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               AppText(
-                '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim().isEmpty
+                '${user?.firstName ?? ''} ${user?.lastName ?? ''}'
+                        .trim()
+                        .isEmpty
                     ? 'User'
                     : '${user?.firstName ?? ''} ${user?.lastName ?? ''}',
                 weight: FontWeight.w600,

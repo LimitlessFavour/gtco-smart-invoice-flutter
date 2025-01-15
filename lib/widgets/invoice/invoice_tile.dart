@@ -30,7 +30,7 @@ class InvoiceTile extends StatelessWidget {
       onTap: () {
         context.read<NavigationService>().navigateToInvoiceScreen(
               InvoiceScreen.view,
-              invoiceId: invoice.id,
+              invoiceId: invoice.id.toString(),
             );
       },
       child: Container(
@@ -90,7 +90,7 @@ class InvoiceTile extends StatelessWidget {
       onTap: () {
         context.read<NavigationService>().navigateToInvoiceScreen(
               InvoiceScreen.view,
-              invoiceId: invoice.id,
+              invoiceId: invoice.id.toString(),
             );
       },
       child: Container(

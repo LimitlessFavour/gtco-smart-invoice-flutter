@@ -1,21 +1,19 @@
+import 'package:device_preview_plus/device_preview_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
-import 'package:gtco_smart_invoice_flutter/providers/onboarding_provider.dart';
-import 'package:gtco_smart_invoice_flutter/repositories/dashboard_repository.dart';
-import 'package:gtco_smart_invoice_flutter/repositories/onboarding_repository.dart';
-import 'package:provider/provider.dart' as provider;
-import 'package:supabase_flutter/supabase_flutter.dart';
-import './firebase_options.dart';
 import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/onboarding_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/auth_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/client_repository.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/dashboard_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/invoice_repository.dart';
+import 'package:gtco_smart_invoice_flutter/repositories/onboarding_repository.dart';
 import 'package:gtco_smart_invoice_flutter/repositories/product_repository.dart';
 import 'package:gtco_smart_invoice_flutter/screens/web/landing_screen.dart';
 import 'package:gtco_smart_invoice_flutter/services/api_client.dart';
@@ -23,10 +21,12 @@ import 'package:gtco_smart_invoice_flutter/services/dio_client.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/utils/image_precacher.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:provider/single_child_widget.dart';
-import 'package:device_preview_plus/device_preview_plus.dart';
-import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
+import 'package:provider/provider.dart' as provider;
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import './firebase_options.dart';
 
 // Define constants for environment variables
 const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
@@ -112,17 +112,11 @@ class AppRoot extends StatelessWidget {
       provider.ChangeNotifierProvider(
         create: (_) => OnboardingProvider(onboardingRepository),
       ),
-      provider.Provider(
-        create: (_) => ApiClient(baseUrl: apiBaseUrl),
-      ),
-      provider.Provider(
-        create: (context) => InvoiceRepository(
-          context.read<ApiClient>(),
-        ),
-      ),
+      provider.Provider(create: (_) => ApiClient(baseUrl: apiBaseUrl)),
       provider.ChangeNotifierProvider(
         create: (context) => InvoiceProvider(
-          context.read<InvoiceRepository>(),
+          InvoiceRepository(dioClient),
+          context.read<AuthProvider>(),
         ),
       ),
       provider.ChangeNotifierProvider(

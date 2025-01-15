@@ -161,9 +161,29 @@ class AppNavigationDrawer extends StatelessWidget {
         ),
         selected: isSelected,
         onTap: () {
-          Provider.of<NavigationService>(context, listen: false)
-              .navigateTo(screen);
-          Navigator.pop(context); // Close drawer after selection
+          final navigationService =
+              Provider.of<NavigationService>(context, listen: false);
+
+          switch (screen) {
+            case AppScreen.invoice:
+              navigationService.navigateToInvoiceScreen(InvoiceScreen.list);
+              break;
+            case AppScreen.product:
+              navigationService.navigateToProductScreen(ProductScreen.list);
+              break;
+            case AppScreen.client:
+              navigationService.navigateToClientScreen(ClientScreen.list);
+              break;
+            case AppScreen.settings:
+              navigationService.navigateToSettingsScreen(SettingsScreen.list);
+              break;
+            default:
+              navigationService.navigateTo(screen);
+          }
+
+          if (Scaffold.of(context).hasDrawer) {
+            Navigator.pop(context); // Close drawer after selection
+          }
         },
       ),
     );

@@ -1,8 +1,4 @@
-abstract class NavigationPlatform {
-  void initializeHistory({Function? handleUrlChange});
-  String getCurrentPath();
-  void updateBrowserUrl(String path);
-}
+import 'navigation_platform.dart';
 
 class MobileNavigation implements NavigationPlatform {
   @override

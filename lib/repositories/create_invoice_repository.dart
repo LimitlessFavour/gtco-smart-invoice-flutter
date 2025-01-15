@@ -1,25 +1,13 @@
 import 'package:dio/dio.dart';
-import '../models/invoice.dart';
 import '../models/dtos/create_invoice_dto.dart';
+import '../models/invoice.dart';
 import '../services/dio_client.dart';
 import '../services/logger_service.dart';
 
-class InvoiceRepository {
+class CreateInvoiceRepository {
   final DioClient _dioClient;
 
-  InvoiceRepository(this._dioClient);
-
-  Future<List<Invoice>> getInvoices() async {
-    try {
-      final response = await _dioClient.get('/invoice');
-      return (response.data as List)
-          .map((json) => Invoice.fromJson(json))
-          .toList();
-    } on DioException catch (e) {
-      LoggerService.error('Error getting invoices', error: e);
-      throw _handleDioError(e);
-    }
-  }
+  CreateInvoiceRepository(this._dioClient);
 
   Future<Invoice> createInvoice(CreateInvoiceDto dto) async {
     try {
@@ -27,10 +15,15 @@ class InvoiceRepository {
         '/invoice',
         data: dto.toJson(),
       );
+
+      LoggerService.debug('Create invoice response: $response');
       return Invoice.fromJson(response.data);
     } on DioException catch (e) {
       LoggerService.error('Error creating invoice', error: e);
       throw _handleDioError(e);
+    } catch (e) {
+      LoggerService.error('Unexpected error creating invoice', error: e);
+      throw Exception('Failed to create invoice: $e');
     }
   }
 
@@ -41,9 +34,9 @@ class InvoiceRepository {
       case 401:
         return Exception('Unauthorized. Please log in again');
       case 404:
-        return Exception('Resource not found');
+        return Exception('Client or product not found');
       default:
-        return Exception('An error occurred: ${e.message}');
+        return Exception('Failed to create invoice: ${e.message}');
     }
   }
 }
