@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../common/app_text.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-class SuccessDialog extends StatelessWidget {
+class AppSuccessDialog extends StatelessWidget {
   final String title;
   final String message;
   final String buttonText;
-  final VoidCallback? onDismiss;
 
-  const SuccessDialog({
+  const AppSuccessDialog({
     super.key,
-    this.title = 'Successful!',
+    required this.title,
     required this.message,
     this.buttonText = 'OK',
-    this.onDismiss,
   });
 
   @override
@@ -23,54 +22,58 @@ class SuccessDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Container(
-        width: 326,
+        width: 400, // Fixed width for the dialog
         padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min, // Ensure the dialog doesn't expand
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: const BoxDecoration(
-                color: Color(0xFF4CAF50),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.white,
-              ),
+            const Gap(8),
+            // SVG Image
+            SvgPicture.asset(
+              'assets/icons/sent.svg', // Path to your SVG file
+              width: 60,
+              height: 60,
             ),
-            const Gap(24),
+            const Gap(30),
+            // Title
             AppText(
               title,
               size: 24,
               weight: FontWeight.w600,
+              color: const Color(0xff464646),
+              textAlign: TextAlign.center,
             ),
-            const Gap(8),
+            const Gap(20),
+            // Message
             AppText(
               message,
+              size: 16,
+              weight: FontWeight.w500,
+              color: const Color(0xff464646),
               textAlign: TextAlign.center,
-              color: const Color(0xFF667085),
             ),
             const Gap(24),
+            // OK Button
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  onDismiss?.call();
-                },
+                onPressed: () => Navigator.pop(context),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFFE04403),
+                  backgroundColor: const Color(0xffE04826), // Customize button color
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                child: Text(
-                  buttonText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                ),
+                child: AppText(
+                  buttonText,
+                  size: 16,
+                  weight: FontWeight.w600,
+                  color: Colors.white,
                 ),
               ),
             ),

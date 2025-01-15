@@ -85,7 +85,7 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
 
             // Date Range
             const AppText('Date Range', weight: FontWeight.w600),
-            const Gap(8),
+            const Gap(16),
             Row(
               children: [
                 Expanded(

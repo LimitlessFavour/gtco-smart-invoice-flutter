@@ -124,13 +124,13 @@ class StatsRow extends StatelessWidget {
                 label: 'Overdue amount',
               ),
               InvoiceStatsCard(
-                icon: 'assets/icons/draft.svg',
+                icon: 'assets/icons/update.svg',
                 amount:
                     '₦${NumberFormat('#,###').format(stats?.totalDraftedAmount ?? 0)}',
                 label: 'Drafted total',
               ),
               InvoiceStatsCard(
-                icon: 'assets/icons/update.svg',
+                icon: 'assets/icons/draft.svg',
                 amount:
                     '₦${NumberFormat('#,###').format(stats?.unpaidTotal ?? 0)}',
                 label: 'Unpaid total',

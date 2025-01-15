@@ -79,12 +79,11 @@ class ProductTile extends StatelessWidget {
   Future<void> _handleDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => const ConfirmationDialog(
+      builder: (context) => const AppConfirmationDialog(
         title: 'Delete Product',
-        message: 'Are you sure you want to delete this product?',
+        content: 'Are you sure you want to delete this product?',
         confirmText: 'Delete',
         cancelText: 'Cancel',
-        isDestructive: true,
       ),
     );
 
@@ -95,7 +94,8 @@ class ProductTile extends StatelessWidget {
       if (success && context.mounted) {
         await showDialog(
           context: context,
-          builder: (context) => const SuccessDialog(
+          builder: (context) => const AppSuccessDialog(
+            title: 'Successful!',
             message: 'Product deleted successfully',
           ),
         );

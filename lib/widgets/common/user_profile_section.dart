@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/success_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/navigation_service.dart';
@@ -23,19 +24,6 @@ class UserProfileSection extends StatelessWidget {
         content: 'Are you sure you want to logout?',
         confirmText: 'Logout',
         cancelText: 'Cancel',
-        // actions: [
-        //   TextButton(
-        //     onPressed: () => Navigator.of(context).pop(false),
-        //     child: const Text('Cancel'),
-        //   ),
-        //   FilledButton(
-        //     onPressed: () => Navigator.of(context).pop(true),
-        //     style: FilledButton.styleFrom(
-        //       backgroundColor: const Color(0xFFE04403),
-        //     ),
-        //     child: const Text('Logout'),
-        //   ),
-        // ],
       ),
     );
 
@@ -61,6 +49,17 @@ class UserProfileSection extends StatelessWidget {
         );
       }
     }
+  }
+
+
+  void _testSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const AppSuccessDialog(
+        title: 'Successful!',
+        message: 'Your action was successful.',
+      ),
+    );
   }
 
   @override
@@ -129,6 +128,7 @@ class UserProfileSection extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       _handleLogout(context);
+                      // _testSuccessDialog(context);
                     },
                   ),
                 ],
@@ -222,7 +222,8 @@ class UserProfileSection extends StatelessWidget {
             context.read<NavigationService>().navigateTo(AppScreen.settings);
             break;
           case 'logout':
-            _handleLogout(context);
+            // _handleLogout(context);
+            _testSuccessDialog(context);
             break;
         }
       },

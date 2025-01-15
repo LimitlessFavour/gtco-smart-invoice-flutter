@@ -106,29 +106,91 @@ class ManageUsersSettingsMobile extends StatelessWidget {
   void _showAddUserDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const AppText(
-          'Add Team Member',
-          size: 18,
-          weight: FontWeight.w600,
+      builder: (context) => const AddUserDialog(),
+    );
+  }
+}
+
+class AddUserDialog extends StatelessWidget {
+  const AddUserDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Container(
+        width: 400,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
         ),
-        content: Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+            // Header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF9D9D2),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
                 ),
               ),
+              child: AppText(
+                'Add Team Member',
+                size: 16,
+                weight: FontWeight.w600,
+                color: theme.primaryColor,
+              ),
             ),
-            const Gap(16),
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                text: 'Send Invitation',
-                onPressed: () => Navigator.pop(context),
+            // Content
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                  const Gap(16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: AppText(
+                          'Cancel',
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                      const Gap(8),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFE04403),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const AppText(
+                          'Send Invitation',
+                          color: Colors.white,
+                          weight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

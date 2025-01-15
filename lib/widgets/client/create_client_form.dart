@@ -319,7 +319,8 @@ class _CreateClientFormState extends State<CreateClientForm> {
       await showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => SuccessDialog(
+        builder: (context) => AppSuccessDialog(
+          title: 'Successful!',
           message: '${isEdit ? 'Updated' : 'Created'} client successfully',
         ),
       );

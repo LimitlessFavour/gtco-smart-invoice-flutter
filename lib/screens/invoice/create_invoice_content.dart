@@ -44,7 +44,8 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
       if (invoice != null) {
         await showDialog(
           context: context,
-          builder: (_) => const SuccessDialog(
+          builder: (_) => const AppSuccessDialog(
+            title: 'Successful!',
             message: 'Invoice created successfully!',
           ),
         );

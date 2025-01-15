@@ -2,19 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../common/app_text.dart';
 
-class AppConfirmationDialog extends StatelessWidget {
-  const AppConfirmationDialog({
-    super.key,
-    required this.title,
-    required this.content,
-    required this.confirmText,
-    required this.cancelText,
-  });
+class QuantityEditorDialog extends StatelessWidget {
+  final TextEditingController controller;
+  final Function(int) onSave;
 
-  final String title;
-  final String content;
-  final String confirmText;
-  final String cancelText;
+  const QuantityEditorDialog({
+    super.key,
+    required this.controller,
+    required this.onSave,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +20,13 @@ class AppConfirmationDialog extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Container(
-        width: 400, // Fixed width for the dialog
-        // padding: const EdgeInsets.all(16),
+        width: 400,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Ensure the dialog doesn't expand
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -44,24 +39,24 @@ class AppConfirmationDialog extends StatelessWidget {
                 ),
               ),
               child: AppText(
-                title,
+                'Edit Quantity',
                 size: 16,
                 weight: FontWeight.w600,
                 color: theme.primaryColor,
               ),
             ),
-            const Gap(16),
             Container(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: AppText(
-                      content,
-                      size: 16,
-                      weight: FontWeight.w400,
-                      color: Colors.black,
+                  TextField(
+                    controller: controller,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Quantity',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                   const Gap(16),
@@ -69,23 +64,29 @@ class AppConfirmationDialog extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context, false),
+                        onPressed: () => Navigator.pop(context),
                         child: AppText(
-                          cancelText,
+                          'Cancel',
                           color: Colors.grey[800],
                         ),
                       ),
                       const Gap(8),
                       FilledButton(
-                        onPressed: () => Navigator.pop(context, true),
+                        onPressed: () {
+                          final quantity = int.tryParse(controller.text);
+                          if (quantity != null && quantity > 0) {
+                            onSave(quantity);
+                            Navigator.pop(context);
+                          }
+                        },
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFFE04403),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: AppText(
-                          confirmText,
+                        child: const AppText(
+                          'Save',
                           color: Colors.white,
                           weight: FontWeight.w600,
                         ),

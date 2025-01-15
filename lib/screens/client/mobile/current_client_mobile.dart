@@ -283,9 +283,9 @@ class CurrentClientMobile extends StatelessWidget {
   void _handleDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => const AppConfirmationDialog(
         title: 'Delete Client',
-        message:
+        content:
             'Are you sure you want to delete this client? This action cannot be undone.',
         confirmText: 'Delete',
         cancelText: 'Cancel',
@@ -298,7 +298,8 @@ class CurrentClientMobile extends StatelessWidget {
       if (context.mounted) {
         await showDialog(
           context: context,
-          builder: (context) => const SuccessDialog(
+          builder: (context) => const AppSuccessDialog(
+            title: 'Successful!',
             message: 'Client deleted successfully',
           ),
         );

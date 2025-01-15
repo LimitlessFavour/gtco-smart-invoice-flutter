@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
-import '../../models/product.dart';
+
 import '../../providers/product_provider.dart';
 import '../common/app_text.dart';
 
@@ -31,86 +31,131 @@ class _ProductSelectionDialogState extends State<ProductSelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final width = MediaQuery.of(context).size.width;
+
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.8,
-        padding: const EdgeInsets.all(24),
+        width: width * 0.8,
+        constraints: BoxConstraints(maxWidth: width * 0.4),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AppText(
-              'Select Product',
-              size: 20,
-              weight: FontWeight.w600,
-            ),
-            const Gap(16),
-            TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: 'Search products...',
-                prefixIcon: Icon(Icons.search),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF9D9D2),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                ),
               ),
-              onChanged: (value) {
-                context.read<ProductProvider>().searchProducts(value);
-              },
+              child: AppText(
+                'Select Product',
+                size: 16,
+                weight: FontWeight.w600,
+                color: theme.primaryColor,
+              ),
             ),
-            const Gap(16),
-            Consumer<ProductProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (provider.error != null) {
-                  return Center(
-                    child: AppText(
-                      provider.error!,
-                      color: Colors.red,
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Search products...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                  );
-                }
+                    onChanged: (value) {
+                      context.read<ProductProvider>().searchProducts(value);
+                    },
+                  ),
+                  const Gap(16),
+                  Consumer<ProductProvider>(
+                    builder: (context, provider, child) {
+                      if (provider.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                final products = provider.products;
-                if (products.isEmpty) {
-                  return const Center(
-                    child: AppText('No products found'),
-                  );
-                }
+                      if (provider.error != null) {
+                        return Center(
+                          child: AppText(
+                            provider.error!,
+                            color: Colors.red,
+                          ),
+                        );
+                      }
 
-                return SizedBox(
-                  height: 300,
-                  child: ListView.separated(
-                    itemCount: products.length,
-                    separatorBuilder: (_, __) => const Divider(),
-                    itemBuilder: (context, index) {
-                      final product = products[index];
-                      return ListTile(
-                        title: AppText(product.productName),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            AppText(
-                              product.description,
-                              size: 14,
-                              color: Colors.grey[600],
-                            ),
-                            AppText(
-                              '₦${product.price}',
-                              size: 14,
-                              weight: FontWeight.w600,
-                            ),
-                          ],
+                      final products = provider.products;
+                      if (products.isEmpty) {
+                        return const Center(
+                          child: AppText('No products found'),
+                        );
+                      }
+
+                      return Container(
+                        constraints: const BoxConstraints(maxHeight: 300),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        onTap: () {
-                          Navigator.of(context).pop(product);
-                        },
+                        child: ListView.separated(
+                          itemCount: products.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final product = products[index];
+                            return ListTile(
+                              title: AppText(product.productName),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  AppText(
+                                    product.description,
+                                    size: 14,
+                                    color: Colors.grey[600],
+                                  ),
+                                  AppText(
+                                    '₦${product.price}',
+                                    size: 14,
+                                    weight: FontWeight.w600,
+                                  ),
+                                ],
+                              ),
+                              onTap: () => Navigator.of(context).pop(product),
+                            );
+                          },
+                        ),
                       );
                     },
                   ),
-                );
-              },
+                  const Gap(16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: AppText(
+                          'Cancel',
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

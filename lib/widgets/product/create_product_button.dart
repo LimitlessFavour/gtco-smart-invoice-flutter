@@ -100,7 +100,8 @@ class _ProductActionButtonState extends State<ProductActionButton> {
         await showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => SuccessDialog(
+          builder: (context) => AppSuccessDialog(
+            title: 'Successful!',
             message: widget.isEdit
                 ? 'Product updated successfully'
                 : 'Product created successfully',

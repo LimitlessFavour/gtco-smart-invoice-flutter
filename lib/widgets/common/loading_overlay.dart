@@ -34,7 +34,7 @@ class CommonProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black.withOpacity(0.1),
+      color: Colors.black.withOpacity(0.01),
       child: Center(
         child: LoadingAnimationWidget.threeArchedCircle(
           color: Theme.of(context).primaryColor,

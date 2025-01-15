@@ -346,12 +346,11 @@ class CurrentClientContent extends StatelessWidget {
   Future<void> _handleDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => AppConfirmationDialog(
         title: 'Delete Client',
-        message: 'Are you sure you want to delete ${client.fullName}?',
+        content: 'Are you sure you want to delete ${client.fullName}?',
         confirmText: 'Delete',
         cancelText: 'Cancel',
-        isDestructive: true,
       ),
     );
 
@@ -364,7 +363,8 @@ class CurrentClientContent extends StatelessWidget {
         if (success && context.mounted) {
           await showDialog(
             context: context,
-            builder: (context) => const SuccessDialog(
+            builder: (context) => const AppSuccessDialog(
+              title: 'Successful!',
               message: 'Client deleted successfully',
             ),
           );

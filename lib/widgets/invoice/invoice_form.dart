@@ -12,6 +12,7 @@ import 'package:gtco_smart_invoice_flutter/widgets/dialogs/product_selection_dia
 import 'package:provider/provider.dart';
 import '../common/app_text.dart';
 import '../auth/custom_text_field.dart';
+import '../dialogs/quantity_editor_dialog.dart';
 
 class InvoiceForm extends StatefulWidget {
   const InvoiceForm({super.key});
@@ -300,34 +301,14 @@ class _InvoiceFormState extends State<InvoiceForm> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Quantity'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Quantity',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              final quantity = int.tryParse(controller.text);
-              if (quantity != null && quantity > 0) {
-                context.read<InvoiceProvider>().updateItemQuantity(
-                      item.productId.toString(),
-                      quantity,
-                    );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
+      builder: (context) => QuantityEditorDialog(
+        controller: controller,
+        onSave: (quantity) {
+          context.read<InvoiceProvider>().updateItemQuantity(
+                item.productId.toString(),
+                quantity,
+              );
+        },
       ),
     );
   }
