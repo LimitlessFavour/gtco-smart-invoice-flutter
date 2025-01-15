@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
+import 'package:provider/provider.dart';
 import '../../models/product.dart';
+import '../../providers/product_provider.dart';
+import '../dialogs/confirmation_dialog.dart';
+import '../dialogs/success_dialog.dart';
 import 'package:intl/intl.dart';
+import '../../services/navigation_service.dart';
 
 class ProductTile extends StatelessWidget {
   final Product product;
+  final VoidCallback? onEdit;
 
   const ProductTile({
     super.key,
     required this.product,
+    this.onEdit,
   });
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.currency(
-      symbol: '₦',
-      decimalDigits: 2,
-    );
-
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -33,54 +36,35 @@ class ProductTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Product Name
             Expanded(
               flex: 2,
-              child: Text(
-                product.productName,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF344054),
-                ),
-              ),
+              child: AppText(product.productName),
             ),
-            // Price
             Expanded(
-              child: Text(
-                currencyFormatter.format(product.price),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF344054),
-                ),
+              child: AppText(
+                NumberFormat.currency(symbol: '₦').format(product.price),
               ),
             ),
-            // Quantity
             Expanded(
-              child: Text(
-                product.quantity.toString(),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF344054),
-                ),
-              ),
+              child: AppText(product.quantity.toString()),
             ),
-            // Actions
             SizedBox(
               width: 100,
               child: Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit_outlined),
-                    onPressed: () {
-                      // TODO: Handle edit
-                    },
+                    onPressed: () => context
+                        .read<NavigationService>()
+                        .navigateToProductScreen(
+                          ProductScreen.edit,
+                          productId: product.id,
+                        ),
                     color: const Color(0xFF667085),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline),
-                    onPressed: () {
-                      // TODO: Handle delete
-                    },
+                    onPressed: () => _handleDelete(context),
                     color: const Color(0xFF667085),
                   ),
                 ],
@@ -91,4 +75,31 @@ class ProductTile extends StatelessWidget {
       ),
     );
   }
-} 
+
+  Future<void> _handleDelete(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const ConfirmationDialog(
+        title: 'Delete Product',
+        message: 'Are you sure you want to delete this product?',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        isDestructive: true,
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final success =
+          await context.read<ProductProvider>().deleteProduct(product.id);
+
+      if (success && context.mounted) {
+        await showDialog(
+          context: context,
+          builder: (context) => const SuccessDialog(
+            message: 'Product deleted successfully',
+          ),
+        );
+      }
+    }
+  }
+}

@@ -1,25 +1,96 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/invoice.dart';
 import '../../services/navigation_service.dart';
+import '../common/app_text.dart';
 
 class InvoiceTile extends StatelessWidget {
   final Invoice invoice;
+  final bool isMobile;
 
   const InvoiceTile({
     super.key,
     required this.invoice,
+    this.isMobile = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isMobile) {
+      return _buildMobileTile(context);
+    }
+    return _buildDesktopTile(context);
+  }
+
+  Widget _buildMobileTile(BuildContext context) {
     return InkWell(
       onTap: () {
         context.read<NavigationService>().navigateToInvoiceScreen(
               InvoiceScreen.view,
-              invoiceId: invoice.id,
+              invoiceId: invoice.id.toString(),
+            );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: const Color(0xFFC6C1C1)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppText(
+                  '#${invoice.invoiceNumber}',
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFF344054),
+                ),
+                _buildStatusBadge(invoice.status),
+              ],
+            ),
+            const Gap(12),
+            AppText(
+              invoice.client.fullName,
+              size: 16,
+              weight: FontWeight.w500,
+              color: const Color(0xFF344054),
+            ),
+            const Gap(8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppText(
+                  DateFormat('dd.MM.yyyy').format(invoice.dueDate),
+                  size: 14,
+                  color: const Color(0xFF667085),
+                ),
+                AppText(
+                  '₦${NumberFormat('#,###').format(invoice.totalAmount)}',
+                  size: 14,
+                  weight: FontWeight.w600,
+                  color: const Color(0xFF344054),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopTile(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        context.read<NavigationService>().navigateToInvoiceScreen(
+              InvoiceScreen.view,
+              invoiceId: invoice.id.toString(),
             );
       },
       child: Container(
@@ -35,54 +106,41 @@ class InvoiceTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: Row(
             children: [
-              // Invoice Number
               Expanded(
                 flex: 2,
-                child: Text(
+                child: AppText(
                   '#${invoice.invoiceNumber}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF344054),
-                  ),
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFF344054),
                 ),
               ),
-              // Client Name
               Expanded(
                 flex: 3,
-                child: Text(
+                child: AppText(
                   invoice.client.fullName,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF344054),
-                  ),
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFF344054),
                 ),
               ),
-              // Due Date
               Expanded(
                 flex: 2,
-                child: Text(
+                child: AppText(
                   DateFormat('dd.MM.yyyy').format(invoice.dueDate),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF667085),
-                  ),
+                  size: 14,
+                  color: const Color(0xFF667085),
                 ),
               ),
-              // Amount
               Expanded(
                 flex: 2,
-                child: Text(
+                child: AppText(
                   '₦${NumberFormat('#,###').format(invoice.totalAmount)}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF344054),
-                  ),
+                  size: 14,
+                  weight: FontWeight.w500,
+                  color: const Color(0xFF344054),
                 ),
               ),
-              // Status
               _buildStatusBadge(invoice.status),
             ],
           ),

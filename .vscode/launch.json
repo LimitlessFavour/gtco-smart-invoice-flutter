@@ -1,0 +1,20 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Flutter Debug",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": ["--dart-define-from-file=.env"]
+        },
+        {
+            "name": "Flutter iOS Simulator Debug",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "75709168-4555-4841-A49A-923B7573961F",
+            "program": "lib/main.dart",
+            "args": ["--dart-define-from-file=.env"]
+        }
+    ]
+}

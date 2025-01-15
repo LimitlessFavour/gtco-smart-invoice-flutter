@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dashboard/timeline_selector.dart';
 
 import '../../constants/styles.dart';
 import '../../widgets/common/app_text.dart';
@@ -45,39 +46,18 @@ class DashboardContent extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Row(
+                                const Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const AppText(
+                                    AppText(
                                       'Payments',
                                       size: 18,
                                       weight: FontWeight.w600,
                                     ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.grey[300]!),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          AppText(
-                                            'Last 9 Month',
-                                            color: Colors.grey[600],
-                                            size: 14,
-                                          ),
-                                          const Gap(8),
-                                          Icon(
-                                            Icons.keyboard_arrow_down,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ],
-                                      ),
+                                    TimelineSelector(
+                                      isMobile: false,
+                                      type: TimelineType.payments,
                                     ),
                                   ],
                                 ),
@@ -101,7 +81,7 @@ class DashboardContent extends StatelessWidget {
                                       title: 'Top Paying Clients',
                                       items: List.generate(
                                         4,
-                                        (index) => TopListItem(
+                                        (index) => const TopListItem(
                                           title: 'John Snow',
                                           value: '₦260,000',
                                         ),
@@ -117,7 +97,7 @@ class DashboardContent extends StatelessWidget {
                                       title: 'Top Selling Products',
                                       items: List.generate(
                                         4,
-                                        (index) => TopListItem(
+                                        (index) => const TopListItem(
                                           title: 'Bone Straight',
                                           value: '₦260,000',
                                         ),

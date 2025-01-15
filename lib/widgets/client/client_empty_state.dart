@@ -4,7 +4,12 @@ import '../../screens/client/client_content.dart';
 import '../common/app_text.dart';
 
 class ClientEmptyState extends StatelessWidget {
-  const ClientEmptyState({super.key});
+  final bool isMobile;
+
+  const ClientEmptyState({
+    super.key,
+    this.isMobile = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,25 +20,26 @@ class ClientEmptyState extends StatelessWidget {
         children: [
           Image.asset(
             'assets/images/empty_client.png',
-            height: 160,
-            width: 120,
+            height: isMobile ? 120 : 160,
+            width: isMobile ? 90 : 120,
           ),
-          const Gap(24),
-          const AppText(
+          Gap(isMobile ? 16 : 24),
+          AppText(
             'Save Client Information here',
-            size: 24,
+            size: isMobile ? 18 : 24,
             weight: FontWeight.w600,
             textAlign: TextAlign.center,
           ),
-          const Gap(24),
-          const Center(
-            child: SizedBox(
-              width: 200,
-              child: CreateClientButton(),
+          Gap(isMobile ? 16 : 24),
+          if (!isMobile)
+            const Center(
+              child: SizedBox(
+                width: 200,
+                child: CreateClientButton(),
+              ),
             ),
-          ),
         ],
       ),
     );
   }
-} 
+}

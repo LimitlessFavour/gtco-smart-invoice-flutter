@@ -8,7 +8,7 @@ import 'package:gtco_smart_invoice_flutter/screens/invoice/invoice_content.dart'
 import 'package:gtco_smart_invoice_flutter/screens/product/product_content.dart';
 import 'package:gtco_smart_invoice_flutter/screens/settings/settings_content.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/client/create_client_form.dart';
-import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/user_profile_section.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/product/create_product_form.dart';
 import 'package:provider/provider.dart';
 
@@ -17,8 +17,8 @@ import '../widgets/common/slide_panel.dart';
 import '../widgets/web/sidebar_menu.dart';
 import '../providers/client_provider.dart';
 
-class WebMainLayout extends StatelessWidget {
-  const WebMainLayout({super.key});
+class DesktopLayout extends StatelessWidget {
+  const DesktopLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,24 +75,38 @@ class WebMainLayout extends StatelessWidget {
                       child: CreateClientForm(
                         onCancel: () => navigation
                             .navigateToClientScreen(ClientScreen.list),
-                        client:
+                        clientId:
                             navigation.currentClientScreen == ClientScreen.edit
-                                ? context
-                                    .read<ClientProvider>()
-                                    .getClientById(navigation.currentClientId!)
+                                ? navigation.currentClientId
                                 : null,
                       ),
                     ),
                     // Product Create Panel
                     SlidePanel(
                       isOpen: navigation.currentScreen == AppScreen.product &&
-                          navigation.currentProductScreen ==
-                              ProductScreen.create,
+                          (navigation.currentProductScreen ==
+                                  ProductScreen.create ||
+                              navigation.currentProductScreen ==
+                                  ProductScreen.edit),
                       onClose: () => navigation
                           .navigateToProductScreen(ProductScreen.list),
-                      child: CreateProductForm(
-                        onCancel: () => navigation
-                            .navigateToProductScreen(ProductScreen.list),
+                      child: Builder(
+                        builder: (context) {
+                          debugPrint('=== SlidePanel Builder ===');
+                          debugPrint(
+                              'currentProductScreen: ${navigation.currentProductScreen}');
+                          debugPrint(
+                              'currentProductId: ${navigation.currentProductId}');
+                          debugPrint('========================');
+
+                          return CreateProductForm(
+                            isEdit: navigation.currentProductScreen ==
+                                ProductScreen.edit,
+                            productId: navigation.currentProductId,
+                            onCancel: () => navigation
+                                .navigateToProductScreen(ProductScreen.list),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -148,31 +162,7 @@ class TopBar extends StatelessWidget {
             height: 24,
           ),
           const Gap(40),
-          Row(
-            children: [
-              const CircleAvatar(
-                backgroundImage:
-                    AssetImage('assets/images/avatar_placeholder.png'),
-              ),
-              const Gap(12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AppText(
-                    'Bee Daisy Hair & Merchandise',
-                    weight: FontWeight.w600,
-                    size: 16,
-                  ),
-                  AppText(
-                    'Sales Admin',
-                    color: Colors.grey[600],
-                    size: 14,
-                  ),
-                ],
-              ),
-            ],
-          ),
+          const UserProfileSection(),
         ],
       ),
     );

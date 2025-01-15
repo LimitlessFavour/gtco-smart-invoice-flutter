@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/models/client.dart';
 import 'package:gtco_smart_invoice_flutter/screens/client/current_client_content.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/client/client_empty_state.dart';
@@ -19,35 +20,38 @@ class _ClientContentState extends State<ClientContent> {
   @override
   void initState() {
     super.initState();
-    // Load clients when the screen is first shown
-    //TODO: Readd this when we have a backend
-    // context.read<ClientProvider>().loadClients();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ClientProvider>().loadClients();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<NavigationService, ClientProvider>(
       builder: (context, navigation, clientProvider, _) {
-        if (navigation.currentClientScreen == ClientScreen.view && 
+        if (navigation.currentClientScreen == ClientScreen.view &&
             navigation.currentClientId != null) {
           try {
-            final client = clientProvider.getClientById(navigation.currentClientId!);
-            return CurrentClientContent(client: client);
+            final client =
+                clientProvider.getClientById(navigation.currentClientId!);
+            return FutureBuilder<Client?>(
+              future: client,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: AppText(snapshot.error.toString()));
+                }
+                if (snapshot.hasData) {
+                  return CurrentClientContent(client: snapshot.data!);
+                }
+                return EmptyOrErrorState(navigation: navigation);
+              },
+            );
           } catch (e) {
             // Handle the case when client is not found
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const AppText('Client not found'),
-                  const Gap(16),
-                  TextButton(
-                    onPressed: () => navigation.navigateToClientScreen(ClientScreen.list),
-                    child: const AppText('Back to Clients'),
-                  ),
-                ],
-              ),
-            );
+            return EmptyOrErrorState(navigation: navigation);
           }
         }
 
@@ -103,6 +107,32 @@ class _ClientContentState extends State<ClientContent> {
           ),
         );
       },
+    );
+  }
+}
+
+class EmptyOrErrorState extends StatelessWidget {
+  const EmptyOrErrorState({
+    super.key,
+    required this.navigation,
+  });
+
+  final NavigationService navigation;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const AppText('Client not found'),
+          const Gap(16),
+          TextButton(
+            onPressed: () =>
+                navigation.navigateToClientScreen(ClientScreen.list),
+            child: const AppText('Back to Clients'),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -232,6 +262,9 @@ class ClientSearchRow extends StatelessWidget {
                   vertical: 8,
                 ),
               ),
+              onChanged: (value) {
+                context.read<ClientProvider>().searchClients(value);
+              },
             ),
           ),
         ),

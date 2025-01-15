@@ -1,79 +1,97 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import '../services/logger_service.dart';
 import '../models/client.dart';
-import '../services/api_client.dart';
+import '../services/dio_client.dart';
 
 class ClientRepository {
-  final ApiClient _apiClient;
+  final DioClient _dioClient;
 
-  ClientRepository(this._apiClient);
+  ClientRepository(this._dioClient);
 
   Future<List<Client>> getClients() async {
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      final response = await _dioClient.get('/client');
+      if (response.data == null) {
+        throw Exception('Invalid response format');
+      }
 
-      // When ready for real API:
-      // final response = await _apiClient.get('/clients');
-      // return (response['data'] as List).map((json) => Client.fromJson(json)).toList();
-
-      // Return mock data
-      return [
-        Client(
-          id: '1',
-          companyId: '1',
-          firstName: 'John',
-          lastName: 'Snow',
-          email: 'john@example.com',
-          phoneNumber: '1234567890',
-          address: '123 Street',
-        ),
-      ];
+      // Based on the API schema, the response will be wrapped in a ClientListResponseDto
+      final clients = (response.data['data'] as List)
+          .map((json) => Client.fromJson(json))
+          .toList();
+      return clients;
     } catch (e) {
+      LoggerService.error('Failed to load clients', error: e);
       throw Exception('Failed to load clients: $e');
     }
   }
 
-  Future<bool> createClient(Client client) async {
+  Future<Client> getClientById(String id) async {
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // When ready for real API:
-      // final response = await _apiClient.post('/clients', client.toJson());
-      // return response['success'] ?? false;
-
-      return true;
+      final response = await _dioClient.get('/client/$id');
+      return Client.fromJson(response.data);
     } catch (e) {
+      LoggerService.error('Failed to get client', error: e);
+      throw Exception('Failed to get client: $e');
+    }
+  }
+
+  Future<Client> createClient(Client client) async {
+    try {
+      if (kDebugMode) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
+
+      final Map<String, dynamic> data = {
+        'firstName': client.firstName,
+        'lastName': client.lastName,
+        'email': client.email,
+        'phoneNumber': client.phoneNumber,
+        'address': client.address,
+      };
+
+      final response = await _dioClient.post('/client', data: data);
+      return Client.fromJson(response.data);
+    } catch (e) {
+      LoggerService.error('Failed to create client', error: e);
       throw Exception('Failed to create client: $e');
+    }
+  }
+
+  Future<Client> updateClient(Client client) async {
+    try {
+      if (kDebugMode) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
+
+      final Map<String, dynamic> data = {
+        'firstName': client.firstName,
+        'lastName': client.lastName,
+        'email': client.email,
+        'phoneNumber': client.phoneNumber,
+        'address': client.address,
+      };
+
+      final response = await _dioClient.put('/client/${client.id}', data: data);
+      return Client.fromJson(response.data);
+    } catch (e) {
+      LoggerService.error('Failed to update client', error: e);
+      throw Exception('Failed to update client: $e');
     }
   }
 
   Future<bool> deleteClient(String id) async {
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      if (kDebugMode) {
+        await Future.delayed(const Duration(seconds: 2));
+      }
 
-      // When ready for real API:
-      // final response = await _apiClient.delete('/clients/$id');
-      // return response['success'] ?? false;
-
+      await _dioClient.delete('/client/$id');
       return true;
     } catch (e) {
+      LoggerService.error('Failed to delete client', error: e);
       throw Exception('Failed to delete client: $e');
     }
   }
-
-  Future<bool> updateClient(Client client) async {
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // When ready for real API:
-      // final response = await _apiClient.put('/clients/${client.id}', client.toJson());
-      // return response['success'] ?? false;
-
-      return true;
-    } catch (e) {
-      throw Exception('Failed to update client: $e');
-    }
-  }
-} 
+}

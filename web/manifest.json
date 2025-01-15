@@ -1,11 +1,11 @@
 {
-    "name": "gtco_smart_invoice_flutter",
-    "short_name": "gtco_smart_invoice_flutter",
+    "name": "GTCO Smart Invoice",
+    "short_name": "Smart Invoice",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#ffffff",
+    "theme_color": "#E04403",
+    "description": "A comprehensive invoicing solution by GTCO",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
