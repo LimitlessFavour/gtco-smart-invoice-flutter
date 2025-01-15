@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
+import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/utils/responsive_utils.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import 'package:provider/provider.dart';
@@ -99,6 +100,9 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
         if (!mounted) return;
 
         if (companySuccess) {
+          //auth provider set user here:
+          context.read<AuthProvider>().updateUser(userSuccess);
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(

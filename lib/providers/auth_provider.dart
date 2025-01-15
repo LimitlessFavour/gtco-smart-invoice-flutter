@@ -51,6 +51,19 @@ class AuthProvider extends ChangeNotifier {
     });
   }
 
+
+  void _handleSignupAuthResponse(SignupAuthResponse response) {
+    _token = AuthToken.fromJson({
+      'access_token': response.accessToken,
+      'refresh_token': response.refreshToken,
+    });
+    LoggerService.success('Authentication successful', {
+      'user': response.user.email,
+      'onboardingCompleted': false,
+      'tokenExpiry': _token?.accessTokenExpiry.toIso8601String(),
+    });
+  }
+
   Future<void> login(String email, String password) async {
     try {
       LoggerService.auth('Attempting login', {'email': email});
@@ -91,7 +104,7 @@ class AuthProvider extends ChangeNotifier {
           companyName: companyName,
         ),
       );
-      _handleAuthResponse(response);
+      _handleSignupAuthResponse(response);
       _stopLoading(null);
     } on AuthException catch (e) {
       _stopLoading(e.toString());

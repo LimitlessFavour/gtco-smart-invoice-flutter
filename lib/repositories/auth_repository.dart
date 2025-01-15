@@ -62,16 +62,16 @@ class AuthRepository {
     }
   }
 
-  Future<AuthResponse> signup(SignupDto signupDto) async {
+  Future<SignupAuthResponse> signup(SignupDto signupDto) async {
     try {
       LoggerService.debug('Making signup request', {'email': signupDto.email});
       final response =
           await _client.post('/auth/signup', data: signupDto.toJson());
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         LoggerService.debug('Signup response data', {'data': response.data});
 
-        final authResponse = AuthResponse.fromJson(response.data);
+        final authResponse = SignupAuthResponse.fromJson(response.data);
         _client.setAuthToken(AuthToken.fromJson({
           'access_token': authResponse.accessToken,
           'refresh_token': authResponse.refreshToken,
