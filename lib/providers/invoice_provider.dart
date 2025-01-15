@@ -154,7 +154,8 @@ class InvoiceProvider extends ChangeNotifier {
       _isLoading = false;
       _error = e.toString();
       //log the error
-      LoggerService.debug('eroror has occvured load invoices: ${_error.toString()}');
+      LoggerService.debug(
+          'eroror has occvured load invoices: ${_error.toString()}');
 
       notifyListeners();
     }
@@ -188,6 +189,50 @@ class InvoiceProvider extends ChangeNotifier {
 
       LoggerService.debug('Creating invoice with DTO: ${dto.toJson()}');
       final invoice = await _repository.createInvoice(dto);
+
+      // Add to local list
+      _invoices.insert(0, invoice);
+
+      _isLoading = false;
+      notifyListeners();
+
+      return invoice;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<Invoice> createDraftInvoice() async {
+    if (!isValid) {
+      throw Exception('Please fill in all required fields');
+    }
+
+    final user = _authProvider.user;
+    if (user == null || user.company?.id == null) {
+      throw Exception('User company information not found');
+    }
+
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final dto = CreateInvoiceDto(
+        clientId: int.parse(_selectedClient!.id),
+        companyId: int.parse(user.company!.id),
+        dueDate: _dueDate!,
+        items: _items
+            .map((item) => CreateInvoiceItemDto(
+                  productId: item.productId,
+                  quantity: item.quantity,
+                ))
+            .toList(),
+      );
+
+      LoggerService.debug('Creating draft invoice with DTO: ${dto.toJson()}');
+      final invoice = await _repository.createDraftInvoice(dto);
 
       // Add to local list
       _invoices.insert(0, invoice);

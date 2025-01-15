@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/invoice_provider.dart';
@@ -24,6 +25,60 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
   void initState() {
     super.initState();
     _dialogContext = context;
+  }
+
+  Future<void> _handleCreateDraftInvoice() async {
+    final createProvider = context.read<InvoiceProvider>();
+    // confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const AppConfirmationDialog(
+        title: 'Save as Draft',
+        content: 'Are you sure you want to save this invoice as draft?',
+        confirmText: 'Save',
+        cancelText: 'Cancel',
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    if (!createProvider.isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all required fields'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final invoice = await createProvider.createDraftInvoice();
+
+      if (invoice != null) {
+        await showDialog(
+          context: context,
+          builder: (_) => const AppSuccessDialog(
+            title: 'Successful!',
+            message: 'Invoice saved as draft successfully!',
+          ),
+        );
+        createProvider.createClear();
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.list);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleCreateInvoice() async {
@@ -117,7 +172,7 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                       children: [
                         TextButton(
                           onPressed: () {
-                            // TODO: Save as draft functionality
+                            _handleCreateDraftInvoice();
                           },
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.white,

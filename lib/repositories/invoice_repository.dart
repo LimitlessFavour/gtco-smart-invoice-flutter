@@ -34,6 +34,19 @@ class InvoiceRepository {
     }
   }
 
+  Future<Invoice> createDraftInvoice(CreateInvoiceDto dto) async {
+    try {
+      final response = await _dioClient.post(
+        '/invoice/draft',
+        data: dto.toJson(),
+      );
+      return Invoice.fromJson(response.data);
+    } on DioException catch (e) {
+      LoggerService.error('Error creating draft invoice', error: e);
+      throw _handleDioError(e);
+    }
+  }
+
   Exception _handleDioError(DioException e) {
     switch (e.response?.statusCode) {
       case 400:

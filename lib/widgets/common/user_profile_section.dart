@@ -51,17 +51,6 @@ class UserProfileSection extends StatelessWidget {
     }
   }
 
-
-  void _testSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => const AppSuccessDialog(
-        title: 'Successful!',
-        message: 'Your action was successful.',
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -222,8 +211,7 @@ class UserProfileSection extends StatelessWidget {
             context.read<NavigationService>().navigateTo(AppScreen.settings);
             break;
           case 'logout':
-            // _handleLogout(context);
-            _testSuccessDialog(context);
+            _handleLogout(context);
             break;
         }
       },
