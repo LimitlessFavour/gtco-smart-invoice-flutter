@@ -5,6 +5,8 @@ import 'package:gtco_smart_invoice_flutter/models/invoice_item.dart';
 import 'package:gtco_smart_invoice_flutter/models/product.dart';
 import 'package:gtco_smart_invoice_flutter/models/product_enums.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/styled_date_picker.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/styled_dropdown.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/client_selection_dialog.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/product_selection_dialog.dart';
 import 'package:provider/provider.dart';
@@ -148,11 +150,9 @@ class _InvoiceFormState extends State<InvoiceForm> {
               ),
               const Gap(24),
               // VAT Selection
-              DropdownButtonFormField<VatCategory>(
+              StyledDropdown<VatCategory>(
+                label: 'VAT',
                 value: provider.selectedVat,
-                decoration: const InputDecoration(
-                  labelText: 'VAT',
-                ),
                 items: VatCategory.values.map((vat) {
                   return DropdownMenuItem(
                     value: vat,
@@ -179,53 +179,17 @@ class _InvoiceFormState extends State<InvoiceForm> {
     final provider = context.watch<InvoiceProvider>();
     final dueDate = provider.dueDate;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const AppText(
-          'Due Date',
-          weight: FontWeight.w500,
-        ),
-        const Gap(8),
-        InkWell(
-          onTap: () async {
-            final date = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime.now(),
-              lastDate: DateTime.now().add(const Duration(days: 365)),
-            );
-            if (date != null) {
-              provider.setDueDate(date);
-            }
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 20,
-                  color: Colors.grey[600],
-                ),
-                const Gap(8),
-                Text(
-                  dueDate == null
-                      ? 'Select date'
-                      : '${dueDate.day}/${dueDate.month}/${dueDate.year}',
-                  style: TextStyle(
-                    color: dueDate == null ? Colors.grey[600] : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+    return StyledDatePicker(
+      label: 'Due Date',
+      value: dueDate,
+      borderColor: Colors.grey[600],
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      onChanged: (date) {
+        if (date != null) {
+          provider.setDueDate(date);
+        }
+      },
     );
   }
 
@@ -263,12 +227,7 @@ class _InvoiceFormState extends State<InvoiceForm> {
             ),
             const Gap(16),
             if (provider.items.isEmpty)
-              const Center(
-                child: AppText(
-                  'No items added yet',
-                  color: Colors.grey,
-                ),
-              )
+              const NoItemsAddedEmptyState()
             else
               ListView.separated(
                 shrinkWrap: true,
@@ -367,6 +326,35 @@ class _InvoiceFormState extends State<InvoiceForm> {
               }
             },
             child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class NoItemsAddedEmptyState extends StatelessWidget {
+  const NoItemsAddedEmptyState({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Gap(16),
+          Image.asset(
+            'assets/images/receipt.png',
+            height: 50,
+            width: 50,
+            color: Colors.grey[600],
+          ),
+          const Gap(6),
+          const AppText(
+            'No items added yet',
+            color: Colors.grey,
           ),
         ],
       ),

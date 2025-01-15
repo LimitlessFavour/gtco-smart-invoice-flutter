@@ -13,6 +13,7 @@ class ClientEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // return AppConfimationDialog();
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -25,7 +26,7 @@ class ClientEmptyState extends StatelessWidget {
           ),
           Gap(isMobile ? 16 : 24),
           AppText(
-            'Save Client Information here',
+            'Save Clienst Information here',
             size: isMobile ? 18 : 24,
             weight: FontWeight.w600,
             textAlign: TextAlign.center,

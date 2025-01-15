@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/navigation_service.dart';
@@ -17,22 +18,24 @@ class UserProfileSection extends StatelessWidget {
   void _handleLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFE04403),
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
+      builder: (context) => const AppConfirmationDialog(
+        title: 'Confirm Logout',
+        content: 'Are you sure you want to logout?',
+        confirmText: 'Logout',
+        cancelText: 'Cancel',
+        // actions: [
+        //   TextButton(
+        //     onPressed: () => Navigator.of(context).pop(false),
+        //     child: const Text('Cancel'),
+        //   ),
+        //   FilledButton(
+        //     onPressed: () => Navigator.of(context).pop(true),
+        //     style: FilledButton.styleFrom(
+        //       backgroundColor: const Color(0xFFE04403),
+        //     ),
+        //     child: const Text('Logout'),
+        //   ),
+        // ],
       ),
     );
 

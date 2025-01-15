@@ -4,6 +4,7 @@ import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/invoice/invoices_sent_out_today.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/navigation_service.dart';
@@ -51,26 +52,35 @@ class InvoiceListContent extends StatelessWidget {
                       // Table Header
                       const TableHeader(),
                       const Gap(24),
-                      // Empty State
                       Expanded(
                         child: Consumer<InvoiceProvider>(
                           builder: (context, provider, child) {
+                            // Only show loading overlay for initial load, not refresh
+                            final showLoading = provider.isLoading &&
+                                provider.filteredInvoices.isEmpty;
+
                             return LoadingOverlay(
-                              isLoading: provider.isLoading,
+                              isLoading: showLoading,
                               child: provider.hasInvoices
                                   ? provider.filteredInvoices.isNotEmpty
-                                      ? ListView.separated(
-                                          padding: const EdgeInsets.all(24),
-                                          itemCount:
-                                              provider.filteredInvoices.length,
-                                          separatorBuilder: (context, index) =>
-                                              const Gap(16),
-                                          itemBuilder: (context, index) {
-                                            final invoice = provider
-                                                .filteredInvoices[index];
-                                            return InvoiceTile(
-                                                invoice: invoice);
+                                      ? RefreshIndicator(
+                                          onRefresh: () async {
+                                            await provider.loadInvoices();
                                           },
+                                          child: ListView.separated(
+                                            padding: const EdgeInsets.all(24),
+                                            itemCount: provider
+                                                .filteredInvoices.length,
+                                            separatorBuilder:
+                                                (context, index) =>
+                                                    const Gap(16),
+                                            itemBuilder: (context, index) {
+                                              final invoice = provider
+                                                  .filteredInvoices[index];
+                                              return InvoiceTile(
+                                                  invoice: invoice);
+                                            },
+                                          ),
                                         )
                                       : const NoResultsFoundState()
                                   : const InvoiceEmptyState(),
@@ -109,17 +119,20 @@ class StatsRow extends StatelessWidget {
             children: [
               InvoiceStatsCard(
                 icon: 'assets/icons/clock.svg',
-                amount: '₦${stats?.overdueAmount ?? 0}',
+                amount:
+                    '₦${NumberFormat('#,###').format(stats?.overdueAmount ?? 0)}',
                 label: 'Overdue amount',
               ),
               InvoiceStatsCard(
                 icon: 'assets/icons/draft.svg',
-                amount: '₦${stats?.totalDraftedAmount ?? 0}',
+                amount:
+                    '₦${NumberFormat('#,###').format(stats?.totalDraftedAmount ?? 0)}',
                 label: 'Drafted total',
               ),
               InvoiceStatsCard(
                 icon: 'assets/icons/update.svg',
-                amount: '₦${stats?.unpaidTotal ?? 0}',
+                amount:
+                    '₦${NumberFormat('#,###').format(stats?.unpaidTotal ?? 0)}',
                 label: 'Unpaid total',
               ),
               InvoiceStatsCard(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/styled_date_picker.dart';
 import '../../widgets/common/app_text.dart';
 
 class FilterCriteria {
@@ -88,7 +89,7 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
             Row(
               children: [
                 Expanded(
-                  child: _buildDatePicker(
+                  child: StyledDatePicker(
                     label: 'Start Date',
                     value: _criteria.startDate,
                     onChanged: (date) {
@@ -98,7 +99,7 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
                 ),
                 const Gap(16),
                 Expanded(
-                  child: _buildDatePicker(
+                  child: StyledDatePicker(
                     label: 'End Date',
                     value: _criteria.endDate,
                     onChanged: (date) {
