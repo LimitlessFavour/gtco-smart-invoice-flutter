@@ -137,10 +137,13 @@ class UserProfileSection extends StatelessWidget {
     }
 
     return PopupMenuButton<String>(
-      offset: const Offset(0, -20),
-      position: PopupMenuPosition.under,
-      elevation: 4,
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
       color: Colors.white,
+      elevation: 4,
       child: Row(
         children: [
           CircleAvatar(
@@ -177,30 +180,36 @@ class UserProfileSection extends StatelessWidget {
       itemBuilder: (context) => [
         PopupMenuItem<String>(
           value: 'settings',
-          child: Row(
-            children: [
-              Icon(
-                Icons.settings_outlined,
-                color: theme.primaryColor,
-                size: 20,
-              ),
-              const Gap(12),
-              AppText('Settings', color: theme.primaryColor),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.settings_outlined,
+                  color: theme.primaryColor,
+                  size: 20,
+                ),
+                const Gap(12),
+                AppText('Settings', color: theme.primaryColor),
+              ],
+            ),
           ),
         ),
         PopupMenuItem<String>(
           value: 'logout',
-          child: Row(
-            children: [
-              Icon(
-                Icons.logout_outlined,
-                color: theme.primaryColor,
-                size: 20,
-              ),
-              const Gap(12),
-              AppText('Logout', color: theme.primaryColor),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout_outlined,
+                  color: theme.primaryColor,
+                  size: 20,
+                ),
+                const Gap(12),
+                AppText('Logout', color: theme.primaryColor),
+              ],
+            ),
           ),
         ),
       ],

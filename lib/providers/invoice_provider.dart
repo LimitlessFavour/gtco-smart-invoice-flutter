@@ -10,6 +10,7 @@ import '../repositories/invoice_repository.dart';
 import '../models/dtos/create_invoice_dto.dart';
 import '../services/logger_service.dart';
 import '../providers/auth_provider.dart';
+import '../models/invoice_list_stats.dart';
 
 class InvoiceProvider extends ChangeNotifier {
   final InvoiceRepository _repository;
@@ -29,6 +30,8 @@ class InvoiceProvider extends ChangeNotifier {
   DateTime? _dueDate;
   Client? _selectedClient;
   final List<InvoiceItem> _items = [];
+  InvoiceListStats? _stats;
+
   VatCategory _selectedVat = VatCategory.none;
 
   FilterCriteria _filterCriteria = FilterCriteria();
@@ -41,6 +44,7 @@ class InvoiceProvider extends ChangeNotifier {
     'Due Latest',
   ];
 
+  // Add new field for stats
   InvoiceProvider(this._repository, this._authProvider) {
     _currentInvoiceNumber = _generateInvoiceNumber();
     loadInvoices();
@@ -134,13 +138,24 @@ class InvoiceProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      _invoices = await _repository.getInvoices();
+      print('not yet found: ${_invoices.length}');
+      print('not yet found: ${_stats}');
+
+      final response = await _repository.getInvoices();
+      _invoices = response.data;
+      _stats = response.stats;
+
+      print('our invoices: ${_invoices.length}');
+      print('our stats: ${_stats}');
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
       _error = e.toString();
+      //log the error
+      LoggerService.debug('eroror has occvured load invoices: ${_error.toString()}');
+
       notifyListeners();
     }
   }
@@ -318,4 +333,7 @@ class InvoiceProvider extends ChangeNotifier {
           _filterCriteria.isEmpty
       ? _invoices
       : _filteredInvoices;
+
+  // Add getter for stats
+  InvoiceListStats? get stats => _stats;
 }

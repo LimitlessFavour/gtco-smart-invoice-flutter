@@ -39,15 +39,38 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
   @override
   void initState() {
     super.initState();
-    _criteria = widget.initialCriteria;
+    _criteria = FilterCriteria()
+      ..startDate = widget.initialCriteria.startDate
+      ..endDate = widget.initialCriteria.endDate
+      ..status = widget.initialCriteria.status
+      ..minAmount = widget.initialCriteria.minAmount
+      ..maxAmount = widget.initialCriteria.maxAmount;
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _criteria = FilterCriteria();
+      _minAmountController.clear();
+      _maxAmountController.clear();
+    });
+    widget.onApply(_criteria);
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Container(
         padding: const EdgeInsets.all(24),
         width: 400,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,8 +173,8 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel'),
+                  onPressed: _clearFilters,
+                  child: const Text('Clear'),
                 ),
                 const Gap(8),
                 ElevatedButton(
@@ -159,6 +182,17 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
                     widget.onApply(_criteria);
                     Navigator.pop(context);
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE04403),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   child: const Text('Apply Filters'),
                 ),
               ],

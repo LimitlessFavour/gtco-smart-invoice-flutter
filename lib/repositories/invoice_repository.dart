@@ -3,18 +3,18 @@ import '../models/invoice.dart';
 import '../models/dtos/create_invoice_dto.dart';
 import '../services/dio_client.dart';
 import '../services/logger_service.dart';
+import '../models/paginated_invoice_response.dart';
 
 class InvoiceRepository {
   final DioClient _dioClient;
 
   InvoiceRepository(this._dioClient);
 
-  Future<List<Invoice>> getInvoices() async {
+  Future<PaginatedInvoiceResponse> getInvoices() async {
     try {
       final response = await _dioClient.get('/invoice');
-      return (response.data as List)
-          .map((json) => Invoice.fromJson(json))
-          .toList();
+      print('response: ${response.data}');
+      return PaginatedInvoiceResponse.fromJson(response.data);
     } on DioException catch (e) {
       LoggerService.error('Error getting invoices', error: e);
       throw _handleDioError(e);

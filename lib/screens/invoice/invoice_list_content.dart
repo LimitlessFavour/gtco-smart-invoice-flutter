@@ -98,37 +98,40 @@ class StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 120,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InvoiceStatsCard(
-            icon: 'assets/icons/clock.svg',
-            amount: '₦0',
-            label: 'Overdue amount',
-          ),
-          // Gap(40),
-          InvoiceStatsCard(
-            icon: 'assets/icons/draft.svg',
-            amount: '₦0',
-            label: 'Drafted total',
-          ),
-          // Gap(40),
-          InvoiceStatsCard(
-            icon: 'assets/icons/update.svg',
-            amount: '₦0',
-            label: 'Updated total',
-          ),
-          // Gap(40),
-          InvoiceStatsCard(
-            icon: 'assets/icons/timer.svg',
-            amount: '0 day',
-            label: 'Average paid time',
-          ),
-          // Gap(40),
-          InvoicesSentOutToday(),
-        ],
+      child: Consumer<InvoiceProvider>(
+        builder: (context, provider, _) {
+          final stats = provider.stats;
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InvoiceStatsCard(
+                icon: 'assets/icons/clock.svg',
+                amount: '₦${stats?.overdueAmount ?? 0}',
+                label: 'Overdue amount',
+              ),
+              InvoiceStatsCard(
+                icon: 'assets/icons/draft.svg',
+                amount: '₦${stats?.totalDraftedAmount ?? 0}',
+                label: 'Drafted total',
+              ),
+              InvoiceStatsCard(
+                icon: 'assets/icons/update.svg',
+                amount: '₦${stats?.unpaidTotal ?? 0}',
+                label: 'Unpaid total',
+              ),
+              InvoiceStatsCard(
+                icon: 'assets/icons/timer.svg',
+                amount:
+                    '${stats?.averagePaidTime ?? 0} day${stats?.averagePaidTime == 1 ? '' : 's'}',
+                label: 'Average paid time',
+              ),
+              const InvoicesSentOutToday(),
+            ],
+          );
+        },
       ),
     );
   }
@@ -351,7 +354,7 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
                 ],
               ),
             ),
-            const Gap(24),
+            const Spacer(),
             InkWell(
               onTap: () async {
                 await showDialog(
@@ -387,11 +390,17 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
                 ),
               ),
             ),
-            const Spacer(),
+            const Gap(24),
 
             // Sort Dropdown
             PopupMenuButton<String>(
               offset: const Offset(0, 40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade300),
+              ),
+              color: Colors.white,
+              elevation: 4,
               child: Container(
                 height: 32,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -419,10 +428,13 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
                   .map(
                     (option) => PopupMenuItem<String>(
                       value: option,
-                      child: AppText(
-                        option,
-                        size: 14,
-                        weight: FontWeight.w500,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: AppText(
+                          option,
+                          size: 14,
+                          weight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   )
