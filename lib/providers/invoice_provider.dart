@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/invoice/invoice_filter_dialog.dart';
 import 'dart:math';
 import '../models/invoice.dart';
 import '../models/invoice_item.dart';
@@ -17,6 +18,11 @@ class InvoiceProvider extends ChangeNotifier {
   String? _error;
   List<Invoice> _invoices = [];
 
+  // Add these properties at the top of the class
+  List<Invoice> _filteredInvoices = [];
+  String _searchQuery = '';
+  String _currentFilter = 'All invoices';
+  String _currentSort = 'Newest First';
 
   // Form State for Create/Edit
   String? _currentInvoiceNumber;
@@ -24,6 +30,16 @@ class InvoiceProvider extends ChangeNotifier {
   Client? _selectedClient;
   final List<InvoiceItem> _items = [];
   VatCategory _selectedVat = VatCategory.none;
+
+  FilterCriteria _filterCriteria = FilterCriteria();
+  final List<String> sortOptions = [
+    'Newest First',
+    'Oldest First',
+    'Highest Amount',
+    'Lowest Amount',
+    'Due Soonest',
+    'Due Latest',
+  ];
 
   InvoiceProvider(this._repository, this._authProvider) {
     _currentInvoiceNumber = _generateInvoiceNumber();
@@ -33,7 +49,11 @@ class InvoiceProvider extends ChangeNotifier {
   // Getters
   bool get isLoading => _isLoading;
   String? get error => _error;
-  List<Invoice> get invoices => _invoices;
+  List<Invoice> get invoices => _filteredInvoices.isEmpty &&
+          _searchQuery.isEmpty &&
+          _currentFilter == 'All invoices'
+      ? _invoices
+      : _filteredInvoices;
   bool get hasInvoices => _invoices.isNotEmpty;
 
   // Form State Getters
@@ -92,7 +112,8 @@ class InvoiceProvider extends ChangeNotifier {
 
   void updateItemQuantity(String productId, int quantity) {
     if (quantity > 0) {
-      final item = _items.firstWhere((item) => item.productId.toString() == productId);
+      final item =
+          _items.firstWhere((item) => item.productId.toString() == productId);
       item.quantity = quantity;
       notifyListeners();
     }
@@ -177,11 +198,124 @@ class InvoiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-    void createClear() {
+  void createClear() {
     _dueDate = null;
     _selectedClient = null;
     _items.clear();
     _selectedVat = VatCategory.none;
     notifyListeners();
   }
+
+  // Add these methods
+  void searchInvoices(String query) {
+    _searchQuery = query.toLowerCase();
+    _filterAndSortInvoices();
+  }
+
+  void setFilter(String filter) {
+    _currentFilter = filter;
+    _filterAndSortInvoices();
+  }
+
+  void setSortOption(String sort) {
+    _currentSort = sort;
+    _filterAndSortInvoices();
+  }
+
+  void setFilterCriteria(FilterCriteria criteria) {
+    _filterCriteria = criteria;
+    _filterAndSortInvoices();
+  }
+
+  void _filterAndSortInvoices() {
+    _filteredInvoices = List.from(_invoices);
+
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      _filteredInvoices = _filteredInvoices
+          .where((invoice) =>
+              invoice.invoiceNumber.toLowerCase().contains(_searchQuery) ||
+              invoice.client.fullName.toLowerCase().contains(_searchQuery))
+          .toList();
+    }
+
+    // Apply quick filter tabs
+    if (_currentFilter != 'All invoices') {
+      _filteredInvoices = _filteredInvoices
+          .where((invoice) =>
+              invoice.status.toLowerCase() == _currentFilter.toLowerCase())
+          .toList();
+    }
+
+    // Apply advanced filter criteria
+    if (!_filterCriteria.isEmpty) {
+      _filteredInvoices = _filteredInvoices.where((invoice) {
+        if (_filterCriteria.startDate != null &&
+            invoice.createdAt.isBefore(_filterCriteria.startDate!)) {
+          return false;
+        }
+        if (_filterCriteria.endDate != null &&
+            invoice.createdAt.isAfter(_filterCriteria.endDate!)) {
+          return false;
+        }
+        if (_filterCriteria.status != null &&
+            invoice.status.toLowerCase() !=
+                _filterCriteria.status!.toLowerCase()) {
+          return false;
+        }
+        if (_filterCriteria.minAmount != null &&
+            invoice.totalAmount < _filterCriteria.minAmount!) {
+          return false;
+        }
+        if (_filterCriteria.maxAmount != null &&
+            invoice.totalAmount > _filterCriteria.maxAmount!) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
+
+    // Apply sorting
+    switch (_currentSort) {
+      case 'Due Soonest':
+        _filteredInvoices.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+        break;
+      case 'Due Latest':
+        _filteredInvoices.sort((a, b) => b.dueDate.compareTo(a.dueDate));
+        break;
+      case 'Newest First':
+        _filteredInvoices.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+      case 'Oldest First':
+        _filteredInvoices.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        break;
+      case 'Highest Amount':
+        _filteredInvoices
+            .sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
+        break;
+      case 'Lowest Amount':
+        _filteredInvoices
+            .sort((a, b) => a.totalAmount.compareTo(b.totalAmount));
+        break;
+    }
+
+    notifyListeners();
+  }
+
+  int getFilterCount(String filter) {
+    if (filter == 'All invoices') return _invoices.length;
+    return _invoices
+        .where(
+            (invoice) => invoice.status.toLowerCase() == filter.toLowerCase())
+        .length;
+  }
+
+  FilterCriteria get filterCriteria => _filterCriteria;
+
+  List<Invoice> get filteredInvoices => _filteredInvoices.isEmpty &&
+          _searchQuery.isEmpty &&
+          _currentFilter == 'All invoices' &&
+          _filterCriteria.isEmpty
+      ? _invoices
+      : _filteredInvoices;
 }
