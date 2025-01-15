@@ -322,16 +322,16 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
         Container(
           height: 32,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color(0xffF1F1F1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE0E0E0)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildFilterTab('All invoices'),
-              _buildFilterTab('Unpaid'),
-              _buildFilterTab('Draft'),
+              _buildFilterTab('All invoices', const Color(0xff3B5FEC)),
+              _buildFilterTab('Unpaid', const Color(0xffFCB300)),
+              _buildFilterTab('Draft', const Color(0xff6A6A6A)),
             ],
           ),
         ),
@@ -411,7 +411,7 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
     );
   }
 
-  Widget _buildFilterTab(String label) {
+  Widget _buildFilterTab(String label, Color color) {
     final bool isSelected = selectedFilter == label;
     final int count = filterCounts[label] ?? 0;
 
@@ -426,8 +426,10 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF5F5F5) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(
+            isSelected ? 20 : 0,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -442,14 +444,14 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFE04403) : Colors.grey[300],
+                color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: AppText(
                 count.toString(),
                 size: 12,
                 weight: FontWeight.w600,
-                color: isSelected ? Colors.white : Colors.grey[800],
+                color: color,
               ),
             ),
           ],
