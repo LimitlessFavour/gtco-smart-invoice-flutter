@@ -1,3 +1,5 @@
+import 'package:gtco_smart_invoice_flutter/models/auth/auth_dtos.dart';
+
 import '../company.dart';
 
 class User {
@@ -42,6 +44,23 @@ class User {
       company: json['company'] != null
           ? Company.fromJson(json['company'] as Map<String, dynamic>)
           : null,
+    );
+  }
+
+  // Add this factory constructor to create a User from a SignupUser
+  factory User.fromSignUpUser(SignupUser signupUser) {
+    return User(
+      id: signupUser.id,
+      email: signupUser.email,
+      firstName: '', // Empty string for firstName
+      lastName: '', // Empty string for lastName
+      phoneNumber: null, // Null for phoneNumber
+      location: null, // Null for location
+      onboardingStep: 0, // Default onboarding step
+      onboardingCompleted: false, // Default onboarding status
+      createdAt: DateTime.now(), // Current time for createdAt
+      updatedAt: DateTime.now(), // Current time for updatedAt
+      company: null, // Null for company
     );
   }
 
