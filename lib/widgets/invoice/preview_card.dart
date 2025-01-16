@@ -1,6 +1,6 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gtco_smart_invoice_flutter/models/auth/user.dart';
 import 'package:gtco_smart_invoice_flutter/models/company.dart';
@@ -8,7 +8,7 @@ import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/powered_by_gtco.dart';
 import 'package:provider/provider.dart';
-import '../common/app_text.dart';
+
 import '../common/company_logo.dart';
 
 class PreviewCard extends StatelessWidget {

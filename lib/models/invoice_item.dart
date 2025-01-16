@@ -32,7 +32,7 @@ class InvoiceItem {
       invoiceId: json['invoiceId'] ?? '',
       productId: json['productId'] ?? '',
       createdAt: DateTime.parse(json['createdAt'] ?? '2000-01-01'),
-      productName: json['productName'] ?? '',
+      productName: json['product']['productName'] ?? '',
       sku: json['sku'] ?? '',
     );
   }

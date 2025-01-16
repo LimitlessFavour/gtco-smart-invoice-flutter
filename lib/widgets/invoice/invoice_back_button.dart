@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
-import '../../../widgets/common/app_text.dart';
-import '../../../services/navigation_service.dart';
 
-class SettingsBackButton extends StatelessWidget {
-  const SettingsBackButton({super.key});
+class InvoiceBackButton extends StatelessWidget {
+  const InvoiceBackButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.read<NavigationService>().navigateToSettingsScreen(SettingsScreen.list);
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.list);
       },
       child: const Row(
         mainAxisSize: MainAxisSize.min,
@@ -19,7 +21,7 @@ class SettingsBackButton extends StatelessWidget {
           Icon(Icons.arrow_back_ios, size: 16),
           Gap(1.5),
           AppText(
-            'Settings',
+            'Invoices',
             size: 16,
             weight: FontWeight.w500,
           ),
@@ -28,5 +30,4 @@ class SettingsBackButton extends StatelessWidget {
       ),
     );
   }
-} 
-
+}

@@ -17,6 +17,16 @@ class InvoiceTile extends StatelessWidget {
     this.isMobile = false,
   });
 
+  void _handleNavigation(BuildContext context) {
+    // Wrap the navigation in a post-frame callback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NavigationService>().navigateToInvoiceScreen(
+            InvoiceScreen.view,
+            invoiceId: invoice.id.toString(),
+          );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isMobile) {
@@ -27,12 +37,7 @@ class InvoiceTile extends StatelessWidget {
 
   Widget _buildMobileTile(BuildContext context) {
     return InkWell(
-      onTap: () {
-        context.read<NavigationService>().navigateToInvoiceScreen(
-              InvoiceScreen.view,
-              invoiceId: invoice.id.toString(),
-            );
-      },
+      onTap: () => _handleNavigation(context),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -87,12 +92,7 @@ class InvoiceTile extends StatelessWidget {
 
   Widget _buildDesktopTile(BuildContext context) {
     return InkWell(
-      onTap: () {
-        context.read<NavigationService>().navigateToInvoiceScreen(
-              InvoiceScreen.view,
-              invoiceId: invoice.id.toString(),
-            );
-      },
+      onTap: () => _handleNavigation(context),
       child: Container(
         decoration: BoxDecoration(
           border: Border(
@@ -161,6 +161,10 @@ class InvoiceTile extends StatelessWidget {
         textColor = const Color(0xFF027A48);
         break;
       case 'unpaid':
+        backgroundColor = const Color(0xffFCB300).withOpacity(0.1);
+        textColor = const Color(0xffFCB300);
+        break;
+      case 'overdue':
         backgroundColor = const Color(0xFFFEF3F2);
         textColor = const Color(0xFFB42318);
         break;

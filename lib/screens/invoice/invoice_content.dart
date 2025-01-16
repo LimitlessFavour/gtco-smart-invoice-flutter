@@ -30,7 +30,7 @@ class InvoiceContent extends StatelessWidget {
       case InvoiceScreen.view:
         if (navigation.currentInvoiceId != null) {
           final invoice = invoiceProvider.invoices.firstWhere(
-            (inv) => inv.id == navigation.currentInvoiceId,
+            (inv) => inv.id.toString() == navigation.currentInvoiceId,
             orElse: () {
               // If invoice not found, navigate back to list
               navigation.navigateToInvoiceScreen(InvoiceScreen.list);

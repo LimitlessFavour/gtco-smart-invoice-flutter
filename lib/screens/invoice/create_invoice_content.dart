@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/models/invoice.dart';
+import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
+import 'package:gtco_smart_invoice_flutter/services/pdf_generator_service.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +29,7 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
     super.initState();
     _dialogContext = context;
   }
+
 
   Future<void> _handleCreateDraftInvoice() async {
     final createProvider = context.read<InvoiceProvider>();
@@ -204,34 +208,6 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                           ),
                           child: const AppText(
                             'Send Invoice',
-                            size: 16,
-                            weight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Gap(16),
-                        ElevatedButton(
-                          onPressed: () {
-                            // showSendConfirmation(
-                            //   context,
-                            //   clientName: 'John Doe',
-                            //   onSuccess: (context) {
-                            //     context
-                            //         .read<NavigationService>()
-                            //         .navigateToInvoiceScreen(
-                            //             InvoiceScreen.list);
-                            //   },
-                            // );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xffE04826),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const AppText(
-                            'Download Invoice',
                             size: 16,
                             weight: FontWeight.w600,
                             color: Colors.white,
