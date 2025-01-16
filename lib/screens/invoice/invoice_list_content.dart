@@ -321,7 +321,7 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Enter invoice number',
+                    hintText: 'Enter invoice # or customer name',
                     hintStyle: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,

@@ -122,18 +122,22 @@ class PreviewCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildInfoSection(
-          'From',
-          company?.name ?? 'Your Company Name',
-          '${user?.email ?? 'your.email@example.com'}\n'
-              '${user?.phoneNumber ?? '+234 905 691 8846'}',
+        Expanded(
+          child: _buildInfoSection(
+            'From',
+            company?.name ?? 'Your Company Name',
+            '${user?.email ?? 'your.email@example.com'}\n'
+                '${user?.phoneNumber ?? '+234 905 691 8846'}',
+          ),
         ),
-        _buildInfoSection(
-          'Bill To',
-          provider.selectedClient?.fullName ?? 'Customer Name',
-          '${provider.selectedClient?.email ?? 'customer@example.com'}\n'
-              '${provider.selectedClient?.phoneNumber ?? '+234 XXX XXX XXXX'}\n'
-              '${provider.selectedClient?.address ?? 'Address'}',
+        Expanded(
+          child: _buildInfoSection(
+            'Bill To',
+            provider.selectedClient?.fullName ?? 'Customer Name',
+            '${provider.selectedClient?.email ?? 'customer@example.com'}\n'
+                '${provider.selectedClient?.phoneNumber ?? '+234 XXX XXX XXXX'}\n'
+                '${provider.selectedClient?.address ?? 'Address'}',
+          ),
         ),
       ],
     );

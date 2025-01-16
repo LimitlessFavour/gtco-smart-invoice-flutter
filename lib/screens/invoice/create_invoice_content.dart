@@ -27,7 +27,6 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
     _dialogContext = context;
   }
 
-
   Future<void> _handleCreateDraftInvoice() async {
     final createProvider = context.read<InvoiceProvider>();
     // confirmation dialog
@@ -93,6 +92,18 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
       );
       return;
     }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const AppConfirmationDialog(
+        title: 'Send Invoice',
+        content: 'Are you sure you want to send the invoice?',
+        confirmText: 'Send',
+        cancelText: 'Cancel',
+      ),
+    );
+
+    if(confirmed != true) return;
 
     try {
       final invoice = await createProvider.createInvoice();

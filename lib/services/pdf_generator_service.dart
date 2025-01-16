@@ -412,19 +412,23 @@ class PdfGeneratorService {
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        _buildInfoSection(
-          'From',
-          company.name,
-          '${user.email}\n${user.phoneNumber}',
-          regularFont,
-          boldFont,
+        pw.Expanded(
+          child: _buildInfoSection(
+            'From',
+            company.name,
+            '${user.email}\n${user.phoneNumber}',
+            regularFont,
+            boldFont,
+          ),
         ),
-        _buildInfoSection(
-          'Bill To',
-          client.fullName,
-          '${client.email}\n${client.phoneNumber}\n${client.address}',
-          regularFont,
-          boldFont,
+        pw.Expanded(
+          child: _buildInfoSection(
+            'Bill To',
+            client.fullName,
+            '${client.email}\n${client.phoneNumber}\n${client.address}',
+            regularFont,
+            boldFont,
+          ),
         ),
       ],
     );

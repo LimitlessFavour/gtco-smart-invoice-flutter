@@ -173,7 +173,7 @@ class CurrentClientMobile extends StatelessWidget {
         children: [
           AppText(
             title,
-            size: 16,
+            size: 18,
             weight: FontWeight.w600,
           ),
           const Gap(16),

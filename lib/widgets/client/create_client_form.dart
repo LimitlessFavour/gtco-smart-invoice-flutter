@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import '../common/app_text.dart';
 import 'package:provider/provider.dart';
 import '../../models/client.dart';
@@ -7,7 +9,6 @@ import '../../providers/client_provider.dart';
 import '../../services/navigation_service.dart';
 import '../dialogs/success_dialog.dart';
 import '../common/loading_overlay.dart';
-import '../dialogs/basic_confirmation_dialog.dart';
 
 class CreateClientForm extends StatefulWidget {
   final VoidCallback onCancel;
@@ -83,6 +84,7 @@ class _CreateClientFormState extends State<CreateClientForm> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Consumer<ClientProvider>(
       builder: (context, provider, child) {
         return LoadingOverlay(
@@ -199,14 +201,17 @@ class _CreateClientFormState extends State<CreateClientForm> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: widget.onCancel,
+                        onPressed: () {
+                          _clearForm();
+                          widget.onCancel();
+                        },
                         child: const Text('Cancel'),
                       ),
                       const Gap(16),
                       ElevatedButton(
                         onPressed: _showConfirmation,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor: theme.primaryColor,
                           foregroundColor: Colors.white,
                         ),
                         child: Text(isEdit ? 'Update' : 'Save'),
@@ -276,33 +281,37 @@ class _CreateClientFormState extends State<CreateClientForm> {
     return RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(phone);
   }
 
-  void _showConfirmation() {
+  void _showConfirmation() async {
     if (_formKey.currentState!.validate()) {
-      showDialog(
+      final confirmed = await showDialog<bool>(
         context: context,
-        builder: (context) => BasicConfirmationDialog(
+        builder: (context) => AppConfirmationDialog(
           title: isEdit ? 'Update Client' : 'Create Client',
-          message: isEdit
+          content: isEdit
               ? 'Are you sure you want to update this client?'
               : 'Are you sure you want to create this client?',
           confirmText: isEdit ? 'Update' : 'Create',
-          onConfirm: _handleSubmit,
+          cancelText: 'Cancel',
         ),
       );
+      if (confirmed == true) {
+        _handleSubmit();
+      }
     }
   }
 
   void _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final user = context.read<AuthProvider>().user;
+
     final clientProvider = context.read<ClientProvider>();
     final navigationService = context.read<NavigationService>();
 
-    final String clientId = isEdit
-        ? widget.clientId!
-        : DateTime.now().millisecondsSinceEpoch.toString();
-
     final client = Client(
-      id: clientId,
-      companyId: '1', // TODO: Get from authenticated user
+      id: isEdit
+          ? widget.clientId!
+          : DateTime.now().millisecondsSinceEpoch.toString(),
+      companyId: user?.company?.id ?? '1',
       firstName: _firstNameController.text,
       lastName: _lastNameController.text,
       email: _emailController.text,
@@ -311,23 +320,45 @@ class _CreateClientFormState extends State<CreateClientForm> {
       address: _addressController.text,
     );
 
-    final success = isEdit
-        ? await clientProvider.updateClient(client)
-        : await clientProvider.createClient(client);
+    try {
+      final success = await clientProvider.submitClient(client, isEdit);
 
-    if (success && context.mounted) {
-      await showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AppSuccessDialog(
-          title: 'Successful!',
-          message: '${isEdit ? 'Updated' : 'Created'} client successfully',
-        ),
-      );
+      if (success && context.mounted) {
+        _clearForm();
+        clientProvider.clearForm();
 
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AppSuccessDialog(
+            title: 'Successful!',
+            message: '${isEdit ? 'Updated' : 'Created'} client successfully',
+          ),
+        );
+
+        if (context.mounted) {
+          widget.onCancel(); // Dismiss the slide-in
+          navigationService.navigateToClientScreen(ClientScreen.list);
+        }
+      }
+    } catch (e) {
       if (context.mounted) {
-        navigationService.navigateToClientScreen(ClientScreen.list);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
+  }
+
+  void _clearForm() {
+    _firstNameController.clear();
+    _lastNameController.clear();
+    _phoneController.clear();
+    _mobileController.clear();
+    _emailController.clear();
+    _addressController.clear();
   }
 }

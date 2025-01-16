@@ -223,8 +223,11 @@ class _CurrentInvoiceContentState extends State<CurrentInvoiceContent> {
             message: 'Invoice marked as paid!',
           ),
         );
-        // TODO: update the invoice in in the invoice lists
-        //TODO: and make  sure this new status shows in this screen
+
+        // Navigate to invoice list screen
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.list);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
