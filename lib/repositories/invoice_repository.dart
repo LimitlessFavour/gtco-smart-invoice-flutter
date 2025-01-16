@@ -47,6 +47,20 @@ class InvoiceRepository {
     }
   }
 
+  Future<Invoice> markAsPaid(Invoice invoice) async {
+    try {
+      final response = await _dioClient.post(
+        '/invoice/${invoice.id}/mark-paid',
+      );
+
+      return Invoice.fromJson(response.data);
+    } on DioException catch (e) {
+      LoggerService.error('Error marking invoice as paid', error: e);
+
+      throw _handleDioError(e);
+    }
+  }
+
   Exception _handleDioError(DioException e) {
     switch (e.response?.statusCode) {
       case 400:

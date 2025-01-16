@@ -12,7 +12,7 @@ class AppSuccessDialog extends StatelessWidget {
     super.key,
     required this.title,
     required this.message,
-    this.buttonText = 'OK',
+    this.buttonText = 'Okay',
   });
 
   @override

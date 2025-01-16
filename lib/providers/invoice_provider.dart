@@ -73,6 +73,11 @@ class InvoiceProvider extends ChangeNotifier {
   double get vatAmount => subtotal * (_selectedVat.value / 100);
   double get total => subtotal + vatAmount;
 
+  void setLoadingState(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
   // Static methods
   static String _generateInvoiceNumber() {
     final random = Random();
@@ -381,4 +386,29 @@ class InvoiceProvider extends ChangeNotifier {
 
   // Add getter for stats
   InvoiceListStats? get stats => _stats;
+
+  Future<Invoice?> markAsPaid(Invoice invoice) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final updatedInvoice = await _repository.markAsPaid(invoice);
+
+      // Update the invoice in the local list
+      final index = _invoices.indexWhere((inv) => inv.id == invoice.id);
+      if (index != -1) {
+        _invoices[index] = updatedInvoice;
+      }
+
+      _isLoading = false;
+      notifyListeners();
+
+      return updatedInvoice;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
 }
