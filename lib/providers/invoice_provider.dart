@@ -411,4 +411,29 @@ class InvoiceProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<Invoice?> finalizeDraft(Invoice invoice) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final updatedInvoice = await _repository.finalizeDraft(invoice);
+
+      // Update the invoice in the local list
+      final index = _invoices.indexWhere((inv) => inv.id == invoice.id);
+      if (index != -1) {
+        _invoices[index] = updatedInvoice;
+      }
+
+      _isLoading = false;
+      notifyListeners();
+
+      return updatedInvoice;
+    } catch (e) {
+      _isLoading = false;
+      _error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
 }

@@ -138,7 +138,7 @@ class StatsRow extends StatelessWidget {
               InvoiceStatsCard(
                 icon: 'assets/icons/timer.svg',
                 amount:
-                    '${stats?.averagePaidTime ?? 0} day${stats?.averagePaidTime == 1 ? '' : 's'}',
+                    '${(stats?.averagePaidTime ?? 0).toStringAsFixed(2)} day${stats?.averagePaidTime == 1 ? '' : 's'}',
                 label: 'Average paid time',
               ),
               const InvoicesSentOutToday(),

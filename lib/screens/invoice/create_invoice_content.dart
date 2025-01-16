@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:gtco_smart_invoice_flutter/models/invoice.dart';
-import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
-import 'package:gtco_smart_invoice_flutter/services/pdf_generator_service.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import 'package:provider/provider.dart';
 
