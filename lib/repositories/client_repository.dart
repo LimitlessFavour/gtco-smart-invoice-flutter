@@ -1,8 +1,11 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../services/logger_service.dart';
 import '../models/client.dart';
 import '../services/dio_client.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ClientRepository {
   final DioClient _dioClient;
@@ -92,6 +95,89 @@ class ClientRepository {
     } catch (e) {
       LoggerService.error('Failed to delete client', error: e);
       throw Exception('Failed to delete client: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> validateBulkUpload(File file) async {
+    try {
+      final form = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: 'clients.csv',
+          contentType: MediaType('text', 'csv'),
+        ),
+      });
+
+      final response = await _dioClient.post(
+        '/client/bulk-upload/validate',
+        data: form,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to validate file: $e');
+    }
+  }
+
+  Future<String> startBulkUpload({
+    required File file,
+    required Map<String, String> columnMapping,
+    Map<String, dynamic>? defaultValues,
+  }) async {
+    try {
+      // Create reversed mapping to match API expectations
+      final reversedMapping =
+          columnMapping.map((key, value) => MapEntry(value, key));
+
+      final form = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: 'clients.csv',
+          contentType: MediaType('text', 'csv'),
+        ),
+        'columnMapping': jsonEncode(reversedMapping),
+        'defaultValues': jsonEncode(defaultValues ?? {}),
+        'batchSize': 100,
+      });
+
+      final response = await _dioClient.post(
+        '/client/bulk-upload',
+        data: form,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+      return response.data['jobId'];
+    } catch (e) {
+      throw Exception('Failed to start bulk upload: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getBulkUploadStatus(String jobId) async {
+    try {
+      final response =
+          await _dioClient.get('/client/bulk-upload/$jobId/status');
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to get job status: $e');
+    }
+  }
+
+  Future<List<String>> getBulkUploadErrors(String jobId) async {
+    try {
+      final response =
+          await _dioClient.get('/client/bulk-upload/$jobId/errors');
+      return List<String>.from(response.data);
+    } catch (e) {
+      throw Exception('Failed to get upload errors: $e');
     }
   }
 }

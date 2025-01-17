@@ -28,17 +28,6 @@ class ProductContent extends StatelessWidget {
         return const ProductListContent();
       case ProductScreen.bulkUpload:
         return const ProductBulkUploadContent();
-      //   if (navigation.currentInvoiceId != null) {
-      //     final invoice = productProvider.invoices.firstWhere(
-      //       (inv) => inv.id.toString() == navigation.currentInvoiceId,
-      //       orElse: () {
-      //         // If invoice not found, navigate back to list
-      //         navigation.navigateToInvoiceScreen(InvoiceScreen.list);
-      //         return productProvider.invoices.first; // This return won't be used
-      //       },
-      //     );
-      //     return CurrentProductContent(invoice: invoice);
-      //   }
       default:
         // Fallback to list if no invoice ID
       navigation.navigateToProductScreen(ProductScreen.list);

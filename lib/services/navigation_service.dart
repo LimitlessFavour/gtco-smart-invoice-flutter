@@ -34,6 +34,7 @@ enum ClientScreen {
   create,
   view,
   edit,
+  bulkUpload,
 }
 
 enum SettingsScreen {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import '../../screens/client/client_content.dart';
+import '../../screens/client/client_list_content.dart';
 import '../common/app_text.dart';
 
 class ClientEmptyState extends StatelessWidget {
