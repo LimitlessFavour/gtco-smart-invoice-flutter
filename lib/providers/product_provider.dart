@@ -224,7 +224,7 @@ class ProductProvider extends ChangeNotifier {
   void _startStatusPolling() {
     _statusCheckTimer?.cancel();
     _statusCheckTimer =
-        Timer.periodic(const Duration(seconds: 45), (timer) async {
+        Timer.periodic(const Duration(seconds: 10), (timer) async {
       if (_bulkUploadState.jobId == null) {
         timer.cancel();
         return;

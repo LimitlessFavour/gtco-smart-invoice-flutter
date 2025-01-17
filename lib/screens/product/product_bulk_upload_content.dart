@@ -352,24 +352,29 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
   Widget _buildProgressIndicator() {
     final provider = context.watch<ProductProvider>();
     final state = provider.bulkUploadState;
-    final progress = state.processedRows != null && state.totalRows != null
-        ? (state.processedRows! / state.totalRows! * 100).toInt()
-        : 0;
+    final hasProgress = state.processedRows != null && state.totalRows != null;
 
-    return Column(
-      children: [
-        LinearProgressIndicator(
-          value: progress / 100,
-          backgroundColor: Colors.grey[200],
-          valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00A651)),
-        ),
-        const Gap(16),
-        AppText(
-          'Processing $progress% (${state.processedRows ?? 0}/${state.totalRows ?? 0} products)',
-          size: 14,
-          color: const Color(0xFF464646),
-        ),
-      ],
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Gap(16),
+          LinearProgressIndicator(
+            value:
+                hasProgress ? (state.processedRows! / state.totalRows!) : null,
+            backgroundColor: Colors.grey[200],
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF00A651)),
+          ),
+          const Gap(16),
+          AppText(
+            hasProgress
+                ? 'Processing ${(state.processedRows! / state.totalRows! * 100).toInt()}% (${state.processedRows}/${state.totalRows} products)'
+                : 'Processing...',
+            size: 14,
+            color: const Color(0xFF464646),
+          ),
+        ],
+      ),
     );
   }
 
