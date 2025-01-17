@@ -163,7 +163,7 @@ class BusinessInfoDesktop extends StatelessWidget {
                       ),
                       const Gap(32),
                       _buildDropdown(
-                        'Where are you located?',
+                        'Industry',
                         selectedIndustry,
                         industries,
                         onIndustryChanged,

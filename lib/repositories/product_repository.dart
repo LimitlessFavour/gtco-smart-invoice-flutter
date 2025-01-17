@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gtco_smart_invoice_flutter/services/logger_service.dart';
@@ -116,6 +119,63 @@ class ProductRepository {
       return Product.fromJson(response.data);
     } catch (e) {
       throw Exception('Failed to delete product: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> validateBulkUpload(File file) async {
+    try {
+      final form = FormData.fromMap({
+        'file':
+            await MultipartFile.fromFile(file.path, filename: 'products.csv'),
+      });
+
+      final response =
+          await _dioClient.post('/product/bulk-upload/validate', data: form);
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to validate file: $e');
+    }
+  }
+
+  Future<String> startBulkUpload({
+    required File file,
+    required Map<String, String> columnMapping,
+    Map<String, dynamic>? defaultValues,
+  }) async {
+    try {
+      final form = FormData.fromMap({
+        'file':
+            await MultipartFile.fromFile(file.path, filename: 'products.csv'),
+        'columnMapping': jsonEncode(columnMapping),
+        if (defaultValues != null) 'defaultValues': jsonEncode(defaultValues),
+        'batchSize': 100,
+      });
+
+      final response =
+          await _dioClient.post('/product/bulk-upload', data: form);
+      return response.data['jobId'];
+    } catch (e) {
+      throw Exception('Failed to start bulk upload: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getBulkUploadStatus(String jobId) async {
+    try {
+      final response =
+          await _dioClient.get('/product/bulk-upload/$jobId/status');
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to get job status: $e');
+    }
+  }
+
+  Future<List<String>> getBulkUploadErrors(String jobId) async {
+    try {
+      final response =
+          await _dioClient.get('/product/bulk-upload/$jobId/errors');
+      return List<String>.from(response.data);
+    } catch (e) {
+      throw Exception('Failed to get job errors: $e');
     }
   }
 }

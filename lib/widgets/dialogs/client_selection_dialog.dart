@@ -19,9 +19,9 @@ class _ClientSelectionDialogState extends State<ClientSelectionDialog> {
   void initState() {
     super.initState();
     // Load clients when dialog opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ClientProvider>().loadClients();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   context.read<ClientProvider>().loadClients();
+    // });
   }
 
   @override

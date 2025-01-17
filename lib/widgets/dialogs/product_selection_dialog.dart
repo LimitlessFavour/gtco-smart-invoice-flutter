@@ -18,9 +18,9 @@ class _ProductSelectionDialogState extends State<ProductSelectionDialog> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductProvider>().loadProducts();
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   context.read<ProductProvider>().loadProducts();
+    // });
   }
 
   @override
