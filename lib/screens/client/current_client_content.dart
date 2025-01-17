@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/client/client_back_button.dart';
 import '../../models/client.dart';
 import '../../widgets/common/app_text.dart';
 import '../../services/navigation_service.dart';
@@ -23,71 +25,127 @@ class CurrentClientContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header with actions
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFC6C1C1)),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () => context
-                          .read<NavigationService>()
-                          .navigateToClientScreen(ClientScreen.list),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ClientsBackButton(),
+                  const Gap(16),
+                  AppText(
+                    client.fullName,
+                    size: 24,
+                    weight: FontWeight.w600,
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Colors.grey.shade300),
                     ),
-                    const Gap(16),
-                    AppText(
-                      client.fullName,
-                      size: 24,
-                      weight: FontWeight.w600,
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    TextButton.icon(
-                      onPressed: () => _handleEdit(context),
-                      icon: const Icon(Icons.edit),
-                      label: const Text('Edit'),
-                    ),
-                    const Gap(16),
-                    TextButton.icon(
-                      onPressed: () => _handleDelete(context),
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      label: const Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red),
+                    color: Colors.white,
+                    elevation: 4,
+                    child: Container(
+                      height: 44,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFE0E0E0)),
+                      ),
+                      child: Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AppText(
+                              'More Actions',
+                              size: 14,
+                              weight: FontWeight.w600,
+                              color: Colors.grey[800],
+                            ),
+                            const Gap(8),
+                            Icon(Icons.keyboard_arrow_down,
+                                size: 20, color: Colors.grey[800]),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    itemBuilder: (context) => ['Edit', 'Delete']
+                        .map(
+                          (option) => PopupMenuItem<String>(
+                            value: option,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                              ),
+                              child: AppText(
+                                option,
+                                size: 14,
+                                weight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onSelected: (value) {
+                      if (value == 'Edit') {
+                        _handleEdit(context);
+                      } else {
+                        _handleDelete(context);
+                      }
+                    },
+                  ),
+                  const Gap(32),
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xffE04826),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const AppText(
+                      'New Client',
+                      size: 16,
+                      weight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
-          const Gap(24),
+          const Gap(32),
+          const Divider(),
+          const Gap(32),
           // Content Row
           Expanded(
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Main Content (Revenue + Invoices)
-                Expanded(
-                  child: Column(
-                    children: [
-                      // Revenue Generated Section
-                      Container(
+                // Main Content (Revenue + Contect Details)
+                Row(
+                  children: [
+                    // Revenue Generated Section
+                    Expanded(
+                      child: Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -99,11 +157,12 @@ class CurrentClientContent extends StatelessWidget {
                           children: [
                             const AppText(
                               'Revenue Generated',
-                              size: 18,
+                              size: 22,
                               weight: FontWeight.w600,
                             ),
                             const Gap(24),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _buildRevenueCard(
                                   amount: 0,
@@ -124,32 +183,30 @@ class CurrentClientContent extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const Gap(16),
-                            const Divider(),
-                            const Gap(16),
-                            Row(
+                            const Gap(18),
+                            const Row(
                               children: [
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const AppText(
+                                    AppText(
                                       'No of Invoices sent:',
-                                      color: Color(0xFF464646),
+                                      color: Colors.black,
                                     ),
-                                    const Gap(8),
-                                    const AppText(
+                                    Gap(8),
+                                    AppText(
                                       'No of Invoices drafted:',
-                                      color: Color(0xFF464646),
+                                      color: Colors.black,
                                     ),
                                   ],
                                 ),
-                                const Gap(16),
+                                Gap(16),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const AppText('1'),
-                                    const Gap(8),
-                                    const AppText('0'),
+                                    AppText('1'),
+                                    Gap(8),
+                                    AppText('0'),
                                   ],
                                 ),
                               ],
@@ -157,134 +214,53 @@ class CurrentClientContent extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Gap(24),
-                      // Invoices Section
-                      Expanded(
+                    ),
+                    const Gap(24),
+                    // Client Details Card (right side)
+                    SizedBox(
+                      width: width * 0.3,
+                      child: Container(
+                        padding: const EdgeInsets.only(top: 10),
+                        decoration: BoxDecoration(
+                          color: theme.primaryColor,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFC6C1C1)),
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(24),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(16),
+                              bottomRight: Radius.circular(16),
+                            ),
                             border: Border.all(color: const Color(0xFFC6C1C1)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const AppText(
-                                    'Invoices for John Snow',
-                                    size: 18,
-                                    weight: FontWeight.w600,
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFE04403),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const AppText(
-                                      '2',
-                                      color: Colors.white,
-                                      size: 12,
-                                    ),
-                                  ),
-                                ],
+                              const AppText(
+                                'John Snow',
+                                size: 18,
+                                weight: FontWeight.w700,
                               ),
                               const Gap(24),
-                              // Invoice Table Header
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE04403),
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                child: const Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: AppText(
-                                        'INVOICE ID',
-                                        color: Colors.white,
-                                        weight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: AppText(
-                                        'CUSTOMER',
-                                        color: Colors.white,
-                                        weight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: AppText(
-                                        'DATE',
-                                        color: Colors.white,
-                                        weight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: AppText(
-                                        'AMOUNT',
-                                        color: Colors.white,
-                                        weight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: AppText(
-                                        'STATUS',
-                                        color: Colors.white,
-                                        weight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              _buildDetailRow('call', client.phoneNumber),
                               const Gap(16),
-                              // Invoice List
-                              Expanded(
-                                child: ListView(
-                                  children: [
-                                    _buildInvoiceRow(
-                                      '#12345',
-                                      'John Snow',
-                                      '12.03.2024',
-                                      80000,
-                                      'Paid',
-                                    ),
-                                    _buildInvoiceRow(
-                                      '#12345',
-                                      'John Snow',
-                                      '12.03.2024',
-                                      80000,
-                                      'Drafted',
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              _buildDetailRow('mail', client.email),
+                              const Gap(16),
+                              _buildDetailRow('location', client.address),
                             ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const Gap(24),
-                // Client Details Card (right side)
-                SizedBox(
-                  width: 300,
+                const Gap(32),
+                // Invoices Section
+                Expanded(
                   child: Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -294,23 +270,117 @@ class CurrentClientContent extends StatelessWidget {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const AppText(
-                          'John Snow',
-                          size: 18,
-                          weight: FontWeight.w600,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const AppText(
+                              'Invoices for John Snow',
+                              size: 18,
+                              weight: FontWeight.w600,
+                            ),
+                            const Gap(12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE04403),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const AppText(
+                                '2',
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
+                          ],
                         ),
                         const Gap(24),
-                        _buildDetailRow('Phone Number', client.phoneNumber),
+                        // Invoice Table Header
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE04403),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: AppText(
+                                  'INVOICE ID',
+                                  color: Colors.white,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: AppText(
+                                  'CUSTOMER',
+                                  color: Colors.white,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: AppText(
+                                  'DATE',
+                                  color: Colors.white,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: AppText(
+                                  'AMOUNT',
+                                  color: Colors.white,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: AppText(
+                                  'STATUS',
+                                  color: Colors.white,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         const Gap(16),
-                        _buildDetailRow('Email', client.email),
-                        const Gap(16),
-                        _buildDetailRow('Address', client.address),
+                        // Invoice List
+                        Expanded(
+                          child: ListView(
+                            children: [
+                              _buildInvoiceRow(
+                                '#12345',
+                                'John Snow',
+                                '12.03.2024',
+                                80000,
+                                'Paid',
+                              ),
+                              _buildInvoiceRow(
+                                '#12345',
+                                'John Snow',
+                                '12.03.2024',
+                                80000,
+                                'Drafted',
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
+                const Gap(32),
               ],
             ),
           ),
@@ -319,20 +389,22 @@ class CurrentClientContent extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String icon, String value) {
+    final path = 'assets/icons/$icon.svg';
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 200,
-          child: AppText(
-            label,
-            weight: FontWeight.w500,
+        SvgPicture.asset(
+          path,
+          width: 24,
+          height: 24,
+          colorFilter: const ColorFilter.mode(
+            Colors.black,
+            BlendMode.srcIn,
           ),
         ),
-        Expanded(
-          child: AppText(value),
-        ),
+        const Gap(21),
+        Expanded(child: AppText(value)),
       ],
     );
   }
@@ -346,12 +418,11 @@ class CurrentClientContent extends StatelessWidget {
   Future<void> _handleDelete(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => ConfirmationDialog(
+      builder: (context) => AppConfirmationDialog(
         title: 'Delete Client',
-        message: 'Are you sure you want to delete ${client.fullName}?',
+        content: 'Are you sure you want to delete ${client.fullName}?',
         confirmText: 'Delete',
         cancelText: 'Cancel',
-        isDestructive: true,
       ),
     );
 
@@ -364,7 +435,8 @@ class CurrentClientContent extends StatelessWidget {
         if (success && context.mounted) {
           await showDialog(
             context: context,
-            builder: (context) => const SuccessDialog(
+            builder: (context) => const AppSuccessDialog(
+              title: 'Successful!',
               message: 'Client deleted successfully',
             ),
           );
@@ -386,45 +458,38 @@ class CurrentClientContent extends StatelessWidget {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF4F4F4),
-          borderRadius: BorderRadius.circular(8),
+        width: double.maxFinite,
+        padding: const EdgeInsets.symmetric(
+          // horizontal: 34,
+          vertical: 28,
         ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
+        decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xffC6C1C1))),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
                 icon,
                 color: const Color(0xFF464646),
                 size: 20,
               ),
-            ),
-            const Gap(12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AppText(
-                    _currencyFormatter.format(amount),
-                    size: 16,
-                    weight: FontWeight.w600,
-                  ),
-                  const Gap(4),
-                  AppText(
-                    label,
-                    size: 12,
-                    color: const Color(0xFF464646),
-                  ),
-                ],
+              const Gap(6),
+              AppText(
+                _currencyFormatter.format(amount),
+                size: 16,
+                weight: FontWeight.w600,
               ),
-            ),
-          ],
+              const Gap(6),
+              AppText(
+                label,
+                size: 12,
+                color: const Color(0xFF464646),
+              ),
+            ],
+          ),
         ),
       ),
     );

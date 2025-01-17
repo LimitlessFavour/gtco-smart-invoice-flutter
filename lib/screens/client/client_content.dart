@@ -62,15 +62,20 @@ class _ClientContentState extends State<ClientContent> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header Row
-              const Row(
+               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppText(
-                    'Clients',
-                    size: 24,
-                    weight: FontWeight.w600,
+                  InkWell(
+                    onTap: () {
+                      clientProvider.loadClients();
+                    },
+                    child: const AppText(
+                      'Clients',
+                      size: 24,
+                      weight: FontWeight.w600,
+                    ),
                   ),
-                  CreateClientButton(),
+                  const CreateClientButton(),
                 ],
               ),
               const Gap(24),

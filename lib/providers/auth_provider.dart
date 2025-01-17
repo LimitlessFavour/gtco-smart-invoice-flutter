@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:gtco_smart_invoice_flutter/models/auth/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth/auth_token.dart';
 import '../models/auth/auth_dtos.dart';
 import '../repositories/auth_repository.dart';
 import '../services/logger_service.dart';
 import '../exceptions/auth_exception.dart';
+import 'dart:convert';
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository;
@@ -13,7 +15,53 @@ class AuthProvider extends ChangeNotifier {
   String? _error;
   User? _user;
 
-  AuthProvider(this._repository);
+  static const String _tokenKey = 'auth_token';
+  static const String _userKey = 'auth_user';
+
+  AuthProvider(this._repository) {
+    _loadPersistedState();
+  }
+
+  // Load persisted state when provider is initialized
+  Future<void> _loadPersistedState() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final tokenJson = prefs.getString(_tokenKey);
+    final userJson = prefs.getString(_userKey);
+
+    if (tokenJson != null) {
+      final token = AuthToken.fromJson(json.decode(tokenJson));
+      // Only restore if the token isn't expired
+      if (!token.isAccessTokenExpired && !token.isRefreshTokenExpired) {
+        _token = token;
+      } else {
+        await prefs.remove(_tokenKey);
+      }
+
+      if (userJson != null) {
+        _user = User.fromJson(json.decode(userJson));
+      }
+    }
+
+    notifyListeners();
+  }
+
+  // Persist state whenever it changes
+  Future<void> _persistState() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (_token != null) {
+      await prefs.setString(_tokenKey, json.encode(_token!.toJson()));
+    } else {
+      await prefs.remove(_tokenKey);
+    }
+
+    if (_user != null) {
+      await prefs.setString(_userKey, json.encode(_user!.toJson()));
+    } else {
+      await prefs.remove(_userKey);
+    }
+  }
 
   bool get isAuthenticated => _token != null && !_token!.isAccessTokenExpired;
   bool get isLoading => _isLoading;
@@ -44,13 +92,13 @@ class AuthProvider extends ChangeNotifier {
       'refresh_token': response.refreshToken,
     });
     _user = response.user;
+    _persistState(); // Persist after state change
     LoggerService.success('Authentication successful', {
       'user': response.user.email,
       'onboardingCompleted': response.user.onboardingCompleted,
       'tokenExpiry': _token?.accessTokenExpiry.toIso8601String(),
     });
   }
-
 
   void _handleSignupAuthResponse(SignupAuthResponse response) {
     _token = AuthToken.fromJson({
@@ -157,14 +205,15 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     try {
       _startLoading();
-      
+
       if (_token?.refreshToken != null) {
         await _repository.logout(_token!.refreshToken);
       }
-      
+
       _token = null;
       _user = null;
-      
+      await _persistState(); // Persist the cleared state
+
       LoggerService.success('User logged out successfully');
       _stopLoading(null);
     } catch (e) {

@@ -4,12 +4,15 @@ import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/invoice/invoices_sent_out_today.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/navigation_service.dart';
 import '../../widgets/invoice/invoice_empty_state.dart';
 import '../../widgets/invoice/invoice_stats_card.dart';
 import '../../widgets/invoice/invoice_tile.dart';
+import '../../widgets/invoice/invoice_filter_dialog.dart';
+import '../../widgets/invoice/no_results_found_state.dart';
 
 class InvoiceListContent extends StatelessWidget {
   const InvoiceListContent({super.key});
@@ -49,24 +52,37 @@ class InvoiceListContent extends StatelessWidget {
                       // Table Header
                       const TableHeader(),
                       const Gap(24),
-                      // Empty State
                       Expanded(
                         child: Consumer<InvoiceProvider>(
                           builder: (context, provider, child) {
+                            // Only show loading overlay for initial load, not refresh
+                            final showLoading = provider.isLoading &&
+                                provider.filteredInvoices.isEmpty;
+
                             return LoadingOverlay(
-                              isLoading: provider.isLoading,
+                              isLoading: showLoading,
                               child: provider.hasInvoices
-                                  ? ListView.separated(
-                                      padding: const EdgeInsets.all(24),
-                                      itemCount: provider.invoices.length,
-                                      separatorBuilder: (context, index) =>
-                                          const Gap(16),
-                                      itemBuilder: (context, index) {
-                                        final invoice =
-                                            provider.invoices[index];
-                                        return InvoiceTile(invoice: invoice);
-                                      },
-                                    )
+                                  ? provider.filteredInvoices.isNotEmpty
+                                      ? RefreshIndicator(
+                                          onRefresh: () async {
+                                            await provider.loadInvoices();
+                                          },
+                                          child: ListView.separated(
+                                            padding: const EdgeInsets.all(24),
+                                            itemCount: provider
+                                                .filteredInvoices.length,
+                                            separatorBuilder:
+                                                (context, index) =>
+                                                    const Gap(16),
+                                            itemBuilder: (context, index) {
+                                              final invoice = provider
+                                                  .filteredInvoices[index];
+                                              return InvoiceTile(
+                                                  invoice: invoice);
+                                            },
+                                          ),
+                                        )
+                                      : const NoResultsFoundState()
                                   : const InvoiceEmptyState(),
                             );
                           },
@@ -92,37 +108,43 @@ class StatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
+    return SizedBox(
       height: 120,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          InvoiceStatsCard(
-            icon: 'assets/icons/clock.svg',
-            amount: '₦0',
-            label: 'Overdue amount',
-          ),
-          // Gap(40),
-          InvoiceStatsCard(
-            icon: 'assets/icons/draft.svg',
-            amount: '₦0',
-            label: 'Drafted total',
-          ),
-          // Gap(40),
-          InvoiceStatsCard(
-            icon: 'assets/icons/update.svg',
-            amount: '₦0',
-            label: 'Updated total',
-          ),
-          // Gap(40),
-          InvoiceStatsCard(
-            icon: 'assets/icons/timer.svg',
-            amount: '0 day',
-            label: 'Average paid time',
-          ),
-          // Gap(40),
-          InvoicesSentOutToday(),
-        ],
+      child: Consumer<InvoiceProvider>(
+        builder: (context, provider, _) {
+          final stats = provider.stats;
+
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InvoiceStatsCard(
+                icon: 'assets/icons/clock.svg',
+                amount:
+                    '₦${NumberFormat('#,###').format(stats?.overdueAmount ?? 0)}',
+                label: 'Overdue amount',
+              ),
+              InvoiceStatsCard(
+                icon: 'assets/icons/update.svg',
+                amount:
+                    '₦${NumberFormat('#,###').format(stats?.totalDraftedAmount ?? 0)}',
+                label: 'Drafted total',
+              ),
+              InvoiceStatsCard(
+                icon: 'assets/icons/draft.svg',
+                amount:
+                    '₦${NumberFormat('#,###').format(stats?.unpaidTotal ?? 0)}',
+                label: 'Unpaid total',
+              ),
+              InvoiceStatsCard(
+                icon: 'assets/icons/timer.svg',
+                amount:
+                    '${(stats?.averagePaidTime ?? 0).toStringAsFixed(2)} day${stats?.averagePaidTime == 1 ? '' : 's'}',
+                label: 'Average paid time',
+              ),
+              const InvoicesSentOutToday(),
+            ],
+          );
+        },
       ),
     );
   }
@@ -260,6 +282,8 @@ class SearchAndFilterRow extends StatefulWidget {
 }
 
 class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
+  final TextEditingController _searchController = TextEditingController();
+
   String selectedFilter = 'All invoices';
   String selectedSort = 'Newest First';
 
@@ -268,158 +292,187 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
     'Oldest First',
     'Highest Amount',
     'Lowest Amount',
+    'Due Soonest',
+    'Due Latest',
   ];
 
-  // Sample counter data (replace with actual data from your provider)
-  final Map<String, int> filterCounts = {
-    'All invoices': 30,
-    'Unpaid': 30,
-    'Draft': 2,
-  };
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Search Field
-        SizedBox(
-          width: 252,
-          child: Container(
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
-            ),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Enter invoice number',
-                hintStyle: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.grey[600],
-                  size: 20,
-                ),
-                border: OutlineInputBorder(
+    return Consumer<InvoiceProvider>(
+      builder: (context, provider, child) {
+        return Row(
+          children: [
+            // Search Field
+            SizedBox(
+              width: 252,
+              child: Container(
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+                  border: Border.all(color: const Color(0xFFE0E0E0)),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const Gap(24),
-
-        // Filter Tabs
-        Container(
-          height: 32,
-          decoration: BoxDecoration(
-            color: const Color(0xffF1F1F1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildFilterTab('All invoices', const Color(0xff3B5FEC)),
-              _buildFilterTab('Unpaid', const Color(0xffFCB300)),
-              _buildFilterTab('Draft', const Color(0xff6A6A6A)),
-            ],
-          ),
-        ),
-        const Spacer(),
-
-        // Filter Button
-        Container(
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE0E0E0)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.filter_list, size: 20, color: Colors.grey[800]),
-              const Gap(8),
-              AppText(
-                'Filter',
-                size: 14,
-                weight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ],
-          ),
-        ),
-        const Gap(24),
-
-        // Sort Dropdown
-        PopupMenuButton<String>(
-          offset: const Offset(0, 40),
-          child: Container(
-            height: 32,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE0E0E0)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                AppText(
-                  selectedSort,
-                  size: 14,
-                  weight: FontWeight.w600,
-                  color: Colors.grey[800],
-                ),
-                const Gap(8),
-                Icon(Icons.keyboard_arrow_down,
-                    size: 20, color: Colors.grey[800]),
-              ],
-            ),
-          ),
-          itemBuilder: (context) => sortOptions
-              .map(
-                (option) => PopupMenuItem<String>(
-                  value: option,
-                  child: AppText(
-                    option,
-                    size: 14,
-                    weight: FontWeight.w500,
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter invoice # or customer name',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.grey[600],
+                      size: 20,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                   ),
+                  onChanged: (value) {
+                    provider.searchInvoices(value);
+                  },
                 ),
-              )
-              .toList(),
-          onSelected: (value) {
-            setState(() {
-              selectedSort = value;
-              // TODO: Implement sorting logic
-            });
-          },
-        ),
-      ],
+              ),
+            ),
+            const Gap(24),
+
+            // Filter Tabs
+            Container(
+              height: 32,
+              decoration: BoxDecoration(
+                color: const Color(0xffF1F1F1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE0E0E0)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildFilterTab(
+                      'All invoices', const Color(0xff3B5FEC), provider),
+                  _buildFilterTab('Unpaid', const Color(0xffFCB300), provider),
+                  _buildFilterTab('Draft', const Color(0xff6A6A6A), provider),
+                ],
+              ),
+            ),
+            const Spacer(),
+            InkWell(
+              onTap: () async {
+                await showDialog(
+                  context: context,
+                  builder: (context) => InvoiceFilterDialog(
+                    initialCriteria: provider.filterCriteria,
+                    onApply: (criteria) {
+                      provider.setFilterCriteria(criteria);
+                    },
+                  ),
+                );
+              },
+              child: Container(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.filter_list, size: 20, color: Colors.grey[800]),
+                    const Gap(8),
+                    AppText(
+                      'Filter',
+                      size: 14,
+                      weight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const Gap(24),
+
+            // Sort Dropdown
+            PopupMenuButton<String>(
+              offset: const Offset(0, 40),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey.shade300),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              child: Container(
+                height: 32,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE0E0E0)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppText(
+                      selectedSort,
+                      size: 14,
+                      weight: FontWeight.w600,
+                      color: Colors.grey[800],
+                    ),
+                    const Gap(8),
+                    Icon(Icons.keyboard_arrow_down,
+                        size: 20, color: Colors.grey[800]),
+                  ],
+                ),
+              ),
+              itemBuilder: (context) => sortOptions
+                  .map(
+                    (option) => PopupMenuItem<String>(
+                      value: option,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: AppText(
+                          option,
+                          size: 14,
+                          weight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+              onSelected: (value) {
+                setState(() {
+                  selectedSort = value;
+                  provider.setSortOption(value);
+                });
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildFilterTab(String label, Color color) {
+  Widget _buildFilterTab(String label, Color color, InvoiceProvider provider) {
     final bool isSelected = selectedFilter == label;
-    final int count = filterCounts[label] ?? 0;
 
     return InkWell(
       onTap: () {
         setState(() {
           selectedFilter = label;
-          // TODO: Implement filtering logic based on selected filter
+          provider.setFilter(label);
         });
       },
       child: Container(
@@ -448,7 +501,7 @@ class _SearchAndFilterRowState extends State<SearchAndFilterRow> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: AppText(
-                count.toString(),
+                provider.getFilterCount(label).toString(),
                 size: 12,
                 weight: FontWeight.w600,
                 color: color,

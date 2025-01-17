@@ -40,7 +40,7 @@ class SetupScreen extends StatelessWidget {
               ),
               //app gap with height context.height * 0.2
               if (!ResponsiveUtils.isMobileScreen(context)) const Gap(48),
-              const Gap(48),
+              const Gap(32),
 
               ElevatedButton(
                 onPressed: () {

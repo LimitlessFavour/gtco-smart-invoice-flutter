@@ -37,19 +37,21 @@ class Invoice {
 
   factory Invoice.fromJson(Map<String, dynamic> json) {
     return Invoice(
-      id: json['id'],
-      invoiceNumber: json['invoiceNumber'],
-      dueDate: DateTime.parse(json['dueDate']),
-      status: json['status'],
+      id: json['id'] ?? 0,
+      invoiceNumber: json['invoiceNumber'] ?? '',
+      dueDate: DateTime.parse(json['dueDate'] ?? '2000-01-01'),
+      status: json['status'] ?? '',
       // totalAmount: double.parse(json['totalAmount'].toString()),
-      totalAmount: double.tryParse(json['totalAmount']) ?? 0, // Fix here
+      // totalAmount: double.tryParse(json['totalAmount']) ?? 0, // Fix here
+      totalAmount: double.tryParse(json['totalAmount']?.toString() ?? '0') ?? 0,
+
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt:
           json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
       paidAt: json['paidAt'] != null ? DateTime.parse(json['paidAt']) : null,
-      paymentLink: json['paymentLink'],
-      transactionRef: json['transactionRef'],
-      squadTransactionRef: json['squadTransactionRef'],
+      paymentLink: json['paymentLink'] ?? '',
+      transactionRef: json['transactionRef'] ?? '',
+      squadTransactionRef: json['squadTransactionRef'] ?? '',
       items: (json['items'] as List)
           .map((item) => InvoiceItem.fromJson(item))
           .toList(),

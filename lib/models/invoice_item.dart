@@ -26,14 +26,14 @@ class InvoiceItem {
   factory InvoiceItem.fromJson(Map<String, dynamic> json) {
     return InvoiceItem(
       id: json['id'],
-      invoiceId: json['invoiceId'],
-      productId: json['productId'],
-      quantity: json['quantity'],
+      description: json['description'] ?? '',
+      quantity: json['quantity'] ?? 0,
       price: double.tryParse(json['price']) ?? 0,
-      createdAt: DateTime.parse(json['createdAt']),
-      productName: json['productName'],
-      description: json['description'],
-      sku: json['sku'],
+      invoiceId: json['invoiceId'] ?? '',
+      productId: json['productId'] ?? '',
+      createdAt: DateTime.parse(json['createdAt'] ?? '2000-01-01'),
+      productName: json['product']['productName'] ?? '',
+      sku: json['sku'] ?? '',
     );
   }
 

@@ -2,14 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/screens/invoice/mobile/preview_invoice_screen.dart';
 import 'package:provider/provider.dart';
-import '../../../models/client.dart';
-import '../../../models/invoice.dart';
+
 import '../../../providers/invoice_provider.dart';
-import '../../../services/navigation_service.dart';
 import '../../../widgets/common/app_text.dart';
 import '../../../widgets/common/loading_overlay.dart';
-import '../../../widgets/dialogs/success_dialog.dart';
-import '../../../widgets/dialogs/basic_confirmation_dialog.dart';
 
 class CreateInvoiceMobile extends StatefulWidget {
   const CreateInvoiceMobile({super.key});

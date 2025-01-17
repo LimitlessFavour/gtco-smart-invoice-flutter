@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/success_dialog.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/navigation_service.dart';
@@ -17,22 +19,11 @@ class UserProfileSection extends StatelessWidget {
   void _handleLogout(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFE04403),
-            ),
-            child: const Text('Logout'),
-          ),
-        ],
+      builder: (context) => const AppConfirmationDialog(
+        title: 'Confirm Logout',
+        content: 'Are you sure you want to logout?',
+        confirmText: 'Logout',
+        cancelText: 'Cancel',
       ),
     );
 
@@ -126,6 +117,7 @@ class UserProfileSection extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       _handleLogout(context);
+                      // _testSuccessDialog(context);
                     },
                   ),
                 ],
@@ -137,10 +129,13 @@ class UserProfileSection extends StatelessWidget {
     }
 
     return PopupMenuButton<String>(
-      offset: const Offset(0, -20),
-      position: PopupMenuPosition.under,
-      elevation: 4,
+      offset: const Offset(0, 40),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
       color: Colors.white,
+      elevation: 4,
       child: Row(
         children: [
           CircleAvatar(
@@ -177,30 +172,36 @@ class UserProfileSection extends StatelessWidget {
       itemBuilder: (context) => [
         PopupMenuItem<String>(
           value: 'settings',
-          child: Row(
-            children: [
-              Icon(
-                Icons.settings_outlined,
-                color: theme.primaryColor,
-                size: 20,
-              ),
-              const Gap(12),
-              AppText('Settings', color: theme.primaryColor),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.settings_outlined,
+                  color: theme.primaryColor,
+                  size: 20,
+                ),
+                const Gap(12),
+                AppText('Settings', color: theme.primaryColor),
+              ],
+            ),
           ),
         ),
         PopupMenuItem<String>(
           value: 'logout',
-          child: Row(
-            children: [
-              Icon(
-                Icons.logout_outlined,
-                color: theme.primaryColor,
-                size: 20,
-              ),
-              const Gap(12),
-              AppText('Logout', color: theme.primaryColor),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.logout_outlined,
+                  color: theme.primaryColor,
+                  size: 20,
+                ),
+                const Gap(12),
+                AppText('Logout', color: theme.primaryColor),
+              ],
+            ),
           ),
         ),
       ],

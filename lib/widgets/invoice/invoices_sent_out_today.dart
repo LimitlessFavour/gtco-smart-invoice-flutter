@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 
 class InvoicesSentOutToday extends StatelessWidget {
@@ -14,7 +16,7 @@ class InvoicesSentOutToday extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Image.asset(
             'assets/images/invoice_sent_out.png',
@@ -22,24 +24,29 @@ class InvoicesSentOutToday extends StatelessWidget {
             width: 80,
           ),
           const Gap(12),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppText(
-                '0 invoice',
-                color: Colors.black,
-                weight: FontWeight.w600,
-                size: 16,
-              ),
-              Gap(3),
-              AppText(
-                'Sent out today',
-                color: Color(0xFF464646),
-                weight: FontWeight.w600,
-                size: 12,
-              ),
-            ],
+          Consumer<InvoiceProvider>(
+            builder: (context, provider, _) {
+              final sentToday = provider.stats?.totalInvoicesSentToday ?? 0;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppText(
+                    '$sentToday ${sentToday == 1 ? 'invoice' : 'invoices'}',
+                    color: Colors.black,
+                    weight: FontWeight.w600,
+                    size: 16,
+                  ),
+                  const Gap(3),
+                  const AppText(
+                    'Sent out today',
+                    color: Color(0xFF464646),
+                    weight: FontWeight.w600,
+                    size: 12,
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

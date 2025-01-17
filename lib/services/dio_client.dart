@@ -52,6 +52,7 @@ class DioClient {
         'headers': options.headers,
         'data': options.data,
         'queryParameters': options.queryParameters,
+        'Authorization' : 'Bearer ${_authToken?.accessToken}'
       },
     );
 

@@ -3,18 +3,18 @@ import '../models/invoice.dart';
 import '../models/dtos/create_invoice_dto.dart';
 import '../services/dio_client.dart';
 import '../services/logger_service.dart';
+import '../models/paginated_invoice_response.dart';
 
 class InvoiceRepository {
   final DioClient _dioClient;
 
   InvoiceRepository(this._dioClient);
 
-  Future<List<Invoice>> getInvoices() async {
+  Future<PaginatedInvoiceResponse> getInvoices() async {
     try {
       final response = await _dioClient.get('/invoice');
-      return (response.data as List)
-          .map((json) => Invoice.fromJson(json))
-          .toList();
+      print('response: ${response.data}');
+      return PaginatedInvoiceResponse.fromJson(response.data);
     } on DioException catch (e) {
       LoggerService.error('Error getting invoices', error: e);
       throw _handleDioError(e);
@@ -30,6 +30,46 @@ class InvoiceRepository {
       return Invoice.fromJson(response.data);
     } on DioException catch (e) {
       LoggerService.error('Error creating invoice', error: e);
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<Invoice> createDraftInvoice(CreateInvoiceDto dto) async {
+    try {
+      final response = await _dioClient.post(
+        '/invoice/draft',
+        data: dto.toJson(),
+      );
+      return Invoice.fromJson(response.data);
+    } on DioException catch (e) {
+      LoggerService.error('Error creating draft invoice', error: e);
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<Invoice> markAsPaid(Invoice invoice) async {
+    try {
+      final response = await _dioClient.post(
+        '/invoice/${invoice.id}/mark-paid',
+      );
+
+      return Invoice.fromJson(response.data);
+    } on DioException catch (e) {
+      LoggerService.error('Error marking invoice as paid', error: e);
+
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<Invoice> finalizeDraft(Invoice invoice) async {
+    try {
+      final response = await _dioClient.post(
+        '/invoice/draft/${invoice.id}/finalize',
+      );
+
+      return Invoice.fromJson(response.data);
+    } on DioException catch (e) {
+      LoggerService.error('Error finalizing draft invoice', error: e);
       throw _handleDioError(e);
     }
   }

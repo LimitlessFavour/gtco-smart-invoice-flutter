@@ -152,4 +152,29 @@ class ClientProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  Future<bool> submitClient(Client client, bool isEdit) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      final success =
+          isEdit ? await updateClient(client) : await createClient(client);
+
+      if (success) {
+        // Refresh the clients list after successful operation
+        await loadClients();
+      }
+
+      return success;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void clearForm() {
+    // _selectedClient = null;
+    notifyListeners();
+  }
 }

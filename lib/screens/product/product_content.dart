@@ -36,15 +36,20 @@ class _ProductContentState extends State<ProductContent> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Row
-                const Row(
+                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    AppText(
-                      'Products',
-                      size: 24,
-                      weight: FontWeight.w600,
+                    InkWell(
+                      onTap: () {
+                        provider.loadProducts();
+                      },
+                      child: const AppText(
+                        'Products',
+                        size: 24,
+                        weight: FontWeight.w600,
+                      ),
                     ),
-                    CreateProductButton(),
+                    const CreateProductButton(),
                   ],
                 ),
                 const Gap(24),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/invoice_provider.dart';
@@ -26,6 +27,60 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
     _dialogContext = context;
   }
 
+  Future<void> _handleCreateDraftInvoice() async {
+    final createProvider = context.read<InvoiceProvider>();
+    // confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const AppConfirmationDialog(
+        title: 'Save as Draft',
+        content: 'Are you sure you want to save this invoice as draft?',
+        confirmText: 'Save',
+        cancelText: 'Cancel',
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    if (!createProvider.isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all required fields'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      final invoice = await createProvider.createDraftInvoice();
+
+      if (invoice != null) {
+        await showDialog(
+          context: context,
+          builder: (_) => const AppSuccessDialog(
+            title: 'Successful!',
+            message: 'Invoice saved as draft successfully!',
+          ),
+        );
+        createProvider.createClear();
+        context
+            .read<NavigationService>()
+            .navigateToInvoiceScreen(InvoiceScreen.list);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _handleCreateInvoice() async {
     final createProvider = context.read<InvoiceProvider>();
 
@@ -38,13 +93,26 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
       return;
     }
 
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => const AppConfirmationDialog(
+        title: 'Send Invoice',
+        content: 'Are you sure you want to send the invoice?',
+        confirmText: 'Send',
+        cancelText: 'Cancel',
+      ),
+    );
+
+    if(confirmed != true) return;
+
     try {
       final invoice = await createProvider.createInvoice();
 
       if (invoice != null) {
         await showDialog(
           context: context,
-          builder: (_) => const SuccessDialog(
+          builder: (_) => const AppSuccessDialog(
+            title: 'Successful!',
             message: 'Invoice created successfully!',
           ),
         );
@@ -116,7 +184,7 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                       children: [
                         TextButton(
                           onPressed: () {
-                            // TODO: Save as draft functionality
+                            _handleCreateDraftInvoice();
                           },
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.white,
@@ -148,34 +216,6 @@ class _CreateInvoiceContentState extends State<CreateInvoiceContent> {
                           ),
                           child: const AppText(
                             'Send Invoice',
-                            size: 16,
-                            weight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const Gap(16),
-                        ElevatedButton(
-                          onPressed: () {
-                            // showSendConfirmation(
-                            //   context,
-                            //   clientName: 'John Doe',
-                            //   onSuccess: (context) {
-                            //     context
-                            //         .read<NavigationService>()
-                            //         .navigateToInvoiceScreen(
-                            //             InvoiceScreen.list);
-                            //   },
-                            // );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xffE04826),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const AppText(
-                            'Download Invoice',
                             size: 16,
                             weight: FontWeight.w600,
                             color: Colors.white,
