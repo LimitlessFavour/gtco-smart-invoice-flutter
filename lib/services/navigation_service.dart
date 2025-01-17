@@ -26,6 +26,7 @@ enum ProductScreen {
   list,
   create,
   edit,
+  bulkUpload,
 }
 
 enum ClientScreen {
@@ -54,8 +55,7 @@ class NavigationService extends ChangeNotifier {
   String? _currentClientId;
   String? _currentProductId;
 
-  NavigationService()
-      : _platform = createNavigationPlatform() {
+  NavigationService() : _platform = createNavigationPlatform() {
     if (kIsWeb) {
       _platform.initializeHistory(handleUrlChange: _handleUrlChange);
     }
@@ -77,7 +77,9 @@ class NavigationService extends ChangeNotifier {
         return _currentInvoiceScreen == InvoiceScreen.create ||
             _currentInvoiceScreen == InvoiceScreen.view;
       case AppScreen.product:
-        return _currentProductScreen == ProductScreen.create;
+        return _currentProductScreen == ProductScreen.create ||
+            _currentProductScreen == ProductScreen.edit ||
+            _currentProductScreen == ProductScreen.bulkUpload;
       case AppScreen.client:
         return _currentClientScreen == ClientScreen.create ||
             _currentClientScreen == ClientScreen.view ||
@@ -173,14 +175,16 @@ class NavigationService extends ChangeNotifier {
 
   void navigateToProductScreen(ProductScreen screen, {String? productId}) {
     _currentProductScreen = screen;
-    _currentScreen = AppScreen.product;
     _currentProductId = productId;
+    _currentScreen = AppScreen.product;
 
-    String path = '/product';
+    var path = '/product';
     if (screen == ProductScreen.create) {
       path = '$path/create';
     } else if (screen == ProductScreen.edit && productId != null) {
       path = '$path/edit/$productId';
+    } else if (screen == ProductScreen.bulkUpload) {
+      path = '$path/bulk-upload';
     }
 
     _updateBrowserUrl(path);
@@ -278,6 +282,9 @@ class NavigationService extends ChangeNotifier {
       } else if (path.contains('/edit/')) {
         _currentProductScreen = ProductScreen.edit;
         _currentProductId = path.split('/').last;
+      } else if (path == '/product/bulk-upload') {
+        _currentProductScreen = ProductScreen.bulkUpload;
+        _currentProductId = null;
       } else {
         _currentProductScreen = ProductScreen.list;
         _currentProductId = null;

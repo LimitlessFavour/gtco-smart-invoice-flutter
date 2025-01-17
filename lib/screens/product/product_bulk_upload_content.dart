@@ -5,16 +5,16 @@ import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../models/bulk_upload_state.dart';
 import '../../providers/product_provider.dart';
-import '../common/app_text.dart';
+import '../../widgets/common/app_text.dart';
 
-class BulkUploadDialog extends StatefulWidget {
-  const BulkUploadDialog({super.key});
+class ProductBulkUploadContent extends StatefulWidget {
+  const ProductBulkUploadContent({super.key});
 
   @override
-  State<BulkUploadDialog> createState() => _BulkUploadDialogState();
+  State<ProductBulkUploadContent> createState() => _ProductBulkUploadContentState();
 }
 
-class _BulkUploadDialogState extends State<BulkUploadDialog> {
+class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
   int _currentStep = 0;
   File? _selectedFile;
   final Map<String, String> _columnMapping = {};
