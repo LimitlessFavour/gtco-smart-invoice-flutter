@@ -1,14 +1,17 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import '../services/logger_service.dart';
+import 'package:http_parser/http_parser.dart';
+
 import '../models/client.dart';
 import '../services/dio_client.dart';
-import 'package:http_parser/http_parser.dart';
+import '../services/logger_service.dart';
 
 class ClientRepository {
   final DioClient _dioClient;
+  // final CacheService _cacheService;
 
   ClientRepository(this._dioClient);
 
@@ -180,4 +183,5 @@ class ClientRepository {
       throw Exception('Failed to get upload errors: $e');
     }
   }
+ 
 }

@@ -6,6 +6,15 @@ import '../../services/navigation_service.dart';
 class ClientListView extends StatelessWidget {
   const ClientListView({super.key});
 
+  void _handleClientTap(BuildContext context, String clientId) {
+    // Schedule the navigation for the next frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context
+          .read<NavigationService>()
+          .navigateToClientScreen(ClientScreen.view, clientId: clientId);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ClientProvider>(
@@ -25,11 +34,7 @@ class ClientListView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ListTile(
-                  onTap: () {
-                    context.read<NavigationService>().navigateToClientScreen(
-                        ClientScreen.view,
-                        clientId: client.id);
-                  },
+                  onTap: () => _handleClientTap(context, client.id),
                   title: Row(
                     children: [
                       Expanded(

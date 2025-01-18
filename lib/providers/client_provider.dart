@@ -14,6 +14,8 @@ class ClientProvider extends ChangeNotifier {
   String _searchQuery = '';
   BulkUploadState _bulkUploadState = BulkUploadState();
   Timer? _statusCheckTimer;
+  Client? _currentClient;
+  bool _isLoadingDetails = false;
 
   ClientProvider(this._repository);
 
@@ -32,6 +34,8 @@ class ClientProvider extends ChangeNotifier {
   String? get error => _error;
   bool get hasClients => _clients.isNotEmpty;
   BulkUploadState get bulkUploadState => _bulkUploadState;
+  Client? get currentClient => _currentClient;
+  bool get isLoadingDetails => _isLoadingDetails;
 
   Future<void> loadClients() async {
     try {

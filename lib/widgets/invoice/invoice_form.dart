@@ -250,7 +250,7 @@ class _InvoiceFormState extends State<InvoiceForm> {
                         Row(
                           children: [
                             AppText(
-                              '₦${item.price}',
+                              '₦${item.price.toStringAsFixed(2)}',
                               size: 14,
                               weight: FontWeight.w600,
                             ),
@@ -261,7 +261,7 @@ class _InvoiceFormState extends State<InvoiceForm> {
                             ),
                             const Gap(8),
                             AppText(
-                              '= ₦${item.total}',
+                              '= ₦${item.total.toStringAsFixed(2)}',
                               size: 14,
                               weight: FontWeight.w600,
                             ),

@@ -71,21 +71,36 @@ class DashboardContent extends StatelessWidget {
                           const Gap(24),
                           // Remove Expanded from Top Lists container
                           SizedBox(
-                            height: 400, // Fixed height instead of flex
+                            height: 400,
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Container(
                                     decoration: AppStyles.cardDecoration,
-                                    child: TopListCard(
+                                    child: const TopListCard(
                                       title: 'Top Paying Clients',
-                                      items: List.generate(
-                                        4,
-                                        (index) => const TopListItem(
-                                          title: 'John Snow',
-                                          value: '₦260,000',
+                                      items: [
+                                        TopListItem(
+                                          title: 'Sarah Johnson',
+                                          value: '₦485,000',
                                         ),
-                                      ),
+                                        TopListItem(
+                                          title: 'Michael Chen',
+                                          value: '₦362,000',
+                                        ),
+                                        TopListItem(
+                                          title: 'Aisha Patel',
+                                          value: '₦298,500',
+                                        ),
+                                        TopListItem(
+                                          title: 'David Williams',
+                                          value: '₦245,000',
+                                        ),
+                                        TopListItem(
+                                          title: 'Elena Rodriguez',
+                                          value: '₦189,000',
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -93,15 +108,30 @@ class DashboardContent extends StatelessWidget {
                                 Expanded(
                                   child: Container(
                                     decoration: AppStyles.cardDecoration,
-                                    child: TopListCard(
+                                    child: const TopListCard(
                                       title: 'Top Selling Products',
-                                      items: List.generate(
-                                        4,
-                                        (index) => const TopListItem(
-                                          title: 'Bone Straight',
-                                          value: '₦260,000',
+                                      items: [
+                                        TopListItem(
+                                          title: 'Premium Hair Bundle',
+                                          value: '₦520,000',
                                         ),
-                                      ),
+                                        TopListItem(
+                                          title: 'Silk Base Closure',
+                                          value: '₦385,000',
+                                        ),
+                                        TopListItem(
+                                          title: 'Brazilian Wave',
+                                          value: '₦342,000',
+                                        ),
+                                        TopListItem(
+                                          title: 'Lace Frontal Wig',
+                                          value: '₦278,000',
+                                        ),
+                                        TopListItem(
+                                          title: 'Deep Wave Bundle',
+                                          value: '₦195,000',
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),

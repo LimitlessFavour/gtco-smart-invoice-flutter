@@ -1,3 +1,5 @@
+import 'package:gtco_smart_invoice_flutter/models/invoice.dart';
+
 class Client {
   final String id;
   final String companyId;
@@ -14,6 +16,7 @@ class Client {
   final int totalInvoicesDrafted;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final List<Invoice> invoices;
 
   Client({
     required this.id,
@@ -31,6 +34,7 @@ class Client {
     this.totalInvoicesDrafted = 0,
     this.createdAt,
     this.updatedAt,
+    this.invoices = const [],
   });
 
   String get fullName => '$firstName $lastName';
@@ -56,15 +60,22 @@ class Client {
       phoneNumber: json['phoneNumber'],
       mobileNumber: json['mobileNumber'] ?? '',
       address: json['address'],
-      totalOverdueAmount: (json['totalOverdueAmount'] ?? 0).toDouble(),
-      totalDraftedAmount: (json['totalDraftedAmount'] ?? 0).toDouble(),
-      totalPaidAmount: (json['totalPaidAmount'] ?? 0).toDouble(),
+      totalOverdueAmount:
+          double.tryParse(json['totalOverdueAmount']?.toString() ?? '0') ?? 0,
+      totalDraftedAmount:
+          double.tryParse(json['totalDraftedAmount']?.toString() ?? '0') ?? 0,
+      totalPaidAmount:
+          double.tryParse(json['totalPaidAmount']?.toString() ?? '0') ?? 0,
       totalInvoicesSent: json['totalInvoicesSent'] ?? 0,
       totalInvoicesDrafted: json['totalInvoicesDrafted'] ?? 0,
       createdAt:
           json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
       updatedAt:
           json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      invoices: (json['invoices'] as List<dynamic>?)
+              ?.map((invoice) => Invoice.fromJson(invoice))
+              .toList() ??
+          [],
     );
   }
 }

@@ -24,6 +24,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import './firebase_options.dart';
@@ -68,7 +69,8 @@ Future<void> main() async {
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
+      enabled: false,
+      // enabled: !kReleaseMode,
       builder: (context) => AppRoot(navigationService: navigationService),
     ),
   );
@@ -84,13 +86,31 @@ class AppRoot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return provider.MultiProvider(
-      providers: _createProviders(),
-      child: const SmartInvoiceApp(),
+    return FutureBuilder<List<SingleChildWidget>>(
+      future: _createProviders(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
+          return provider.MultiProvider(
+            providers: snapshot.data!,
+            child: const SmartInvoiceApp(),
+          );
+        }
+        return MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: LoadingAnimationWidget.threeArchedCircle(
+                color: const Color(0xFFE04403),
+                size: 50,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  List<SingleChildWidget> _createProviders() {
+  Future<List<SingleChildWidget>> _createProviders() async {
     // First create DioClient without the callback
     final dioClient = DioClient(
       baseUrl: apiBaseUrl,
@@ -104,6 +124,9 @@ class AppRoot extends StatelessWidget {
     dioClient.setTokenRefreshCallback(authProvider.handleTokenRefresh);
 
     final onboardingRepository = OnboardingRepository(dioClient, authProvider);
+
+    // Initialize SharedPreferences
+    // final sharedPrefs = await SharedPreferences.getInstance();
 
     return [
       provider.ChangeNotifierProvider<NavigationService>.value(
@@ -131,7 +154,9 @@ class AppRoot extends StatelessWidget {
         ),
       ),
       provider.Provider(
-        create: (context) => ClientRepository(dioClient),
+        create: (context) => ClientRepository(
+          dioClient,
+        ),
       ),
       provider.ChangeNotifierProvider(
         create: (context) => ClientProvider(context.read<ClientRepository>()),

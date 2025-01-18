@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/client/client_action_button.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import '../common/app_text.dart';
 import 'package:provider/provider.dart';
@@ -205,16 +206,23 @@ class _CreateClientFormState extends State<CreateClientForm> {
                           _clearForm();
                           widget.onCancel();
                         },
-                        child: const Text('Cancel'),
+                        child: const AppText('Cancel'),
                       ),
                       const Gap(16),
-                      ElevatedButton(
-                        onPressed: _showConfirmation,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.primaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(isEdit ? 'Update' : 'Save'),
+                      ClientActionButton(
+                        isEdit: isEdit,
+                        formKey: _formKey,
+                        formData: {
+                          'firstName': _firstNameController.text,
+                          'lastName': _lastNameController.text,
+                          'phoneNumber': _phoneController.text,
+                          'mobileNumber': _mobileController.text,
+                          'email': _emailController.text,
+                          'address': _addressController.text,
+                        },
+                        onCancel: widget.onCancel,
+                        clientId: widget.clientId,
+                        onSuccess: _clearForm,
                       ),
                     ],
                   ),

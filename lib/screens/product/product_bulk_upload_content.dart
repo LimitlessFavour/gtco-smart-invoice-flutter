@@ -21,72 +21,82 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
   File? _selectedFile;
   final Map<String, String> _columnMapping = {};
 
-  void goBack() {
-    final navigationService =
-        Provider.of<NavigationService>(context, listen: false);
-    navigationService.navigateToProductScreen(ProductScreen.list);
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final width = MediaQuery.of(context).size.width;
 
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Container(
-        width: width * 0.8,
-        constraints: BoxConstraints(maxWidth: width * 0.5),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    return Consumer<ProductProvider>(
+      builder: (context, provider, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header with actions
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              width: double.infinity,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              margin: const EdgeInsets.symmetric(horizontal: 24),
               decoration: const BoxDecoration(
-                color: Color(0xFFF9D9D2),
+                color: Color(0xFFF2F2F2),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(8),
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppText(
-                    'Import products and services',
-                    size: 16,
-                    weight: FontWeight.w600,
-                    color: theme.primaryColor,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => goBack(),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          context
+                              .read<NavigationService>()
+                              .navigateToProductScreen(ProductScreen.list);
+                        },
+                      ),
+                      const Gap(8),
+                      const AppText(
+                        'Import Products',
+                        size: 24,
+                        weight: FontWeight.w600,
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-            // Stepper
-            Container(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  _buildStepper(),
-                  const Gap(24),
-                  _buildCurrentStep(),
-                ],
+            // Stepper and Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFC6C1C1)),
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: _buildStepper(),
+                      ),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(24.0),
+                          child: _buildCurrentStep(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -140,16 +150,17 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
     );
   }
 
+
   Widget _buildCurrentStep() {
-    switch (_currentStep) {
-      case 0:
-        return _buildUploadStep();
-      case 1:
-        return _buildMapDataStep();
-      case 2:
-        return _buildImportStep();
-      default:
-        return const SizedBox();
+    final provider = context.watch<ProductProvider>();
+    final state = provider.bulkUploadState;
+
+    if (_currentStep == 0) {
+      return _buildUploadStep();
+    } else if (_currentStep == 1) {
+      return _buildMappingStep(provider.bulkUploadState.headers ?? []);
+    } else {
+      return _buildImportStep(state);
     }
   }
 
@@ -180,23 +191,12 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
             }
           },
         ),
-        const Gap(24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () => goBack(),
-              child: const AppText('Cancel'),
-            ),
-          ],
-        ),
       ],
     );
   }
 
-  Widget _buildMapDataStep() {
+  Widget _buildMappingStep(List<String> headers) {
     final provider = context.watch<ProductProvider>();
-    final headers = provider.bulkUploadState.headers ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +242,8 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
                   const Gap(16),
                   if (provider.bulkUploadState.sampleData?.isNotEmpty ?? false)
                     _buildSampleData(
-                        provider.bulkUploadState.sampleData!.first),
+                      provider.bulkUploadState.sampleData!.first,
+                    ),
                 ],
               ),
             ),
@@ -281,44 +282,50 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
     return requiredFields.map((field) {
       return Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: DropdownButtonFormField<String>(
-          value: _columnMapping[field],
-          decoration: InputDecoration(
-            labelText: field,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 120,
+              child: AppText(
+                field,
+                size: 14,
+                weight: FontWeight.w500,
+              ),
             ),
-          ),
-          items: [
-            const DropdownMenuItem(
-              value: null,
-              child: AppText('Choose a column'),
+            const Gap(16),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _columnMapping[field],
+                decoration: InputDecoration(
+                  hintText: 'Select field',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                items: headers.map((header) {
+                  return DropdownMenuItem(
+                    value: header,
+                    child: Text(header),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _columnMapping[field] = value;
+                    });
+                  }
+                },
+              ),
             ),
-            ...headers.map((header) {
-              return DropdownMenuItem(
-                value: header,
-                child: Text(header),
-              );
-            }),
           ],
-          onChanged: (value) {
-            setState(() {
-              if (value != null) {
-                _columnMapping[field] = value;
-              } else {
-                _columnMapping.remove(field);
-              }
-            });
-          },
         ),
       );
     }).toList();
   }
 
-  Widget _buildImportStep() {
-    final provider = context.watch<ProductProvider>();
-    final state = provider.bulkUploadState;
-
+  Widget _buildImportStep(BulkUploadState state) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -340,7 +347,11 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: () => goBack(),
+              onPressed: () {
+                context
+                    .read<NavigationService>()
+                    .navigateToProductScreen(ProductScreen.list);
+              },
               child: const AppText('Close'),
             ),
           ],
@@ -384,6 +395,7 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
 
     return Center(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Gap(16),
           const Icon(
@@ -414,7 +426,7 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
           size: 48,
         ),
         const Gap(16),
-        const AppText(
+        AppText(
           'Failed to import products',
           size: 16,
           weight: FontWeight.w500,
@@ -429,46 +441,6 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
         ],
       ],
     );
-  }
-
-  Future<void> _validateFile() async {
-    if (_selectedFile == null) return;
-
-    try {
-      final provider = context.read<ProductProvider>();
-      await provider.validateBulkUpload(_selectedFile!);
-
-      if (provider.bulkUploadState.status == BulkUploadStatus.validated) {
-        // Auto-map columns
-        _autoMapColumns(provider.bulkUploadState.headers ?? []);
-        setState(() => _currentStep = 1);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _startUpload() async {
-    try {
-      final provider = context.read<ProductProvider>();
-      setState(() => _currentStep = 2);
-      await provider.startBulkUpload(
-        file: _selectedFile!,
-        columnMapping: _columnMapping,
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   Widget _buildSampleData(Map<String, dynamic> sampleRow) {
@@ -519,6 +491,50 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
         ),
       ],
     );
+  }
+
+  Future<void> _validateFile() async {
+    if (_selectedFile == null) return;
+
+    try {
+      final provider = context.read<ProductProvider>();
+
+      if (!_selectedFile!.path.toLowerCase().endsWith('.csv')) {
+        throw Exception('Please select a valid CSV file');
+      }
+
+      await provider.validateBulkUpload(_selectedFile!);
+
+      if (provider.bulkUploadState.status == BulkUploadStatus.validated) {
+        _autoMapColumns(provider.bulkUploadState.headers ?? []);
+        setState(() => _currentStep = 1);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _startUpload() async {
+    try {
+      final provider = context.read<ProductProvider>();
+      setState(() => _currentStep = 2);
+      await provider.startBulkUpload(
+        file: _selectedFile!,
+        columnMapping: _columnMapping,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _autoMapColumns(List<String> headers) {

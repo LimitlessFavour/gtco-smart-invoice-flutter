@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../../services/navigation_service.dart';
 
-
 class ClientContent extends StatelessWidget {
   const ClientContent({super.key});
 
@@ -15,23 +14,26 @@ class ClientContent extends StatelessWidget {
     return Consumer2<NavigationService, ClientProvider>(
       builder: (context, navigation, clientProvider, _) {
         return KeyedSubtree(
-          key: ValueKey<String>('${navigation.currentInvoiceScreen}_${navigation.currentInvoiceId ?? ''}'),
-          child: _buildContent(navigation, clientProvider),
+          key: ValueKey<String>(
+              '${navigation.currentClientScreen}_${navigation.currentClientId ?? ''}'),
+          child: _buildContent(navigation),
         );
       },
     );
   }
 
-  Widget _buildContent(NavigationService navigation, ClientProvider clientProvider) {
+  Widget _buildContent(NavigationService navigation) {
     switch (navigation.currentClientScreen) {
       case ClientScreen.list:
         return const ClientListContent();
       case ClientScreen.bulkUpload:
         return const ClientBulkUploadContent();
+      case ClientScreen.view:
+      case ClientScreen.edit:
+      case ClientScreen.create:
+        return const ClientListContent();
       default:
-        // Fallback to list if no invoice ID
-      navigation.navigateToClientScreen(ClientScreen.list);
-      return const ClientListContent();
+        return const ClientListContent();
     }
   }
-} 
+}
