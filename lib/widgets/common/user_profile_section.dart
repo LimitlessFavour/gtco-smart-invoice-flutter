@@ -51,6 +51,52 @@ class UserProfileSection extends StatelessWidget {
     }
   }
 
+  Widget _buildAvatar(String? logoUrl, double radius) {
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.grey[200],
+      child: logoUrl != null && logoUrl.isNotEmpty
+          ? ClipOval(
+              child: Image.network(
+                logoUrl,
+                width: radius * 2,
+                height: radius * 2,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset(
+                    'assets/images/avatar_placeholder.png',
+                    width: radius * 2,
+                    height: radius * 2,
+                    fit: BoxFit.cover,
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: SizedBox(
+                      width: radius,
+                      height: radius,
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+          : Image.asset(
+              'assets/images/avatar_placeholder.png',
+              width: radius * 2,
+              height: radius * 2,
+              fit: BoxFit.cover,
+            ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -58,13 +104,7 @@ class UserProfileSection extends StatelessWidget {
 
     if (isMobile) {
       return IconButton(
-        icon: CircleAvatar(
-          backgroundImage: user?.company?.logo != null
-              ? NetworkImage(user!.company!.logo!)
-              : const AssetImage('assets/images/avatar_placeholder.png')
-                  as ImageProvider,
-          radius: 16,
-        ),
+        icon: _buildAvatar(user?.company?.logo, 16),
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -73,19 +113,14 @@ class UserProfileSection extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
-                        CircleAvatar(
-                          backgroundImage: AssetImage(
-                            'assets/images/avatar_placeholder.png',
-                          ),
-                          radius: 32,
-                        ),
-                        Gap(12),
+                        _buildAvatar(user?.company?.logo, 32),
+                        const Gap(12),
                         AppText(
-                          'Bee Daisy Hair & Merchandise',
+                          user?.company?.name ?? 'Company Name',
                           weight: FontWeight.w600,
                           size: 16,
                         ),
@@ -117,7 +152,6 @@ class UserProfileSection extends StatelessWidget {
                     onTap: () {
                       Navigator.pop(context);
                       _handleLogout(context);
-                      // _testSuccessDialog(context);
                     },
                   ),
                 ],
@@ -138,13 +172,7 @@ class UserProfileSection extends StatelessWidget {
       elevation: 4,
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundImage: user?.company?.logo != null
-                ? NetworkImage(user!.company!.logo!)
-                : const AssetImage('assets/images/avatar_placeholder.png')
-                    as ImageProvider,
-            radius: 16,
-          ),
+          _buildAvatar(user?.company?.logo, 16),
           const Gap(12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +188,6 @@ class UserProfileSection extends StatelessWidget {
                 size: 16,
               ),
               AppText(
-                // 'Merchant',
                 'Sales Admin',
                 color: Colors.grey[600],
                 size: 14,
