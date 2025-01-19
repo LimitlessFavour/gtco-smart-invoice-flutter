@@ -5,6 +5,7 @@ import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dashboard_provider.dart';
 import 'package:intl/intl.dart';
+import 'dashboard_empty_states.dart';
 
 class PaymentChart extends StatefulWidget {
   const PaymentChart({super.key});
@@ -37,6 +38,11 @@ class _PaymentChartState extends State<PaymentChart>
     super.dispose();
   }
 
+  bool _hasSignificantPayments(List<PaymentsByMonth> payments) {
+    // Check if there's any payment with an amount greater than 0
+    return payments.any((payment) => payment.amount > 0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<DashboardProvider>(
@@ -46,8 +52,9 @@ class _PaymentChartState extends State<PaymentChart>
         }
 
         final analytics = provider.analytics;
-        if (analytics == null) {
-          return const Center(child: Text('No data available'));
+        if (analytics == null ||
+            !_hasSignificantPayments(analytics.paymentsTimeline)) {
+          return const PaymentChartEmptyState();
         }
 
         if (provider.shouldAnimatePayments &&

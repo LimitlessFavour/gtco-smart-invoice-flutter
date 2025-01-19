@@ -9,9 +9,11 @@ class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
     super.key,
     required this.message,
+    this.iconColor,
   });
 
   final String message;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +26,12 @@ class AppEmptyState extends StatelessWidget {
             'assets/images/receipt.png',
             height: 50,
             width: 50,
-            color: Colors.grey[600],
+            color: iconColor?? Colors.grey[600],
           ),
           const Gap(6),
           AppText(
             message,
+            textAlign: TextAlign.center,
             color: Colors.grey,
           ),
         ],

@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:gtco_smart_invoice_flutter/models/bulk_upload_state.dart';
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:gtco_smart_invoice_flutter/models/bulk_upload_state.dart';
 
-import '../models/product.dart';
 import '../models/create_product.dart';
+import '../models/product.dart';
 import '../repositories/product_repository.dart';
-import '../services/logger_service.dart';
 
 class ProductProvider extends ChangeNotifier {
   final ProductRepository _repository;
@@ -23,7 +22,17 @@ class ProductProvider extends ChangeNotifier {
     loadProducts();
   }
 
-  List<Product> get products => _products;
+  List<Product> get products {
+    if (_searchQuery.isEmpty) {
+      return _products;
+    }
+    return _products.where((product) {
+      final query = _searchQuery.toLowerCase();
+      return product.productName.toLowerCase().contains(query) ||
+          (product.description?.toLowerCase().contains(query) ?? false) ||
+          (product.sku?.toLowerCase().contains(query) ?? false);
+    }).toList();
+  }
 
   bool get isLoading => _isLoading;
   String? get error => _error;
