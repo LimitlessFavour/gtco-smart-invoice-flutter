@@ -86,12 +86,12 @@ class _ClientActionButtonState extends State<ClientActionButton> {
             ? widget.clientId!
             : DateTime.now().millisecondsSinceEpoch.toString(),
         companyId: user?.company?.id ?? '1',
-        firstName: widget.formData['firstName'],
-        lastName: widget.formData['lastName'],
-        email: widget.formData['email'],
-        phoneNumber: widget.formData['phoneNumber'],
-        mobileNumber: widget.formData['mobileNumber'],
-        address: widget.formData['address'],
+        firstName: widget.formData['firstName'].trim(),
+        lastName: widget.formData['lastName'].trim(),
+        email: widget.formData['email'].trim(),
+        phoneNumber: widget.formData['phoneNumber'].trim(),
+        mobileNumber: widget.formData['mobileNumber'].trim(),
+        address: widget.formData['address'].trim(),
       );
 
       final success = await provider.submitClient(client, widget.isEdit);
@@ -113,11 +113,21 @@ class _ClientActionButtonState extends State<ClientActionButton> {
           widget.onSuccess?.call();
           navigationService.navigateToClientScreen(ClientScreen.list);
         }
+      } else if (context.mounted && provider.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: AppText(provider.error!),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: AppText(e.toString())),
+          SnackBar(
+            content: AppText(e.toString()),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {

@@ -28,7 +28,6 @@ class ClientContent extends StatelessWidget {
       case ClientScreen.list:
         return const ClientListContent();
       case ClientScreen.bulkUpload:
-        print('Building ClientBulkUploadContent');
         return const ClientBulkUploadContent();
       case ClientScreen.view:
       case ClientScreen.edit:

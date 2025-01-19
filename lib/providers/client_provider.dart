@@ -103,11 +103,17 @@ class ClientProvider extends ChangeNotifier {
       notifyListeners();
 
       final newClient = await _repository.createClient(client);
-      _clients.insert(0, newClient);
+      if (newClient != null) {
+        _clients.insert(0, newClient);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
 
       _isLoading = false;
+      _error = 'Failed to create client';
       notifyListeners();
-      return true;
+      return false;
     } catch (e) {
       LoggerService.error('Error creating client', error: e);
       _isLoading = false;
@@ -176,6 +182,32 @@ class ClientProvider extends ChangeNotifier {
 
   Future<bool> submitClient(Client client, bool isEdit) async {
     try {
+      // Validate required fields
+      if (client.firstName.trim().isEmpty ||
+          client.lastName.trim().isEmpty ||
+          client.email.trim().isEmpty ||
+          client.phoneNumber.trim().isEmpty ||
+          client.address.trim().isEmpty) {
+        _error = 'All fields are required';
+        notifyListeners();
+        return false;
+      }
+
+      // Validate email format
+      if (!RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+')
+          .hasMatch(client.email)) {
+        _error = 'Please enter a valid email address';
+        notifyListeners();
+        return false;
+      }
+
+      // Validate phone number format
+      if (!RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(client.phoneNumber)) {
+        _error = 'Please enter a valid phone number';
+        notifyListeners();
+        return false;
+      }
+
       _isLoading = true;
       notifyListeners();
 

@@ -112,24 +112,10 @@ class PaymentChartEmptyState extends StatelessWidget {
                     ),
                   ),
                   const Gap(24),
-                  Image.asset(
-                    'assets/images/receipt.png',
-                    height: 48,
-                    width: 48,
-                    color: theme.primaryColor,
-                  ),
-                  const Gap(16),
-                  const AppText(
-                    'No payment data available',
-                    color: Color(0xFF6A6A6A),
-                    size: 16,
-                    weight: FontWeight.w600,
-                  ),
-                  const Gap(8),
-                  AppText(
-                    'Start creating invoices to track your payments',
-                    color: Colors.grey[600],
-                    size: 14,
+                  AppEmptyState(
+                    header: 'No payment data available',
+                    message: 'Start creating invoices to track your payments',
+                    iconColor: theme.primaryColor,
                   ),
                 ],
               ),
@@ -171,8 +157,9 @@ class TopPayingClientsEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AppEmptyState(
+      header: 'No paying clients yet',
       message:
-          'No paying clients yet\nCreate invoices to track your top clients',
+          'Create invoices to track your top clients',
       iconColor: theme.primaryColor,
     );
   }
@@ -185,8 +172,9 @@ class TopSellingProductsEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AppEmptyState(
+      header: 'No products sold yet',
       message:
-          'No products sold yet\nAdd products and create invoices to track sales',
+          'Add products and create invoices to track sales',
       iconColor: theme.primaryColor,
     );
   }

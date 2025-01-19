@@ -19,28 +19,21 @@ class ClientListContent extends StatelessWidget {
       builder: (context, navigation, clientProvider, _) {
         if (navigation.currentClientScreen == ClientScreen.view &&
             navigation.currentClientId != null) {
-          try {
-            final client =
-                clientProvider.getClientById(navigation.currentClientId!);
-            return FutureBuilder<Client?>(
-              future: client,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CommonProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: AppText(snapshot.error.toString()));
-                }
-                if (snapshot.hasData) {
-                  return CurrentClientContent(client: snapshot.data!);
-                }
-                return EmptyOrErrorState(navigation: navigation);
-              },
-            );
-          } catch (e) {
-            // Handle the case when client is not found
-            return EmptyOrErrorState(navigation: navigation);
-          }
+          return FutureBuilder<Client?>(
+            future: clientProvider.getClientById(navigation.currentClientId!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CommonProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: AppText(snapshot.error.toString()));
+              }
+              if (snapshot.hasData) {
+                return CurrentClientContent(client: snapshot.data!);
+              }
+              return EmptyOrErrorState(navigation: navigation);
+            },
+          );
         }
 
         // Show client list by default

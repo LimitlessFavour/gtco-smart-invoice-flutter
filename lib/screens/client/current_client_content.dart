@@ -528,34 +528,34 @@ class CurrentClientContent extends StatelessWidget {
       context: context,
       builder: (context) => AppConfirmationDialog(
         title: 'Delete Client',
-        content: 'Are you sure you want to delete ${client.fullName}?',
+        content:
+            'Are you sure you want to delete ${client.fullName}? This action cannot be undone.',
         confirmText: 'Delete',
         cancelText: 'Cancel',
       ),
     );
 
     if (confirmed == true && context.mounted) {
-      // Schedule the delete operation for the next frame
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        final success =
-            await context.read<ClientProvider>().deleteClient(client.id);
+      final success =
+          await context.read<ClientProvider>().deleteClient(client.id);
 
-        if (success && context.mounted) {
-          await showDialog(
-            context: context,
-            builder: (context) => const AppSuccessDialog(
-              title: 'Successful!',
-              message: 'Client deleted successfully',
-            ),
-          );
+      if (success && context.mounted) {
+        // First show success dialog
+        await showDialog(
+          context: context,
+          builder: (context) => const AppSuccessDialog(
+            title: 'Successful!',
+            message: 'Client deleted successfully',
+          ),
+        );
 
-          if (context.mounted) {
-            context
-                .read<NavigationService>()
-                .navigateToClientScreen(ClientScreen.list);
-          }
+        // Then navigate back to list if context is still mounted
+        if (context.mounted) {
+          context
+              .read<NavigationService>()
+              .navigateToClientScreen(ClientScreen.list);
         }
-      });
+      }
     }
   }
 
