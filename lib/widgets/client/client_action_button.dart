@@ -35,11 +35,16 @@ class _ClientActionButtonState extends State<ClientActionButton> {
 
   @override
   Widget build(BuildContext context) {
+    // check height of the screen
+    final screenHeight = MediaQuery.of(context).size.height;
     return ElevatedButton(
       onPressed: _isLoading ? null : _handleSubmit,
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFFE04403),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: screenHeight > 600 ? 16 : 12,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
       child: _isLoading

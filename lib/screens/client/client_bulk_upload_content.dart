@@ -4,6 +4,8 @@ import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/file_upload.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_picker/file_picker.dart';
 import '../../models/bulk_upload_state.dart';
 import '../../providers/client_provider.dart';
 import '../../widgets/common/app_text.dart';
@@ -18,14 +20,11 @@ class ClientBulkUploadContent extends StatefulWidget {
 
 class _ClientBulkUploadContentState extends State<ClientBulkUploadContent> {
   int _currentStep = 0;
-  File? _selectedFile;
+  dynamic _selectedFile; // Can be File or PlatformFile
   final Map<String, String> _columnMapping = {};
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final width = MediaQuery.of(context).size.width;
-
     return Consumer<ClientProvider>(
       builder: (context, provider, child) {
         return Column(
@@ -181,8 +180,14 @@ class _ClientBulkUploadContentState extends State<ClientBulkUploadContent> {
         const Gap(24),
         FileUpload(
           label: 'Click to upload or drag and drop CSV file',
-          onFileSelected: (String? path) {
-            if (path != null) {
+          allowedExtensions: const ['csv'],
+          onFileSelected: (String? path, {PlatformFile? webFile}) {
+            if (kIsWeb && webFile != null) {
+              setState(() {
+                _selectedFile = webFile;
+              });
+              _validateFile();
+            } else if (path != null) {
               setState(() {
                 _selectedFile = File(path);
               });
@@ -196,9 +201,9 @@ class _ClientBulkUploadContentState extends State<ClientBulkUploadContent> {
           children: [
             TextButton(
               onPressed: () {
-                final navigationService =
-                    Provider.of<NavigationService>(context, listen: false);
-                navigationService.navigateToClientScreen(ClientScreen.list);
+                context
+                    .read<NavigationService>()
+                    .navigateToClientScreen(ClientScreen.list);
               },
               child: const AppText('Cancel'),
             ),
@@ -506,12 +511,18 @@ class _ClientBulkUploadContentState extends State<ClientBulkUploadContent> {
     try {
       final provider = context.read<ClientProvider>();
 
-      // Add file validation
-      if (!_selectedFile!.path.toLowerCase().endsWith('.csv')) {
-        throw Exception('Please select a valid CSV file');
+      if (kIsWeb) {
+        if (_selectedFile is! PlatformFile ||
+            !_selectedFile.name.toLowerCase().endsWith('.csv')) {
+          throw Exception('Please select a valid CSV file');
+        }
+      } else {
+        if (!_selectedFile.path.toLowerCase().endsWith('.csv')) {
+          throw Exception('Please select a valid CSV file');
+        }
       }
 
-      await provider.validateBulkUpload(_selectedFile!);
+      await provider.validateBulkUpload(_selectedFile);
 
       if (provider.bulkUploadState.status == BulkUploadStatus.validated) {
         _autoMapColumns(provider.bulkUploadState.headers ?? []);
@@ -532,7 +543,7 @@ class _ClientBulkUploadContentState extends State<ClientBulkUploadContent> {
       final provider = context.read<ClientProvider>();
       setState(() => _currentStep = 2);
       await provider.startBulkUpload(
-        file: _selectedFile!,
+        file: _selectedFile,
         columnMapping: _columnMapping,
       );
     } catch (e) {

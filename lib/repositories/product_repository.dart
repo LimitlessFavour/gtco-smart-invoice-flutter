@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -46,7 +48,6 @@ class ProductRepository {
       Map<String, dynamic> formData = {
         'productName': product.productName,
         'description': product.description,
-        //TODO: mod herre for errors.
         'category': product.category.name,
         'price': product.price,
         'defaultQuantity': product.defaultQuantity,
@@ -58,10 +59,28 @@ class ProductRepository {
       }
 
       if (product.image != null) {
-        final form = FormData.fromMap({
-          ...formData,
-          'image': await MultipartFile.fromFile(product.image!),
-        });
+        final form = FormData.fromMap(formData);
+
+        if (kIsWeb) {
+          // For web platform
+          final pickedFile = XFile(product.image!);
+          final bytes = await pickedFile.readAsBytes();
+          final filename = product.image!.split('/').last;
+          form.files.add(MapEntry(
+            'image',
+            MultipartFile.fromBytes(
+              bytes,
+              filename: filename,
+            ),
+          ));
+        } else {
+          // For mobile platform
+          form.files.add(MapEntry(
+            'image',
+            await MultipartFile.fromFile(product.image!),
+          ));
+        }
+
         final response = await _dioClient.post('/product', data: form);
         return Product.fromJson(response.data);
       }
@@ -93,10 +112,28 @@ class ProductRepository {
       }
 
       if (product.image != null) {
-        final form = FormData.fromMap({
-          ...formData,
-          'image': await MultipartFile.fromFile(product.image!),
-        });
+        final form = FormData.fromMap(formData);
+
+        if (kIsWeb) {
+          // For web platform
+          final pickedFile = XFile(product.image!);
+          final bytes = await pickedFile.readAsBytes();
+          final filename = product.image!.split('/').last;
+          form.files.add(MapEntry(
+            'image',
+            MultipartFile.fromBytes(
+              bytes,
+              filename: filename,
+            ),
+          ));
+        } else {
+          // For mobile platform
+          form.files.add(MapEntry(
+            'image',
+            await MultipartFile.fromFile(product.image!),
+          ));
+        }
+
         final response = await _dioClient.put('/product/$id', data: form);
         return Product.fromJson(response.data);
       }
@@ -124,10 +161,26 @@ class ProductRepository {
 
   Future<Map<String, dynamic>> validateBulkUpload(File file) async {
     try {
-      final form = FormData.fromMap({
-        'file':
-            await MultipartFile.fromFile(file.path, filename: 'products.csv'),
-      });
+      final form = FormData.fromMap({});
+
+      if (kIsWeb) {
+        // For web platform
+        final pickedFile = XFile(file.path);
+        final bytes = await pickedFile.readAsBytes();
+        form.files.add(MapEntry(
+          'file',
+          MultipartFile.fromBytes(
+            bytes,
+            filename: 'products.csv',
+          ),
+        ));
+      } else {
+        // For mobile platform
+        form.files.add(MapEntry(
+          'file',
+          await MultipartFile.fromFile(file.path, filename: 'products.csv'),
+        ));
+      }
 
       final response =
           await _dioClient.post('/product/bulk-upload/validate', data: form);
@@ -144,12 +197,29 @@ class ProductRepository {
   }) async {
     try {
       final form = FormData.fromMap({
-        'file':
-            await MultipartFile.fromFile(file.path, filename: 'products.csv'),
         'columnMapping': jsonEncode(columnMapping),
         if (defaultValues != null) 'defaultValues': jsonEncode(defaultValues),
         'batchSize': 100,
       });
+
+      if (kIsWeb) {
+        // For web platform
+        final pickedFile = XFile(file.path);
+        final bytes = await pickedFile.readAsBytes();
+        form.files.add(MapEntry(
+          'file',
+          MultipartFile.fromBytes(
+            bytes,
+            filename: 'products.csv',
+          ),
+        ));
+      } else {
+        // For mobile platform
+        form.files.add(MapEntry(
+          'file',
+          await MultipartFile.fromFile(file.path, filename: 'products.csv'),
+        ));
+      }
 
       final response =
           await _dioClient.post('/product/bulk-upload', data: form);
@@ -176,6 +246,51 @@ class ProductRepository {
       return List<String>.from(response.data);
     } catch (e) {
       throw Exception('Failed to get job errors: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> validateBulkUploadWeb(
+    Uint8List bytes,
+    String filename,
+  ) async {
+    try {
+      final form = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+        ),
+      });
+
+      final response =
+          await _dioClient.post('/product/bulk-upload/validate', data: form);
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to validate file: $e');
+    }
+  }
+
+  Future<String> startBulkUploadWeb({
+    required Uint8List bytes,
+    required String filename,
+    required Map<String, String> columnMapping,
+    Map<String, dynamic>? defaultValues,
+  }) async {
+    try {
+      final form = FormData.fromMap({
+        'columnMapping': jsonEncode(columnMapping),
+        if (defaultValues != null) 'defaultValues': jsonEncode(defaultValues),
+        'batchSize': 100,
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+        ),
+      });
+
+      final response =
+          await _dioClient.post('/product/bulk-upload', data: form);
+      return response.data['jobId'];
+    } catch (e) {
+      throw Exception('Failed to start bulk upload: $e');
     }
   }
 }

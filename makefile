@@ -9,6 +9,10 @@ DART_DEFINES = --dart-define=API_BASE_URL=$(API_BASE_URL) \
 
 .PHONY: run build-web build-ios build-apk clean
 
+
+run-ipad-simulator:
+	flutter run -d 75709168-4555-4841-A49A-923B7573961F --dart-define-from-file=.env.production lib/main.dart
+
 # Development
 run:
 	flutter run $(DART_DEFINES)
@@ -20,7 +24,7 @@ build-web:
 # flutter build web --release $(DART_DEFINES)
 
 run-web:
-	cp .env.development .env
+	cp .env.production .env
 	flutter run -d chrome --dart-define-from-file=.env
 #   flutter run -d chrome $(DART_DEFINES)
 

@@ -4,6 +4,8 @@ import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/file_upload.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_picker/file_picker.dart';
 import '../../models/bulk_upload_state.dart';
 import '../../providers/product_provider.dart';
 import '../../widgets/common/app_text.dart';
@@ -18,7 +20,7 @@ class ProductBulkUploadContent extends StatefulWidget {
 
 class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
   int _currentStep = 0;
-  File? _selectedFile;
+  dynamic _selectedFile; // Can be File or PlatformFile
   final Map<String, String> _columnMapping = {};
 
   @override
@@ -150,7 +152,6 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
     );
   }
 
-
   Widget _buildCurrentStep() {
     final provider = context.watch<ProductProvider>();
     final state = provider.bulkUploadState;
@@ -182,8 +183,13 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
         const Gap(24),
         FileUpload(
           label: 'Click to upload or drag and drop CSV file',
-          onFileSelected: (String? path) {
-            if (path != null) {
+          onFileSelected: (String? path, {PlatformFile? webFile}) {
+            if (kIsWeb && webFile != null) {
+              setState(() {
+                _selectedFile = webFile;
+              });
+              _validateFile();
+            } else if (path != null) {
               setState(() {
                 _selectedFile = File(path);
               });
@@ -499,11 +505,18 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
     try {
       final provider = context.read<ProductProvider>();
 
-      if (!_selectedFile!.path.toLowerCase().endsWith('.csv')) {
-        throw Exception('Please select a valid CSV file');
+      if (kIsWeb) {
+        if (_selectedFile is! PlatformFile ||
+            !_selectedFile.name.toLowerCase().endsWith('.csv')) {
+          throw Exception('Please select a valid CSV file');
+        }
+      } else {
+        if (!_selectedFile.path.toLowerCase().endsWith('.csv')) {
+          throw Exception('Please select a valid CSV file');
+        }
       }
 
-      await provider.validateBulkUpload(_selectedFile!);
+      await provider.validateBulkUpload(_selectedFile);
 
       if (provider.bulkUploadState.status == BulkUploadStatus.validated) {
         _autoMapColumns(provider.bulkUploadState.headers ?? []);
@@ -524,7 +537,7 @@ class _ProductBulkUploadContentState extends State<ProductBulkUploadContent> {
       final provider = context.read<ProductProvider>();
       setState(() => _currentStep = 2);
       await provider.startBulkUpload(
-        file: _selectedFile!,
+        file: _selectedFile,
         columnMapping: _columnMapping,
       );
     } catch (e) {

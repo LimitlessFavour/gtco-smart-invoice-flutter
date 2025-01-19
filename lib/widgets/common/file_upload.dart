@@ -1,63 +1,48 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:universal_html/html.dart' as html;
 import 'app_text.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 
 class FileUpload extends StatefulWidget {
-  final Function(String?) onFileSelected;
+  final Function(String? path, {PlatformFile? webFile}) onFileSelected;
   final String label;
-  final List<String> allowedExtensions;
-  final Key? fileKey;
+  final List<String>? allowedExtensions;
 
   const FileUpload({
     super.key,
     required this.onFileSelected,
-    this.label = 'Upload File',
-    this.allowedExtensions = const ['csv'],
-    this.fileKey,
+    this.label = 'Click to upload or drag and drop file',
+    this.allowedExtensions,
   });
 
   @override
-  State<FileUpload> createState() => FileUploadState();
+  State<FileUpload> createState() => _FileUploadState();
 }
 
-class FileUploadState extends State<FileUpload> {
-  String? _selectedFilePath;
-  String? _fileName;
-  html.File? _webFile;
+class _FileUploadState extends State<FileUpload> {
+  String? _selectedFileName;
+  bool _isDragging = false;
 
   Future<void> _pickFile() async {
     try {
-      if (kIsWeb) {
-        final input = html.FileUploadInputElement()
-          ..accept = widget.allowedExtensions.map((e) => '.$e').join(',');
-        input.click();
+      final result = await FilePicker.platform.pickFiles(
+        type: widget.allowedExtensions != null ? FileType.custom : FileType.any,
+        allowedExtensions: widget.allowedExtensions,
+        withData: kIsWeb, // Only load data in web
+      );
 
-        await input.onChange.first;
-        if (input.files?.isNotEmpty ?? false) {
-          _webFile = input.files!.first;
-          setState(() {
-            _fileName = _webFile!.name;
-            _selectedFilePath = _webFile!.name;
-          });
-          widget.onFileSelected(_selectedFilePath);
-        }
-      } else {
-        FilePickerResult? result = await FilePicker.platform.pickFiles(
-          type: FileType.custom,
-          allowedExtensions: widget.allowedExtensions,
-          withData: kIsWeb,
-        );
+      if (result != null) {
+        setState(() {
+          _selectedFileName = result.files.first.name;
+        });
 
-        if (result != null) {
-          setState(() {
-            _selectedFilePath = result.files.single.path;
-            _fileName = result.files.single.name;
-          });
-          widget.onFileSelected(_selectedFilePath);
+        if (kIsWeb) {
+          widget.onFileSelected(null, webFile: result.files.first);
+        } else {
+          widget.onFileSelected(result.files.first.path);
         }
       }
     } catch (e) {
@@ -65,105 +50,102 @@ class FileUploadState extends State<FileUpload> {
     }
   }
 
-  void clearFile() {
-    setState(() {
-      _selectedFilePath = null;
-      _fileName = null;
-      _webFile = null;
-    });
-    widget.onFileSelected(null);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        AppText(
-          widget.label,
-          size: 14,
-          weight: FontWeight.w500,
-        ),
-        const Gap(8),
-        GestureDetector(
+    return DragTarget<List<dynamic>>(
+      onAccept: (List<dynamic> data) async {
+        if (data.isEmpty) return;
+
+        if (kIsWeb) {
+          // Handle web drag and drop
+          final bytes = data[0] as Uint8List;
+          final name = data[1] as String;
+
+          final platformFile = PlatformFile(
+            name: name,
+            size: bytes.length,
+            bytes: bytes,
+          );
+
+          setState(() {
+            _selectedFileName = name;
+            _isDragging = false;
+          });
+
+          widget.onFileSelected(null, webFile: platformFile);
+        } else {
+          // Handle mobile drag and drop
+          final path = data[0] as String;
+          setState(() {
+            _selectedFileName = path.split('/').last;
+            _isDragging = false;
+          });
+          widget.onFileSelected(path);
+        }
+      },
+      onLeave: (data) {
+        setState(() => _isDragging = false);
+      },
+      onWillAccept: (data) {
+        setState(() => _isDragging = true);
+        return true;
+      },
+      builder: (context, candidateData, rejectedData) {
+        return GestureDetector(
           onTap: _pickFile,
-          child: Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE0E0E0)),
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                if (_selectedFilePath == null)
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.upload_file_outlined,
-                        size: 40,
-                        color: Colors.grey[400],
-                      ),
-                      const Gap(8),
-                      AppText(
-                        'Click to upload CSV file',
-                        size: 12,
-                        color: Colors.grey[600]!,
-                      ),
-                    ],
-                  )
-                else
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.description_outlined,
-                        size: 40,
-                        color: Colors.grey[600],
-                      ),
-                      const Gap(8),
-                      AppText(
-                        _fileName ?? 'File selected',
-                        size: 12,
-                        color: Colors.grey[800]!,
-                      ),
-                    ],
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _isDragging
+                      ? const Color(0xFF00A651)
+                      : const Color(0xFFE0E0E0),
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                color:
+                    _isDragging ? const Color(0xFFF5FFF9) : Colors.transparent,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _selectedFileName != null
+                        ? Icons.file_present
+                        : Icons.cloud_upload_outlined,
+                    size: 40,
+                    color: _isDragging
+                        ? const Color(0xFF00A651)
+                        : Colors.grey[400],
                   ),
-                if (_selectedFilePath != null)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: clearFile,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.close,
-                          size: 20,
-                          color: Color(0xFFE04403),
-                        ),
-                      ),
+                  const Gap(8),
+                  if (_selectedFileName != null) ...[
+                    AppText(
+                      _selectedFileName!,
+                      size: 14,
+                      weight: FontWeight.w500,
                     ),
-                  ),
-              ],
+                    const Gap(4),
+                    AppText(
+                      'Click to change file',
+                      size: 12,
+                      color: Colors.grey[600]!,
+                    ),
+                  ] else
+                    AppText(
+                      widget.label,
+                      size: 14,
+                      color: Colors.grey[600]!,
+                    ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

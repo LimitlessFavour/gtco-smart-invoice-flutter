@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../models/client.dart';
 import '../services/dio_client.dart';
@@ -23,7 +24,7 @@ class ClientRepository {
       }
 
       // Based on the API schema, the response will be wrapped in a ClientListResponseDto
-      final clients = (response.data['data'] as List)
+      final clients = (response.data['data'] as List? ?? [])
           .map((json) => Client.fromJson(json))
           .toList();
       return clients;
@@ -103,13 +104,31 @@ class ClientRepository {
 
   Future<Map<String, dynamic>> validateBulkUpload(File file) async {
     try {
-      final form = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: 'clients.csv',
-          contentType: MediaType('text', 'csv'),
-        ),
-      });
+      final form = FormData.fromMap({});
+
+      if (kIsWeb) {
+        // For web platform
+        final pickedFile = XFile(file.path);
+        final bytes = await pickedFile.readAsBytes();
+        form.files.add(MapEntry(
+          'file',
+          MultipartFile.fromBytes(
+            bytes,
+            filename: 'clients.csv',
+            contentType: MediaType('text', 'csv'),
+          ),
+        ));
+      } else {
+        // For mobile platform
+        form.files.add(MapEntry(
+          'file',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: 'clients.csv',
+            contentType: MediaType('text', 'csv'),
+          ),
+        ));
+      }
 
       final response = await _dioClient.post(
         '/client/bulk-upload/validate',
@@ -138,15 +157,34 @@ class ClientRepository {
           columnMapping.map((key, value) => MapEntry(value, key));
 
       final form = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          file.path,
-          filename: 'clients.csv',
-          contentType: MediaType('text', 'csv'),
-        ),
         'columnMapping': jsonEncode(reversedMapping),
         'defaultValues': jsonEncode(defaultValues ?? {}),
         'batchSize': 100,
       });
+
+      if (kIsWeb) {
+        // For web platform
+        final pickedFile = XFile(file.path);
+        final bytes = await pickedFile.readAsBytes();
+        form.files.add(MapEntry(
+          'file',
+          MultipartFile.fromBytes(
+            bytes,
+            filename: 'clients.csv',
+            contentType: MediaType('text', 'csv'),
+          ),
+        ));
+      } else {
+        // For mobile platform
+        form.files.add(MapEntry(
+          'file',
+          await MultipartFile.fromFile(
+            file.path,
+            filename: 'clients.csv',
+            contentType: MediaType('text', 'csv'),
+          ),
+        ));
+      }
 
       final response = await _dioClient.post(
         '/client/bulk-upload',
@@ -183,5 +221,67 @@ class ClientRepository {
       throw Exception('Failed to get upload errors: $e');
     }
   }
- 
+
+  Future<Map<String, dynamic>> validateBulkUploadWeb(
+    Uint8List bytes,
+    String filename,
+  ) async {
+    try {
+      final form = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+          contentType: MediaType('text', 'csv'),
+        ),
+      });
+
+      final response = await _dioClient.post(
+        '/client/bulk-upload/validate',
+        data: form,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('Failed to validate file: $e');
+    }
+  }
+
+  Future<String> startBulkUploadWeb({
+    required Uint8List bytes,
+    required String filename,
+    required Map<String, String> columnMapping,
+    Map<String, dynamic>? defaultValues,
+  }) async {
+    try {
+      final form = FormData.fromMap({
+        'columnMapping': jsonEncode(columnMapping),
+        'defaultValues': jsonEncode(defaultValues ?? {}),
+        'batchSize': 100,
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: filename,
+          contentType: MediaType('text', 'csv'),
+        ),
+      });
+
+      final response = await _dioClient.post(
+        '/client/bulk-upload',
+        data: form,
+        options: Options(
+          contentType: 'multipart/form-data',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+      return response.data['jobId'];
+    } catch (e) {
+      throw Exception('Failed to start bulk upload: $e');
+    }
+  }
 }

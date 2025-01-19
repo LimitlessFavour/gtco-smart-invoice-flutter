@@ -47,7 +47,6 @@ enum SettingsScreen {
 }
 
 class NavigationService extends ChangeNotifier {
-
   final NavigationPlatform _platform;
   AppScreen _currentScreen = AppScreen.dashboard;
   InvoiceScreen _currentInvoiceScreen = InvoiceScreen.list;
@@ -86,7 +85,8 @@ class NavigationService extends ChangeNotifier {
       case AppScreen.client:
         return _currentClientScreen == ClientScreen.create ||
             _currentClientScreen == ClientScreen.view ||
-            _currentClientScreen == ClientScreen.edit;
+            _currentClientScreen == ClientScreen.edit ||
+            _currentClientScreen == ClientScreen.bulkUpload;
       case AppScreen.settings:
         return _currentSettingsScreen != SettingsScreen.list;
       default:
@@ -129,8 +129,11 @@ class NavigationService extends ChangeNotifier {
         }
         return false;
       case AppScreen.product:
-        if (_currentProductScreen == ProductScreen.create) {
+        if (_currentProductScreen == ProductScreen.create ||
+            _currentProductScreen == ProductScreen.edit ||
+            _currentProductScreen == ProductScreen.bulkUpload) {
           _currentProductScreen = ProductScreen.list;
+          _currentProductId = null;
           _updateBrowserUrl('/product');
           notifyListeners();
           return true;
@@ -139,7 +142,8 @@ class NavigationService extends ChangeNotifier {
       case AppScreen.client:
         if (_currentClientScreen == ClientScreen.create ||
             _currentClientScreen == ClientScreen.view ||
-            _currentClientScreen == ClientScreen.edit) {
+            _currentClientScreen == ClientScreen.edit ||
+            _currentClientScreen == ClientScreen.bulkUpload) {
           _currentClientScreen = ClientScreen.list;
           _currentClientId = null;
           _updateBrowserUrl('/client');
@@ -205,6 +209,8 @@ class NavigationService extends ChangeNotifier {
     } else if ((screen == ClientScreen.view || screen == ClientScreen.edit) &&
         clientId != null) {
       path = '$path/${screen == ClientScreen.edit ? 'edit/' : ''}$clientId';
+    } else if (screen == ClientScreen.bulkUpload) {
+      path = '$path/bulk-upload';
     }
 
     _updateBrowserUrl(path);
@@ -297,6 +303,9 @@ class NavigationService extends ChangeNotifier {
 
       if (path == '/client/create') {
         _currentClientScreen = ClientScreen.create;
+        _currentClientId = null;
+      } else if (path == '/client/bulk-upload') {
+        _currentClientScreen = ClientScreen.bulkUpload;
         _currentClientId = null;
       } else if (path == '/client') {
         _currentClientScreen = ClientScreen.list;

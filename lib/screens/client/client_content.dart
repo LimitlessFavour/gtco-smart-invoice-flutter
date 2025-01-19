@@ -13,6 +13,7 @@ class ClientContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<NavigationService, ClientProvider>(
       builder: (context, navigation, clientProvider, _) {
+        print('Current client screen: ${navigation.currentClientScreen}');
         return KeyedSubtree(
           key: ValueKey<String>(
               '${navigation.currentClientScreen}_${navigation.currentClientId ?? ''}'),
@@ -27,12 +28,14 @@ class ClientContent extends StatelessWidget {
       case ClientScreen.list:
         return const ClientListContent();
       case ClientScreen.bulkUpload:
+        print('Building ClientBulkUploadContent');
         return const ClientBulkUploadContent();
       case ClientScreen.view:
       case ClientScreen.edit:
       case ClientScreen.create:
         return const ClientListContent();
       default:
+        navigation.navigateToClientScreen(ClientScreen.list);
         return const ClientListContent();
     }
   }

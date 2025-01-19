@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/models/bulk_upload_state.dart';
 import 'dart:io';
 import 'dart:async';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 
 import '../models/product.dart';
 import '../models/create_product.dart';
 import '../repositories/product_repository.dart';
+import '../services/logger_service.dart';
 
 class ProductProvider extends ChangeNotifier {
   final ProductRepository _repository;
@@ -14,20 +17,13 @@ class ProductProvider extends ChangeNotifier {
   String? _error;
   String _searchQuery = '';
   BulkUploadState _bulkUploadState = BulkUploadState();
-  Timer? _statusCheckTimer;
+  Timer? _pollTimer;
 
   ProductProvider(this._repository) {
     loadProducts();
   }
 
-  List<Product> get products {
-    final filtered = _products
-        .where((product) => product.productName
-            .toLowerCase()
-            .contains(_searchQuery.toLowerCase()))
-        .toList();
-    return filtered;
-  }
+  List<Product> get products => _products;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -174,126 +170,142 @@ class ProductProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _statusCheckTimer?.cancel();
+    _pollTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> validateBulkUpload(File file) async {
+  Future<void> validateBulkUpload(dynamic file) async {
     try {
-      _bulkUploadState = BulkUploadState(status: BulkUploadStatus.validating);
-      notifyListeners();
+      _setBulkUploadState(BulkUploadState(status: BulkUploadStatus.validating));
 
-      final response = await _repository.validateBulkUpload(file);
+      Map<String, dynamic> response;
+      if (kIsWeb && file is PlatformFile) {
+        // Handle web file
+        if (file.bytes == null) {
+          throw Exception('No file data available');
+        }
+        response =
+            await _repository.validateBulkUploadWeb(file.bytes!, file.name);
+      } else if (file is File) {
+        // Handle mobile file
+        response = await _repository.validateBulkUpload(file);
+      } else {
+        throw Exception('Invalid file type');
+      }
 
-      _bulkUploadState = BulkUploadState(
-        status: BulkUploadStatus.validated,
-        headers: List<String>.from(response['headers']),
-        sampleData: List<Map<String, dynamic>>.from(response['sampleData']),
-        totalRows: response['totalRows'],
+      _setBulkUploadState(
+        BulkUploadState(
+          status: BulkUploadStatus.validated,
+          headers: List<String>.from(response['headers'] ?? []),
+          sampleData:
+              List<Map<String, dynamic>>.from(response['sampleData'] ?? []),
+        ),
       );
-      notifyListeners();
     } catch (e) {
-      _bulkUploadState = BulkUploadState(
-        status: BulkUploadStatus.error,
-        error: e.toString(),
+      _setBulkUploadState(
+        BulkUploadState(
+          status: BulkUploadStatus.error,
+          error: e.toString(),
+        ),
       );
-      notifyListeners();
+      rethrow;
     }
   }
 
   Future<void> startBulkUpload({
-    required File file,
+    required dynamic file,
     required Map<String, String> columnMapping,
   }) async {
     try {
-      _bulkUploadState = _bulkUploadState.copyWith(
-        status: BulkUploadStatus.uploading,
-        columnMapping: columnMapping,
-      );
-      notifyListeners();
+      _setBulkUploadState(BulkUploadState(status: BulkUploadStatus.uploading));
 
-      final jobId = await _repository.startBulkUpload(
-        file: file,
-        columnMapping: columnMapping,
-      );
+      String jobId;
+      if (kIsWeb && file is PlatformFile) {
+        // Handle web file
+        if (file.bytes == null) {
+          throw Exception('No file data available');
+        }
+        jobId = await _repository.startBulkUploadWeb(
+          bytes: file.bytes!,
+          filename: file.name,
+          columnMapping: columnMapping,
+        );
+      } else if (file is File) {
+        // Handle mobile file
+        jobId = await _repository.startBulkUpload(
+          file: file,
+          columnMapping: columnMapping,
+        );
+      } else {
+        throw Exception('Invalid file type');
+      }
 
-      _bulkUploadState = _bulkUploadState.copyWith(jobId: jobId);
-      notifyListeners();
-
-      // Start polling for status
-      _startStatusPolling();
+      _startPolling(jobId);
     } catch (e) {
-      _bulkUploadState = BulkUploadState(
-        status: BulkUploadStatus.error,
-        error: e.toString(),
+      _setBulkUploadState(
+        BulkUploadState(
+          status: BulkUploadStatus.error,
+          error: e.toString(),
+        ),
       );
-      notifyListeners();
+      rethrow;
     }
   }
 
-  void _startStatusPolling() {
-    _statusCheckTimer?.cancel();
-    _statusCheckTimer =
-        Timer.periodic(const Duration(seconds: 10), (timer) async {
-      if (_bulkUploadState.jobId == null) {
-        timer.cancel();
-        return;
-      }
-
+  void _startPolling(String jobId) {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
       try {
-        final status =
-            await _repository.getBulkUploadStatus(_bulkUploadState.jobId!);
+        final status = await _repository.getBulkUploadStatus(jobId);
 
-        if (status['status'] == 'completed' || status['status'] == 'failed') {
+        if (status['status'] == 'completed') {
           timer.cancel();
-
-          if (status['status'] == 'completed') {
-            await loadProducts(); // Refresh product list
-          }
-
-          _bulkUploadState = _bulkUploadState.copyWith(
-            status: status['status'] == 'completed'
-                ? BulkUploadStatus.completed
-                : BulkUploadStatus.error,
-            totalRows: status['totalRows'],
-            processedRows: status['processedRows'],
-            successCount: status['successCount'],
-            errorCount: status['errorCount'],
+          _setBulkUploadState(
+            BulkUploadState(
+              status: BulkUploadStatus.completed,
+              successCount: status['successCount'] ?? 0,
+              errorCount: status['errorCount'] ?? 0,
+            ),
           );
-          notifyListeners();
+          loadProducts();
+        } else if (status['status'] == 'failed') {
+          timer.cancel();
+          final errors = await _repository.getBulkUploadErrors(jobId);
+          _setBulkUploadState(
+            BulkUploadState(
+              status: BulkUploadStatus.error,
+              error: errors.isNotEmpty ? errors.first : 'Upload failed',
+            ),
+          );
         } else {
-          // Update progress
-          _bulkUploadState = _bulkUploadState.copyWith(
-            processedRows: status['processedRows'],
-            totalRows: status['totalRows'],
+          _setBulkUploadState(
+            BulkUploadState(
+              status: BulkUploadStatus.uploading,
+              processedRows: status['processedRows'],
+              totalRows: status['totalRows'],
+            ),
           );
-          notifyListeners();
         }
       } catch (e) {
         timer.cancel();
-        _bulkUploadState = BulkUploadState(
-          status: BulkUploadStatus.error,
-          error: e.toString(),
+        _setBulkUploadState(
+          BulkUploadState(
+            status: BulkUploadStatus.error,
+            error: e.toString(),
+          ),
         );
-        notifyListeners();
       }
     });
   }
 
-  Future<List<String>> getBulkUploadErrors() async {
-    if (_bulkUploadState.jobId == null) return [];
-
-    try {
-      return await _repository.getBulkUploadErrors(_bulkUploadState.jobId!);
-    } catch (e) {
-      return ['Failed to fetch errors: ${e.toString()}'];
-    }
+  void _setBulkUploadState(BulkUploadState state) {
+    _bulkUploadState = state;
+    notifyListeners();
   }
 
   void resetBulkUploadState() {
-    _statusCheckTimer?.cancel();
-    _bulkUploadState = BulkUploadState();
-    notifyListeners();
+    _pollTimer?.cancel();
+    _setBulkUploadState(BulkUploadState());
   }
 
   void clearState() {

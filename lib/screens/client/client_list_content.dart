@@ -269,16 +269,14 @@ class ClientSearchRow extends StatelessWidget {
         const Spacer(),
         TextButton.icon(
           onPressed: () {
-            context
-                .read<NavigationService>()
-                .navigateToClientScreen(ClientScreen.bulkUpload);
+            print('Navigating to client bulk upload');
+            final navigation = context.read<NavigationService>();
+            navigation.navigateToClientScreen(ClientScreen.bulkUpload);
           },
-          icon: const Text(
+          icon: const AppText(
             'Import a file',
-            style: TextStyle(
-              color: Color(0xFF00A651),
-              fontWeight: FontWeight.w500,
-            ),
+            color: Color(0xFF00A651),
+            weight: FontWeight.w500,
           ),
           label: const Icon(
             Icons.file_upload_outlined,

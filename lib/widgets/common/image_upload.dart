@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gap/gap.dart';
 import 'app_text.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:typed_data';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
+import 'dart:io' show File;
 
 class ImageUpload extends StatefulWidget {
   final Function(String?) onImageSelected;
@@ -24,6 +27,8 @@ class ImageUpload extends StatefulWidget {
 
 class ImageUploadState extends State<ImageUpload> {
   String? _selectedImagePath;
+  XFile? _pickedFile;
+  Uint8List? _webImage;
 
   Future<void> _pickImage() async {
     try {
@@ -38,7 +43,14 @@ class ImageUploadState extends State<ImageUpload> {
       if (pickedFile != null) {
         setState(() {
           _selectedImagePath = pickedFile.path;
+          _pickedFile = pickedFile;
         });
+
+        if (kIsWeb) {
+          // Read the bytes for web platform
+          _webImage = await pickedFile.readAsBytes();
+        }
+
         widget.onImageSelected(pickedFile.path);
       }
     } catch (e) {
@@ -49,8 +61,34 @@ class ImageUploadState extends State<ImageUpload> {
   void clearImage() {
     setState(() {
       _selectedImagePath = null;
+      _pickedFile = null;
+      _webImage = null;
     });
     widget.onImageSelected(null);
+  }
+
+  Widget _buildImagePreview() {
+    if (_pickedFile == null) return const SizedBox.shrink();
+
+    if (kIsWeb) {
+      if (_webImage != null) {
+        return Image.memory(
+          _webImage!,
+          fit: BoxFit.cover,
+          width: 120,
+          height: 120,
+        );
+      }
+      return const SizedBox.shrink();
+    } else {
+      // Mobile platform: Use Image.file
+      return Image.file(
+        File(_selectedImagePath!),
+        fit: BoxFit.cover,
+        width: 120,
+        height: 120,
+      );
+    }
   }
 
   @override
@@ -104,12 +142,7 @@ class ImageUploadState extends State<ImageUpload> {
                     child: Stack(
                       children: [
                         // Image
-                        Image.file(
-                          File(_selectedImagePath!),
-                          fit: BoxFit.cover,
-                          width: 120,
-                          height: 120,
-                        ),
+                        _buildImagePreview(),
                         // Semi-transparent overlay on hover
                         Positioned.fill(
                           child: Container(

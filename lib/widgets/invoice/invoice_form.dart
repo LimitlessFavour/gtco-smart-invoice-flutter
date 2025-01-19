@@ -5,6 +5,7 @@ import 'package:gtco_smart_invoice_flutter/models/invoice_item.dart';
 import 'package:gtco_smart_invoice_flutter/models/product.dart';
 import 'package:gtco_smart_invoice_flutter/models/product_enums.dart';
 import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_empty_state.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/styled_date_picker.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/styled_dropdown.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/client_selection_dialog.dart';
@@ -321,24 +322,8 @@ class NoItemsAddedEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Gap(16),
-          Image.asset(
-            'assets/images/receipt.png',
-            height: 50,
-            width: 50,
-            color: Colors.grey[600],
-          ),
-          const Gap(6),
-          const AppText(
-            'No items added yet',
-            color: Colors.grey,
-          ),
-        ],
-      ),
+    return const AppEmptyState(
+      message: 'No items added yet',
     );
   }
 }
