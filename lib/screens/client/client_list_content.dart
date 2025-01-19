@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/models/client.dart';
 import 'package:gtco_smart_invoice_flutter/screens/client/current_client_content.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/loading_overlay.dart';
 import '../../widgets/common/app_text.dart';
 import '../../widgets/client/client_empty_state.dart';
 import '../../widgets/client/client_list_view.dart';
@@ -9,21 +10,8 @@ import '../../services/navigation_service.dart';
 import '../../providers/client_provider.dart';
 import 'package:provider/provider.dart';
 
-class ClientListContent extends StatefulWidget {
+class ClientListContent extends StatelessWidget {
   const ClientListContent({super.key});
-
-  @override
-  State<ClientListContent> createState() => _ClientListContentState();
-}
-
-class _ClientListContentState extends State<ClientListContent> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ClientProvider>().loadClients();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +26,7 @@ class _ClientListContentState extends State<ClientListContent> {
               future: client,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CommonProgressIndicator());
                 }
                 if (snapshot.hasError) {
                   return Center(child: AppText(snapshot.error.toString()));
@@ -100,9 +88,14 @@ class _ClientListContentState extends State<ClientListContent> {
                       const ClientTableHeader(),
                       const Gap(24),
                       Expanded(
-                        child: clientProvider.hasClients
-                            ? const ClientListView()
-                            : const ClientEmptyState(),
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            await clientProvider.loadClients();
+                          },
+                          child: clientProvider.hasClients
+                              ? const ClientListView()
+                              : const ClientEmptyState(),
+                        ),
                       ),
                     ],
                   ),

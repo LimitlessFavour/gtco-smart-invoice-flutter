@@ -17,7 +17,9 @@ class ClientProvider extends ChangeNotifier {
   Client? _currentClient;
   bool _isLoadingDetails = false;
 
-  ClientProvider(this._repository);
+  ClientProvider(this._repository) {
+    loadClients();
+  }
 
   List<Client> get clients {
     final filtered = _clients
@@ -53,6 +55,12 @@ class ClientProvider extends ChangeNotifier {
       _isLoading = false;
       _error = e.toString();
       notifyListeners();
+    }
+  }
+
+  Future<void> loadClientsIfEmpty() async {
+    if (_clients.isEmpty) {
+      await loadClients();
     }
   }
 

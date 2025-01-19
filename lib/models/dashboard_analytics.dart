@@ -28,6 +28,17 @@ class DashboardAnalytics {
       activities: activities ?? this.activities,
     );
   }
+
+  //tojson
+  Map<String, dynamic> toJson() {
+    return {
+      'paymentsTimeline': paymentsTimeline.map((e) => e.toJson()).toList(),
+      'invoiceStats': invoiceStats.toJson(),
+      'topPayingClients': topPayingClients.map((e) => e.toJson()).toList(),
+      'topSellingProducts': topSellingProducts.map((e) => e.toJson()).toList(),
+      'activities': activities.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 
 class PaymentsByMonth {
@@ -38,6 +49,14 @@ class PaymentsByMonth {
     required this.month,
     required this.amount,
   });
+
+  //to json
+  Map<String, dynamic> toJson() {
+    return {
+      'month': month,
+      'amount': amount,
+    };
+  }
 }
 
 class InvoiceStats {
@@ -66,6 +85,17 @@ class InvoiceStats {
       totalAmount: json['totalAmount']?.toDouble() ?? 0.0,
     );
   }
+
+  //to json
+  Map<String, dynamic> toJson() {
+    return {
+      'totalInvoiced': totalInvoiced,
+      'paid': paid,
+      'unpaid': unpaid,
+      'drafted': drafted,
+      'totalAmount': totalAmount,
+    };
+  }
 }
 
 class TopClient {
@@ -87,6 +117,15 @@ class TopClient {
     );
   }
 
+  //to json
+  Map<String, dynamic> toJson() {
+    return {
+      'firstName': firstName,
+      'lastName': lastName,
+      'totalPaid': totalPaid,
+    };
+  }
+
   String get fullName => '$firstName $lastName';
 }
 
@@ -104,6 +143,14 @@ class TopProduct {
       name: json['name'],
       totalAmount: double.parse(json['totalAmount']),
     );
+  }
+
+  //to json
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'totalAmount': totalAmount,
+    };
   }
 }
 
@@ -133,5 +180,17 @@ class DashboardActivity {
       metadata: json['metadata'],
       date: json['date'],
     );
+  }
+
+  //to json
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'activity': activity,
+      'entityType': entityType,
+      'entityId': entityId,
+      'metadata': metadata,
+      'date': date,
+    };
   }
 }

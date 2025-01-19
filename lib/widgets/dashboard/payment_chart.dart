@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/models/dashboard_analytics.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dashboard_provider.dart';
 import 'package:intl/intl.dart';
@@ -80,12 +81,10 @@ class _PaymentChartState extends State<PaymentChart>
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
                             if (value >= 0 && value < months.length) {
-                              return Text(
+                              return AppText(
                                 months[value.toInt()],
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
+                                color: Colors.grey[600],
+                                size: 12,
                               );
                             }
                             return const Text('');
@@ -96,12 +95,10 @@ class _PaymentChartState extends State<PaymentChart>
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            return Text(
+                            return AppText(
                               '${(value / 1000).toInt()}K',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                              color: Colors.grey[600],
+                              size: 12,
                             );
                           },
                         ),

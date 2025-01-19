@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:gtco_smart_invoice_flutter/main.dart';
 import 'package:gtco_smart_invoice_flutter/models/auth/user.dart';
 import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
@@ -93,7 +94,7 @@ class AuthProvider extends ChangeNotifier {
       _user = null;
 
       // Clear other providers' state using BuildContext
-      final context = NavigationService.navigatorKey.currentContext;
+      final context = navigatorKey.currentContext;
       if (context != null) {
         // Clear Invoice Provider state
         context.read<InvoiceProvider>().clearState();

@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/dashboard_analytics.dart';
 import '../repositories/dashboard_repository.dart';
-// import '../repositories/dummy_payments_repository.dart';
 import '../services/logger_service.dart';
 import '../providers/auth_provider.dart';
 
 class DashboardProvider extends ChangeNotifier {
   final DashboardRepository _repository;
-  // final DummyPaymentsRepository _dummyPayments;
   final AuthProvider _authProvider;
 
   bool _isLoading = false;
@@ -19,10 +17,8 @@ class DashboardProvider extends ChangeNotifier {
   bool _shouldAnimateInvoices = false;
   bool _initialLoadComplete = false;
 
-  //  DashboardProvider(this._repository, this._authProvider)
-  //     : _dummyPayments = DummyPaymentsRepository() {
   DashboardProvider(this._repository, this._authProvider) {
-    loadDashboardData();
+    loadInitialData();
   }
 
   bool get isLoading => _isLoading;
@@ -47,20 +43,7 @@ class DashboardProvider extends ChangeNotifier {
 
       final companyId = int.parse(_authProvider.user!.company!.id);
 
-      // // Get dummy payments data
-      // final paymentsData =
-      //     await _dummyPayments.getPaymentsAnalytics(_paymentsTimeline);
-
-      // // Get real dashboard data
       final dashboardData = await _repository.getDashboardData(companyId);
-      //       _analytics = DashboardAnalytics(
-      //   paymentsTimeline: paymentsData,
-      //   invoiceStats: dashboardData.invoiceStats,
-      //   topPayingClients: dashboardData.topPayingClients,
-      //   topSellingProducts: dashboardData.topSellingProducts,
-      //   activities: dashboardData.activities,
-      // );
-
       _analytics = dashboardData;
       _isLoading = false;
       _shouldAnimatePayments = true;
@@ -82,6 +65,14 @@ class DashboardProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> loadInitialData() async {
+    _paymentsTimeline = 'LAST_9_MONTHS';
+    _invoicesTimeline = 'LAST_6_MONTHS';
+    _shouldAnimatePayments = true;
+    _shouldAnimateInvoices = true;
+    await loadDashboardData();
   }
 
   Future<void> updatePaymentsTimeline(String timeline) async {

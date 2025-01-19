@@ -21,7 +21,7 @@ class _ProductMobileState extends State<ProductMobile> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductProvider>().loadProducts();
+      context.read<ProductProvider>().loadProductsIfEmpty();
     });
   }
 

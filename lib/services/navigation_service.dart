@@ -47,8 +47,6 @@ enum SettingsScreen {
 }
 
 class NavigationService extends ChangeNotifier {
-  static final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
 
   final NavigationPlatform _platform;
   AppScreen _currentScreen = AppScreen.dashboard;

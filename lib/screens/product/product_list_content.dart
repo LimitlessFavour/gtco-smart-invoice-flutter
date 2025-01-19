@@ -8,21 +8,9 @@ import '../../widgets/common/loading_overlay.dart';
 import '../../widgets/product/product_empty_state.dart';
 import '../../widgets/product/product_list_view.dart';
 
-class ProductListContent extends StatefulWidget {
+class ProductListContent extends StatelessWidget {
   const ProductListContent({super.key});
 
-  @override
-  State<ProductListContent> createState() => _ProductListContentState();
-}
-
-class _ProductListContentState extends State<ProductListContent> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductProvider>().loadProducts();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {

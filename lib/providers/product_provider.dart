@@ -16,7 +16,9 @@ class ProductProvider extends ChangeNotifier {
   BulkUploadState _bulkUploadState = BulkUploadState();
   Timer? _statusCheckTimer;
 
-  ProductProvider(this._repository);
+  ProductProvider(this._repository) {
+    loadProducts();
+  }
 
   List<Product> get products {
     final filtered = _products
@@ -29,6 +31,14 @@ class ProductProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  //method to load products if empty
+
+  Future<void> loadProductsIfEmpty() async {
+    if (_products.isEmpty) {
+      await loadProducts();
+    }
+  }
 
   Future<void> loadProducts() async {
     try {
