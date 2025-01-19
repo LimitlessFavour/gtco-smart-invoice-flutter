@@ -80,7 +80,8 @@ class DioClient {
     };
 
     if (isSuccess) {
-      LoggerService.success('◄ API Response', responseData);
+      // LoggerService.success('◄ API Response', responseData);
+      LoggerService.fullResponse('◄ API Response', responseData);
     } else {
       LoggerService.error('◄ API Response', error: responseData.toString());
     }

@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
 import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
@@ -62,86 +63,82 @@ Future<void> main() async {
     anonKey: supabaseAnonKey,
   );
 
-  debugPrint('API_BASE_URL: $apiBaseUrl');
-  debugPrint('SUPABASE_URL: $supabaseUrl');
-  debugPrint('SUPABASE_ANON_KEY: $supabaseAnonKey');
+  // Create providers once at app startup
+  final dioClient = DioClient(baseUrl: apiBaseUrl);
+  final authRepository = AuthRepository(dioClient);
+  final authProvider = AuthProvider(authRepository);
+  dioClient.setTokenRefreshCallback(authProvider.handleTokenRefresh);
+  final onboardingRepository = OnboardingRepository(dioClient, authProvider);
 
   runApp(
     DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => AppRoot(navigationService: navigationService),
+      enabled: false,
+      builder: (context) => AppRoot(
+        navigationService: navigationService,
+        dioClient: dioClient,
+        authProvider: authProvider,
+        onboardingRepository: onboardingRepository,
+      ),
     ),
   );
 }
 
 class AppRoot extends StatelessWidget {
   final NavigationService navigationService;
+  final DioClient dioClient;
+  final AuthProvider authProvider;
+  final OnboardingRepository onboardingRepository;
 
   const AppRoot({
     required this.navigationService,
+    required this.dioClient,
+    required this.authProvider,
+    required this.onboardingRepository,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return provider.MultiProvider(
-      providers: _createProviders(),
+    return MultiProvider(
+      providers: [
+        provider.ChangeNotifierProvider<NavigationService>.value(
+            value: navigationService),
+        provider.ChangeNotifierProvider<AuthProvider>.value(
+            value: authProvider),
+        provider.ChangeNotifierProvider(
+          create: (_) => OnboardingProvider(onboardingRepository),
+        ),
+        provider.Provider(create: (_) => ApiClient(baseUrl: apiBaseUrl)),
+        provider.Provider(create: (_) => dioClient),
+        provider.ChangeNotifierProvider(
+          create: (context) => InvoiceProvider(
+            InvoiceRepository(dioClient),
+            authProvider,
+          ),
+        ),
+        provider.Provider(
+          create: (context) => ProductRepository(dioClient),
+        ),
+        provider.ChangeNotifierProvider(
+          create: (context) => ProductProvider(
+            context.read<ProductRepository>(),
+          ),
+        ),
+        provider.Provider(
+          create: (context) => ClientRepository(dioClient),
+        ),
+        provider.ChangeNotifierProvider(
+          create: (context) => ClientProvider(context.read<ClientRepository>()),
+        ),
+        provider.ChangeNotifierProvider(
+          create: (context) => DashboardProvider(
+            DashboardRepository(dioClient),
+            authProvider,
+          ),
+        ),
+      ],
       child: const SmartInvoiceApp(),
     );
-  }
-
-  List<SingleChildWidget> _createProviders() {
-    // First create DioClient without the callback
-    final dioClient = DioClient(
-      baseUrl: apiBaseUrl,
-    );
-
-    // Then create AuthRepository and AuthProvider
-    final authRepository = AuthRepository(dioClient);
-    final authProvider = AuthProvider(authRepository);
-
-    // Now set the callback
-    dioClient.setTokenRefreshCallback(authProvider.handleTokenRefresh);
-
-    final onboardingRepository = OnboardingRepository(dioClient, authProvider);
-
-    return [
-      provider.ChangeNotifierProvider<NavigationService>.value(
-          value: navigationService),
-      provider.ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
-      provider.ChangeNotifierProvider(
-        create: (_) => OnboardingProvider(onboardingRepository),
-      ),
-      provider.Provider(create: (_) => ApiClient(baseUrl: apiBaseUrl)),
-      provider.ChangeNotifierProvider(
-        create: (context) => InvoiceProvider(
-          InvoiceRepository(dioClient),
-          context.read<AuthProvider>(),
-        ),
-      ),
-      provider.ChangeNotifierProvider(
-        create: (_) => OnboardingProvider(onboardingRepository),
-      ),
-      provider.Provider(
-        create: (context) => ProductRepository(dioClient),
-      ),
-      provider.ChangeNotifierProvider(
-        create: (context) => ProductProvider(
-          context.read<ProductRepository>(),
-        ),
-      ),
-      provider.Provider(
-        create: (context) => ClientRepository(dioClient),
-      ),
-      provider.ChangeNotifierProvider(
-        create: (context) => ClientProvider(context.read<ClientRepository>()),
-      ),
-      provider.ChangeNotifierProvider(
-        create: (context) => DashboardProvider(
-          DashboardRepository(),
-        ),
-      ),
-    ];
   }
 }
 
@@ -225,30 +222,34 @@ class AppInitializationWrapper extends StatefulWidget {
 }
 
 class _AppInitializationWrapperState extends State<AppInitializationWrapper> {
-  late Future<void> _initFuture;
-  bool _initialized = false;
+  Future<void>? _initFuture;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_initialized) {
-      _initialized = true;
-      _initFuture = _initializeApp();
-    }
+    _initFuture ??= _initializeApp();
   }
 
   Future<void> _initializeApp() async {
-    await ImagePrecacher.precacheImages(context);
-    // Add any other initialization tasks here
+    try {
+      await ImagePrecacher.precacheImages(context);
+      // Add any other initialization tasks here
+    } catch (e) {
+      debugPrint('Initialization error: $e');
+      // Handle initialization errors gracefully
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_initFuture == null) {
+      return _buildLoadingScreen();
+    }
+
     return FutureBuilder(
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          // return const MainLayout();
           return const LandingScreen();
         }
         return _buildLoadingScreen();

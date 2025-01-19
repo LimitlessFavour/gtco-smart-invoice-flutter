@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/main.dart';
 import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_platform.dart';
@@ -26,6 +27,7 @@ enum ProductScreen {
   list,
   create,
   edit,
+  bulkUpload,
 }
 
 enum ClientScreen {
@@ -33,6 +35,7 @@ enum ClientScreen {
   create,
   view,
   edit,
+  bulkUpload,
 }
 
 enum SettingsScreen {
@@ -54,8 +57,7 @@ class NavigationService extends ChangeNotifier {
   String? _currentClientId;
   String? _currentProductId;
 
-  NavigationService()
-      : _platform = createNavigationPlatform() {
+  NavigationService() : _platform = createNavigationPlatform() {
     if (kIsWeb) {
       _platform.initializeHistory(handleUrlChange: _handleUrlChange);
     }
@@ -77,11 +79,14 @@ class NavigationService extends ChangeNotifier {
         return _currentInvoiceScreen == InvoiceScreen.create ||
             _currentInvoiceScreen == InvoiceScreen.view;
       case AppScreen.product:
-        return _currentProductScreen == ProductScreen.create;
+        return _currentProductScreen == ProductScreen.create ||
+            _currentProductScreen == ProductScreen.edit ||
+            _currentProductScreen == ProductScreen.bulkUpload;
       case AppScreen.client:
         return _currentClientScreen == ClientScreen.create ||
             _currentClientScreen == ClientScreen.view ||
-            _currentClientScreen == ClientScreen.edit;
+            _currentClientScreen == ClientScreen.edit ||
+            _currentClientScreen == ClientScreen.bulkUpload;
       case AppScreen.settings:
         return _currentSettingsScreen != SettingsScreen.list;
       default:
@@ -124,8 +129,11 @@ class NavigationService extends ChangeNotifier {
         }
         return false;
       case AppScreen.product:
-        if (_currentProductScreen == ProductScreen.create) {
+        if (_currentProductScreen == ProductScreen.create ||
+            _currentProductScreen == ProductScreen.edit ||
+            _currentProductScreen == ProductScreen.bulkUpload) {
           _currentProductScreen = ProductScreen.list;
+          _currentProductId = null;
           _updateBrowserUrl('/product');
           notifyListeners();
           return true;
@@ -134,7 +142,8 @@ class NavigationService extends ChangeNotifier {
       case AppScreen.client:
         if (_currentClientScreen == ClientScreen.create ||
             _currentClientScreen == ClientScreen.view ||
-            _currentClientScreen == ClientScreen.edit) {
+            _currentClientScreen == ClientScreen.edit ||
+            _currentClientScreen == ClientScreen.bulkUpload) {
           _currentClientScreen = ClientScreen.list;
           _currentClientId = null;
           _updateBrowserUrl('/client');
@@ -173,14 +182,16 @@ class NavigationService extends ChangeNotifier {
 
   void navigateToProductScreen(ProductScreen screen, {String? productId}) {
     _currentProductScreen = screen;
-    _currentScreen = AppScreen.product;
     _currentProductId = productId;
+    _currentScreen = AppScreen.product;
 
-    String path = '/product';
+    var path = '/product';
     if (screen == ProductScreen.create) {
       path = '$path/create';
     } else if (screen == ProductScreen.edit && productId != null) {
       path = '$path/edit/$productId';
+    } else if (screen == ProductScreen.bulkUpload) {
+      path = '$path/bulk-upload';
     }
 
     _updateBrowserUrl(path);
@@ -198,6 +209,8 @@ class NavigationService extends ChangeNotifier {
     } else if ((screen == ClientScreen.view || screen == ClientScreen.edit) &&
         clientId != null) {
       path = '$path/${screen == ClientScreen.edit ? 'edit/' : ''}$clientId';
+    } else if (screen == ClientScreen.bulkUpload) {
+      path = '$path/bulk-upload';
     }
 
     _updateBrowserUrl(path);
@@ -278,6 +291,9 @@ class NavigationService extends ChangeNotifier {
       } else if (path.contains('/edit/')) {
         _currentProductScreen = ProductScreen.edit;
         _currentProductId = path.split('/').last;
+      } else if (path == '/product/bulk-upload') {
+        _currentProductScreen = ProductScreen.bulkUpload;
+        _currentProductId = null;
       } else {
         _currentProductScreen = ProductScreen.list;
         _currentProductId = null;
@@ -287,6 +303,9 @@ class NavigationService extends ChangeNotifier {
 
       if (path == '/client/create') {
         _currentClientScreen = ClientScreen.create;
+        _currentClientId = null;
+      } else if (path == '/client/bulk-upload') {
+        _currentClientScreen = ClientScreen.bulkUpload;
         _currentClientId = null;
       } else if (path == '/client') {
         _currentClientScreen = ClientScreen.list;
@@ -314,6 +333,18 @@ class NavigationService extends ChangeNotifier {
       }
     }
 
+    notifyListeners();
+  }
+
+  void clearNavigationState() {
+    _currentScreen = AppScreen.dashboard;
+    _currentInvoiceScreen = InvoiceScreen.list;
+    _currentInvoiceId = null;
+    _currentProductScreen = ProductScreen.list;
+    _currentClientScreen = ClientScreen.list;
+    _currentSettingsScreen = SettingsScreen.list;
+    _currentClientId = null;
+    _currentProductId = null;
     notifyListeners();
   }
 }

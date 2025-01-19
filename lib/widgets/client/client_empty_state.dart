@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import '../../screens/client/client_content.dart';
+import '../../screens/client/client_list_content.dart';
 import '../common/app_text.dart';
 
 class ClientEmptyState extends StatelessWidget {
@@ -26,7 +26,7 @@ class ClientEmptyState extends StatelessWidget {
           ),
           Gap(isMobile ? 16 : 24),
           AppText(
-            'Save Clienst Information here',
+            'Save Clients Information here',
             size: isMobile ? 18 : 24,
             weight: FontWeight.w600,
             textAlign: TextAlign.center,

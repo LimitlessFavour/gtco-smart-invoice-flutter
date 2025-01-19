@@ -19,41 +19,41 @@ class ClientFormContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // if (clientId == null) {
-    return CreateClientForm(
-      onCancel: onCancel,
-      clientId: clientId,
-    );
-    // }
+    if (clientId == null) {
+      return CreateClientForm(onCancel: onCancel);
+    }
 
-    // return Consumer<ClientProvider>(
-    //   builder: (context, provider, child) {
-    //     try {
-    //       final client = provider.getClientById(clientId!);
-    //       return FutureBuilder<Client?>(
-    //           future: client,
-    //           builder: (context, snapshot) {
-    //             if (snapshot.connectionState == ConnectionState.waiting) {
-    //               return const CommonProgressIndicator(size: 30);
-    //             }
-    //             if (snapshot.hasError) {
-    //               return const Center(
-    //                 child: AppText(
-    //                   'An error has occurred',
-    //                 ),
-    //               );
-    //             }
-    //             return CreateClientForm(
-    //               onCancel: onCancel,
-    //               client: snapshot.data!,
-    //             );
-    //           });
-    //     } catch (e) {
-    //       return Center(
-    //         child: Text('Client not found: $e'),
-    //       );
-    //     }
-    //   },
-    // );
+    return Consumer<ClientProvider>(
+      builder: (context, provider, child) {
+        return FutureBuilder<Client?>(
+          future: provider.getClientById(clientId!),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CommonProgressIndicator(size: 30);
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: AppText(
+                  'Error loading client: ${snapshot.error}',
+                  color: Colors.red,
+                ),
+              );
+            }
+            if (!snapshot.hasData) {
+              return const Center(
+                child: AppText(
+                  'Client not found',
+                  color: Colors.red,
+                ),
+              );
+            }
+            return CreateClientForm(
+              onCancel: onCancel,
+              clientId: clientId,
+            );
+          },
+        );
+      },
+    );
   }
 }

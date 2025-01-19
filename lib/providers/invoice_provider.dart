@@ -436,4 +436,21 @@ class InvoiceProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  void clearState() {
+    _invoices.clear();
+    _filteredInvoices.clear();
+    _searchQuery = '';
+    _currentFilter = 'All invoices';
+    _currentSort = 'Newest First';
+    _filterCriteria = FilterCriteria();
+    _items.clear();
+    _selectedClient = null;
+    _selectedVat = VatCategory.none;
+    _dueDate = null;
+    _currentInvoiceNumber = _generateInvoiceNumber();
+    _stats = null;
+    notifyListeners();
+  }
 }
+

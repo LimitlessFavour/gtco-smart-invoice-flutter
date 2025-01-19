@@ -19,7 +19,7 @@ class _ProductSelectionDialogState extends State<ProductSelectionDialog> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProductProvider>().loadProducts();
+      context.read<ProductProvider>().loadProductsIfEmpty();
     });
   }
 

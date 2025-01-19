@@ -6,6 +6,8 @@ import '../services/dio_client.dart';
 import '../services/logger_service.dart';
 import '../exceptions/auth_exception.dart';
 import '../providers/auth_provider.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class OnboardingRepository {
   final DioClient _client;
@@ -88,7 +90,6 @@ class OnboardingRepository {
     String? logo,
   }) async {
     try {
-      // Get the current auth token
       final token = _authProvider.token;
       if (token == null) throw AuthException('No auth token available');
 
@@ -98,11 +99,28 @@ class OnboardingRepository {
         'hasLogo': logo != null,
       });
 
-      final formData = FormData.fromMap({
+      final Map<String, dynamic> formMap = {
         'companyName': companyName,
         'description': description,
-        if (logo != null) 'logo': await MultipartFile.fromFile(logo),
-      });
+      };
+
+      if (logo != null) {
+        if (kIsWeb) {
+          // For web, we need to handle the file differently
+          final pickedFile = XFile(logo);
+          final bytes = await pickedFile.readAsBytes();
+          final filename = logo.split('/').last;
+          formMap['logo'] = MultipartFile.fromBytes(
+            bytes,
+            filename: filename,
+          );
+        } else {
+          // For mobile, we can use the file directly
+          formMap['logo'] = await MultipartFile.fromFile(logo);
+        }
+      }
+
+      final formData = FormData.fromMap(formMap);
 
       final response = await _client.post(
         '/user/onboard/company',
@@ -132,9 +150,7 @@ class OnboardingRepository {
     } catch (e, stackTrace) {
       LoggerService.error('Company onboarding error',
           error: e, stackTrace: stackTrace);
-
       if (e is AuthException) rethrow;
-
       throw AuthException('Company onboarding failed. Please try again.');
     }
   }

@@ -119,10 +119,10 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
-              items: ['All', 'Paid', 'Unpaid', 'Draft']
+              items: ['All', 'Paid', 'Unpaid', 'Draft', 'Overdue']
                   .map((status) => DropdownMenuItem(
                         value: status == 'All' ? null : status,
-                        child: Text(status),
+                        child: AppText(status),
                       ))
                   .toList(),
               onChanged: (value) {
@@ -199,36 +199,6 @@ class _InvoiceFilterDialogState extends State<InvoiceFilterDialog> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDatePicker({
-    required String label,
-    required DateTime? value,
-    required Function(DateTime?) onChanged,
-  }) {
-    return InkWell(
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: value ?? DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
-        );
-        if (date != null) {
-          onChanged(date);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          value == null ? label : '${value.day}/${value.month}/${value.year}',
         ),
       ),
     );

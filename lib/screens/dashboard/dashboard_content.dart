@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dashboard/timeline_selector.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../../constants/styles.dart';
 import '../../widgets/common/app_text.dart';
@@ -8,6 +11,7 @@ import '../../widgets/dashboard/activity_card.dart';
 import '../../widgets/dashboard/invoice_stats_card.dart';
 import '../../widgets/dashboard/payment_chart.dart';
 import '../../widgets/dashboard/top_list_card.dart';
+import '../../providers/dashboard_provider.dart';
 
 class DashboardContent extends StatelessWidget {
   const DashboardContent({super.key});
@@ -28,7 +32,7 @@ class DashboardContent extends StatelessWidget {
           const Gap(24),
           // Wrap the main content in Expanded + SingleChildScrollView
           Expanded(
-            child: SingleChildScrollView(
+            child: CustomScrollWrapper(
               child: IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -71,21 +75,28 @@ class DashboardContent extends StatelessWidget {
                           const Gap(24),
                           // Remove Expanded from Top Lists container
                           SizedBox(
-                            height: 400, // Fixed height instead of flex
+                            height: 400,
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Container(
                                     decoration: AppStyles.cardDecoration,
-                                    child: TopListCard(
-                                      title: 'Top Paying Clients',
-                                      items: List.generate(
-                                        4,
-                                        (index) => const TopListItem(
-                                          title: 'John Snow',
-                                          value: '₦260,000',
-                                        ),
-                                      ),
+                                    child: Consumer<DashboardProvider>(
+                                      builder: (context, provider, _) {
+                                        final clients = provider
+                                                .analytics?.topPayingClients ??
+                                            [];
+                                        return TopListCard(
+                                          title: 'Top Paying Clients',
+                                          items: clients
+                                              .map((client) => TopListItem(
+                                                    title: client.fullName,
+                                                    value:
+                                                        '₦${NumberFormat("#,##0").format(client.totalPaid)}',
+                                                  ))
+                                              .toList(),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
@@ -93,15 +104,22 @@ class DashboardContent extends StatelessWidget {
                                 Expanded(
                                   child: Container(
                                     decoration: AppStyles.cardDecoration,
-                                    child: TopListCard(
-                                      title: 'Top Selling Products',
-                                      items: List.generate(
-                                        4,
-                                        (index) => const TopListItem(
-                                          title: 'Bone Straight',
-                                          value: '₦260,000',
-                                        ),
-                                      ),
+                                    child: Consumer<DashboardProvider>(
+                                      builder: (context, provider, _) {
+                                        final products = provider.analytics
+                                                ?.topSellingProducts ??
+                                            [];
+                                        return TopListCard(
+                                          title: 'Top Selling Products',
+                                          items: products
+                                              .map((product) => TopListItem(
+                                                    title: product.name,
+                                                    value:
+                                                        '₦${NumberFormat("#,##0").format(product.totalAmount)}',
+                                                  ))
+                                              .toList(),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),

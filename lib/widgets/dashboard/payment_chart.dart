@@ -1,11 +1,15 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/models/dashboard_analytics.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
 import '../../providers/dashboard_provider.dart';
 import 'package:intl/intl.dart';
+import 'dashboard_empty_states.dart';
 
 class PaymentChart extends StatefulWidget {
+  const PaymentChart({super.key});
+
   @override
   State<PaymentChart> createState() => _PaymentChartState();
 }
@@ -34,6 +38,11 @@ class _PaymentChartState extends State<PaymentChart>
     super.dispose();
   }
 
+  bool _hasSignificantPayments(List<PaymentsByMonth> payments) {
+    // Check if there's any payment with an amount greater than 0
+    return payments.any((payment) => payment.amount > 0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<DashboardProvider>(
@@ -43,8 +52,9 @@ class _PaymentChartState extends State<PaymentChart>
         }
 
         final analytics = provider.analytics;
-        if (analytics == null) {
-          return const Center(child: Text('No data available'));
+        if (analytics == null ||
+            !_hasSignificantPayments(analytics.paymentsTimeline)) {
+          return const PaymentChartEmptyState();
         }
 
         if (provider.shouldAnimatePayments &&
@@ -65,9 +75,11 @@ class _PaymentChartState extends State<PaymentChart>
                 return BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
-                    maxY: analytics.paymentsTimeline
-                        .map((p) => p.amount)
-                        .reduce((a, b) => a > b ? a : b),
+                    maxY: timelineData.isEmpty
+                        ? 100 // Default max if no data
+                        : timelineData
+                            .map((p) => p.amount)
+                            .reduce((a, b) => a > b ? a : b),
                     barTouchData: BarTouchData(enabled: false),
                     titlesData: FlTitlesData(
                       show: true,
@@ -76,12 +88,10 @@ class _PaymentChartState extends State<PaymentChart>
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
                             if (value >= 0 && value < months.length) {
-                              return Text(
+                              return AppText(
                                 months[value.toInt()],
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
+                                color: Colors.grey[600],
+                                size: 12,
                               );
                             }
                             return const Text('');
@@ -92,12 +102,10 @@ class _PaymentChartState extends State<PaymentChart>
                         sideTitles: SideTitles(
                           showTitles: true,
                           getTitlesWidget: (value, meta) {
-                            return Text(
+                            return AppText(
                               '${(value / 1000).toInt()}K',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                              color: Colors.grey[600],
+                              size: 12,
                             );
                           },
                         ),

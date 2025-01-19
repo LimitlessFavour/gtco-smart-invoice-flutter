@@ -1,131 +1,153 @@
 import '../models/dashboard_analytics.dart';
+import '../services/dio_client.dart';
+import '../services/logger_service.dart';
 
 class DashboardRepository {
-  Future<List<PaymentsByMonth>> getPaymentsAnalytics(String timeline) async {
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
+  final DioClient _dioClient;
 
-    final now = DateTime.now();
-    int dataPoints;
+  DashboardRepository(this._dioClient);
 
-    switch (timeline) {
-      case 'LAST_WEEK':
-        dataPoints = 7;
-        return List.generate(
-          dataPoints,
-          (index) => PaymentsByMonth(
-            month: now.subtract(Duration(days: index)),
-            amount: (dataPoints - index) * 100000.0,
-          ),
-        ).reversed.toList();
+  Future<DashboardAnalytics> getDashboardData(int companyId) async {
+    try {
+      LoggerService.debug('Fetching dashboard data', {'companyId': companyId});
 
-      case 'LAST_MONTH':
-        dataPoints = 4; // 4 weeks
-        return List.generate(
-          dataPoints,
-          (index) => PaymentsByMonth(
-            month: now.subtract(Duration(days: 7 * index)),
-            amount: (dataPoints - index) * 200000.0,
-          ),
-        ).reversed.toList();
+      final response = await _dioClient.get('/analytics/dashboard');
+      // final response = await _dioClient.get('/analytics/dashboard/$companyId');
 
-      case 'LAST_3_MONTHS':
-        dataPoints = 3;
-        return List.generate(
-          dataPoints,
-          (index) => PaymentsByMonth(
-            month: DateTime(now.year, now.month - index),
-            amount: (dataPoints - index) * 300000.0,
-          ),
-        ).reversed.toList();
+      if (response.statusCode != 200) {
+        throw Exception(
+          response.data?['message'] ?? 'Failed to fetch dashboard data',
+        );
+      }
 
-      case 'LAST_6_MONTHS':
-        dataPoints = 6;
-        return List.generate(
-          dataPoints,
-          (index) => PaymentsByMonth(
-            month: DateTime(now.year, now.month - index),
-            amount: (dataPoints - index) * 150000.0,
-          ),
-        ).reversed.toList();
+      final data = response.data;
+      if (data == null) {
+        throw Exception('No data received from server');
+      }
 
-      case 'LAST_9_MONTHS':
-        dataPoints = 9;
-        return List.generate(
-          dataPoints,
-          (index) => PaymentsByMonth(
-            month: DateTime(now.year, now.month - index),
-            amount: (dataPoints - index) * 100000.0,
-          ),
-        ).reversed.toList();
-
-      case 'LAST_12_MONTHS':
-      default:
-        dataPoints = 12;
-        return List.generate(
-          dataPoints,
-          (index) => PaymentsByMonth(
-            month: DateTime(now.year, now.month - index),
-            amount: (dataPoints - index) * 75000.0,
-          ),
-        ).reversed.toList();
+      return DashboardAnalytics(
+        paymentsTimeline: _parsePaymentsTimeline(data['paymentsTimeline']),
+        invoiceStats: _parseInvoiceStats(data['invoiceStats']),
+        topPayingClients: _parseTopClients(data['topPayingClients']),
+        topSellingProducts: _parseTopProducts(data['topSellingProducts']),
+        activities: _parseActivities(data['activities']),
+      );
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to fetch dashboard data',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     }
   }
 
-  Future<InvoiceStats> getInvoiceAnalytics(String timeline) async {
-    await Future.delayed(const Duration(milliseconds: 800));
+  List<PaymentsByMonth> _parsePaymentsTimeline(dynamic data) {
+    if (data == null) return [];
 
-    // Mock different data based on timeline
-    switch (timeline) {
-      case 'LAST_WEEK':
-        return InvoiceStats(
-          paid: 60,
-          unpaid: 30,
-          drafted: 10,
-          totalAmount: 300000,
+    try {
+      return (data as List).map((p) {
+        return PaymentsByMonth(
+          month: p['month']?.toString() ?? '', // Keep as string, no parsing
+          amount: double.tryParse(p['amount']?.toString() ?? '0') ?? 0,
         );
-      case 'LAST_MONTH':
-        return InvoiceStats(
-          paid: 50,
-          unpaid: 40,
-          drafted: 10,
-          totalAmount: 400000,
-        );
-      case 'LAST_3_MONTHS':
-        return InvoiceStats(
-          paid: 45,
-          unpaid: 45,
-          drafted: 10,
-          totalAmount: 450000,
-        );
-      default:
-        return InvoiceStats(
-          paid: 40,
-          unpaid: 50,
-          drafted: 10,
-          totalAmount: 500000,
-        );
+      }).toList();
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to parse payments timeline',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return [];
     }
   }
 
-  Future<List<TopClient>> getTopClients() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return List.generate(
-      4,
-      (index) => TopClient(
-        name: 'John Snow ${index + 1}',
-        totalAmount: 260000.0 - (index * 50000),
-      ),
-    );
+  InvoiceStats _parseInvoiceStats(dynamic data) {
+    if (data == null) {
+      return InvoiceStats(
+        totalInvoiced: 0,
+        paid: 0,
+        unpaid: 0,
+        drafted: 0,
+        totalAmount: 0,
+      );
+    }
+
+    try {
+      return InvoiceStats.fromJson(data as Map<String, dynamic>);
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to parse invoice stats',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return InvoiceStats(
+        totalInvoiced: 0,
+        paid: 0,
+        unpaid: 0,
+        drafted: 0,
+        totalAmount: 0,
+      );
+    }
   }
 
-  Future<List<TopProduct>> getTopProducts() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return List.generate(
-      4,
-      (index) => TopProduct(
-        name: 'Bone Straight ${index + 1}',
-        totalAmount: 260000.0 - (index * 40000),
-      ),
-    );
+  List<TopClient> _parseTopClients(dynamic data) {
+    if (data == null) return [];
+
+    try {
+      return (data as List).map((c) => TopClient.fromJson(c)).toList();
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to parse top clients',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
+  }
+
+  List<TopProduct> _parseTopProducts(dynamic data) {
+    if (data == null) return [];
+
+    try {
+      return (data as List).map((p) {
+        return TopProduct(
+          name: p['name']?.toString() ?? '',
+          totalAmount:
+              double.tryParse(p['totalAmount']?.toString() ?? '0') ?? 0,
+        );
+      }).toList();
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to parse top products',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
+  }
+
+  List<DashboardActivity> _parseActivities(dynamic data) {
+    if (data == null) return [];
+
+    try {
+      return (data as List).map((a) {
+        return DashboardActivity(
+          id: int.tryParse(a['id']?.toString() ?? '0') ?? 0,
+          activity: a['activity']?.toString() ?? '',
+          entityType: a['entityType']?.toString() ?? '',
+          entityId: a['entityId']?.toString() ?? '',
+          metadata: a['metadata'] as Map<String, dynamic>?,
+          date: a['date']?.toString() ?? DateTime.now().toIso8601String(),
+        );
+      }).toList();
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to parse activities',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
   }
 }

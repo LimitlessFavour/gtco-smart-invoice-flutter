@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 import '../services/navigation_service.dart';
 import '../widgets/common/slide_panel.dart';
 import '../widgets/web/sidebar_menu.dart';
-import '../providers/client_provider.dart';
 
 class DesktopLayout extends StatelessWidget {
   const DesktopLayout({super.key});

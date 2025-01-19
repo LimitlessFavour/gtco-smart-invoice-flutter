@@ -53,4 +53,26 @@ class LoggerService {
   static void auth(String message, [Map<String, dynamic>? data]) {
     _logger.i('🔐 AUTH: ${_formatMessage(message, data)}');
   }
+
+
+  static void fullResponse(String message, [Map<String, dynamic>? data]) {
+    final formattedMessage = _formatMessage(message, data);
+    final maxLineLength = 120;
+    final lines = formattedMessage.split('\n');
+    
+    final buffer = StringBuffer('📝 FULL RESPONSE:\n');
+    for (final line in lines) {
+      if (line.length <= maxLineLength) {
+        buffer.writeln(line);
+      } else {
+        // Break long lines into multiple lines
+        for (var i = 0; i < line.length; i += maxLineLength) {
+          final end = (i + maxLineLength < line.length) ? i + maxLineLength : line.length;
+          buffer.writeln(line.substring(i, end));
+        }
+      }
+    }
+    
+    _logger.i(buffer.toString());
+  }
 }

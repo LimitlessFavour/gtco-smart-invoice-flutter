@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/client/client_action_button.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dialogs/confirmation_dialog.dart';
 import '../common/app_text.dart';
 import 'package:provider/provider.dart';
@@ -205,16 +206,23 @@ class _CreateClientFormState extends State<CreateClientForm> {
                           _clearForm();
                           widget.onCancel();
                         },
-                        child: const Text('Cancel'),
+                        child: const AppText('Cancel'),
                       ),
                       const Gap(16),
-                      ElevatedButton(
-                        onPressed: _showConfirmation,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.primaryColor,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(isEdit ? 'Update' : 'Save'),
+                      ClientActionButton(
+                        isEdit: isEdit,
+                        formKey: _formKey,
+                        formData: {
+                          'firstName': _firstNameController.text,
+                          'lastName': _lastNameController.text,
+                          'phoneNumber': _phoneController.text,
+                          'mobileNumber': _mobileController.text,
+                          'email': _emailController.text,
+                          'address': _addressController.text,
+                        },
+                        onCancel: widget.onCancel,
+                        clientId: widget.clientId,
+                        onSuccess: _clearForm,
                       ),
                     ],
                   ),
@@ -230,9 +238,9 @@ class _CreateClientFormState extends State<CreateClientForm> {
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
+    TextInputType? keyboardType,
     bool isRequired = false,
     int maxLines = 1,
-    TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -246,38 +254,50 @@ class _CreateClientFormState extends State<CreateClientForm> {
         const Gap(8),
         TextFormField(
           controller: controller,
-          maxLines: maxLines,
           keyboardType: keyboardType,
+          maxLines: maxLines,
           decoration: InputDecoration(
+            hintText: 'Enter $label',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFFE04403)),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Colors.red),
             ),
           ),
           validator: validator ??
-              (isRequired
-                  ? (value) {
-                      if (value == null || value.isEmpty) {
-                        return '$label is required';
-                      }
-                      if (label == 'Email' && !_isValidEmail(value)) {
-                        return 'Please enter a valid email address';
-                      }
-                      if (label == 'Phone Number' && !_isValidPhone(value)) {
-                        return 'Please enter a valid phone number';
-                      }
-                      return null;
-                    }
-                  : null),
+              (value) {
+                if (isRequired && (value == null || value.isEmpty)) {
+                  return '$label is required';
+                }
+                return null;
+              },
         ),
       ],
     );
   }
 
   bool _isValidEmail(String email) {
+    if (email.isEmpty) return false;
     return RegExp(r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+').hasMatch(email);
   }
 
   bool _isValidPhone(String phone) {
+    if (phone.isEmpty) return false;
     return RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(phone);
   }
 
@@ -302,23 +322,60 @@ class _CreateClientFormState extends State<CreateClientForm> {
 
   void _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
-    final user = context.read<AuthProvider>().user;
 
+    // Additional validation
+    if (!_isValidEmail(_emailController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (!_isValidPhone(_phoneController.text)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid phone number'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final user = context.read<AuthProvider>().user;
     final clientProvider = context.read<ClientProvider>();
     final navigationService = context.read<NavigationService>();
 
+    // Trim whitespace from all fields
     final client = Client(
       id: isEdit
           ? widget.clientId!
           : DateTime.now().millisecondsSinceEpoch.toString(),
       companyId: user?.company?.id ?? '1',
-      firstName: _firstNameController.text,
-      lastName: _lastNameController.text,
-      email: _emailController.text,
-      phoneNumber: _phoneController.text,
-      mobileNumber: _mobileController.text,
-      address: _addressController.text,
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      email: _emailController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      mobileNumber: _mobileController.text.trim(),
+      address: _addressController.text.trim(),
     );
+
+    // Validate that at least one field has content
+    if (client.firstName.isEmpty &&
+        client.lastName.isEmpty &&
+        client.email.isEmpty &&
+        client.phoneNumber.isEmpty &&
+        client.address.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in at least one field'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     try {
       final success = await clientProvider.submitClient(client, isEdit);

@@ -1,68 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:timelines/timelines.dart';
 import 'package:gtco_smart_invoice_flutter/constants/styles.dart';
+import 'package:provider/provider.dart';
+import 'package:timelines/timelines.dart';
+import '../../providers/dashboard_provider.dart';
+import '../../utils/activity_mapper.dart';
 import '../common/app_text.dart';
 
 class ActivityCard extends StatelessWidget {
   final bool isMobile;
 
-  const ActivityCard({
-    super.key,
-    this.isMobile = false,
-  });
+  const ActivityCard({super.key, this.isMobile = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(isMobile ? 16 : 24),
-      decoration: AppStyles.cardDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppText(
-            'Activity',
-            size: isMobile ? 16 : 18,
-            weight: FontWeight.w600,
-          ),
-          Gap(isMobile ? 16 : 24),
-          Expanded(
-            child: Timeline.tileBuilder(
-              theme: TimelineThemeData(
-                nodePosition: 0,
-                connectorTheme: const ConnectorThemeData(
-                  thickness: 1.0,
-                  color: Color(0xFFE0E0E0),
+    return Consumer<DashboardProvider>(
+      builder: (context, provider, _) {
+        if (provider.isLoading && !provider.initialLoadComplete) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final activities = provider.analytics?.activities ?? [];
+
+        if (activities.isEmpty) {
+          return const Center(
+            child: AppText(
+              'No activities yet',
+              color: Colors.grey,
+            ),
+          );
+        }
+
+        return Container(
+          padding: EdgeInsets.all(isMobile ? 16 : 24),
+          decoration: AppStyles.cardDecoration,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppText(
+                'Activity',
+                size: isMobile ? 16 : 18,
+                weight: FontWeight.w600,
+              ),
+              Gap(isMobile ? 16 : 24),
+              Expanded(
+                child: Timeline.tileBuilder(
+                  theme: TimelineThemeData(
+                    nodePosition: 0,
+                    connectorTheme: const ConnectorThemeData(
+                      thickness: 1.0,
+                      color: Color(0xFFE0E0E0),
+                    ),
+                  ),
+                  builder: TimelineTileBuilder.connected(
+                    connectionDirection: ConnectionDirection.before,
+                    itemCount: activities.length,
+                    contentsBuilder: (_, index) {
+                      final activity = activities[index];
+                      final activityItem =
+                          ActivityMapper.mapToActivityItem(activity);
+                      return _buildTimelineCard(activityItem);
+                    },
+                    indicatorBuilder: (_, index) {
+                      final activity = activities[index];
+                      final activityItem =
+                          ActivityMapper.mapToActivityItem(activity);
+                      return DotIndicator(
+                        size: isMobile ? 24 : 32,
+                        color: activityItem.color.withOpacity(0.1),
+                        child: Icon(
+                          activityItem.icon,
+                          size: isMobile ? 14 : 22,
+                          color: activityItem.color,
+                        ),
+                      );
+                    },
+                    connectorBuilder: (_, index, __) {
+                      return const SolidLineConnector();
+                    },
+                  ),
                 ),
               ),
-              builder: TimelineTileBuilder.connected(
-                connectionDirection: ConnectionDirection.before,
-                itemCount: 3,
-                contentsBuilder: (_, index) {
-                  return _buildTimelineCard(
-                    getActivityData()[index],
-                  );
-                },
-                indicatorBuilder: (_, index) {
-                  final activity = getActivityData()[index];
-                  return DotIndicator(
-                    size: isMobile ? 24 : 32,
-                    color: activity.color.withOpacity(0.1),
-                    child: Icon(
-                      activity.icon,
-                      size: isMobile ? 12 : 16,
-                      color: activity.color,
-                    ),
-                  );
-                },
-                connectorBuilder: (_, index, __) {
-                  return const SolidLineConnector();
-                },
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -130,38 +152,6 @@ class ActivityCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  List<ActivityItem> getActivityData() {
-    return [
-      ActivityItem(
-        icon: Icons.send,
-        color: Colors.green,
-        title: 'Invoice Sent',
-        description:
-            'Invoice #1001 of amount N100,000 has been sent to Ire Victor with email irevirctor@gmail.com',
-        time: '12:03AM',
-        date: '11-02-2025',
-      ),
-      ActivityItem(
-        icon: Icons.receipt,
-        color: const Color(0xFFE04403),
-        title: 'Invoice Generated',
-        description:
-            'Invoice #1001 of amount N300,000 has been generated and is read to be sent to Ire Victor.',
-        time: '12:03AM',
-        date: '11-02-2025',
-      ),
-      ActivityItem(
-        icon: Icons.inventory_2_outlined,
-        color: Colors.blue,
-        title: 'Product Created',
-        description:
-            'A new product named Bag of Rice has been added to your product list',
-        time: '12:03AM',
-        date: '11-02-2025',
-      ),
-    ];
   }
 }
 

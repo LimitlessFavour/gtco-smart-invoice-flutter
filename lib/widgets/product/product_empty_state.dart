@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import '../../screens/product/product_content.dart';
+import '../../screens/product/product_list_content.dart';
 import '../common/app_text.dart';
 
 class ProductEmptyState extends StatelessWidget {

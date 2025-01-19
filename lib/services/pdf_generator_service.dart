@@ -13,13 +13,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:open_file/open_file.dart';
+import 'package:universal_html/html.dart' as html;
 
 import '../models/invoice.dart';
 import './pdf_generator/widgets/powered_by_gtco_pdf.dart';
 import './pdf_preview/pdf_viewer.dart';
+import 'logger_service.dart';
 
 class PdfGeneratorService {
-  static Future<String> generateAndSavePdf(User user, Invoice invoice) async {
+  static bool get isWeb => kIsWeb;
+
+  /// Generates PDF bytes for both web and mobile platforms
+  static Future<Uint8List> generatePdfBytes(User user, Invoice invoice) async {
     final pdf = pw.Document();
 
     // Load fonts
@@ -121,39 +127,138 @@ class PdfGeneratorService {
       ),
     );
 
-    if (kIsWeb) {
-      final bytes = await pdf.save();
-      return 'web_invoice_${invoice.invoiceNumber}';
-    } else {
-      final output = await getTemporaryDirectory();
-      final filePath = '${output.path}/invoice_${invoice.invoiceNumber}.pdf';
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-      return filePath;
+    return pdf.save();
+  }
+
+  /// Downloads PDF in web browser
+  static Future<void> downloadPdfWeb(Uint8List pdfBytes,
+      {required String fileName}) async {
+    if (!isWeb) return;
+
+    // Create a Blob from bytes
+    final blob = html.Blob([pdfBytes], 'application/pdf');
+
+    // Create a URL for the Blob
+    final url = html.Url.createObjectUrlFromBlob(blob);
+
+    // Create an anchor element with download attribute
+    final anchor = html.AnchorElement()
+      ..href = url
+      ..style.display = 'none'
+      ..download = fileName;
+
+    // Add to document body
+    html.document.body?.children.add(anchor);
+
+    // Trigger click to start download
+    anchor.click();
+
+    // Clean up
+    html.document.body?.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
+  }
+
+  /// Generates and saves PDF file for mobile platforms
+  static Future<String> generateAndSavePdf(User user, Invoice invoice) async {
+    if (isWeb) {
+      throw UnsupportedError('This method is not supported on web platform');
+    }
+
+    final pdfBytes = await generatePdfBytes(user, invoice);
+
+    // Get temporary directory
+    final tempDir = await getTemporaryDirectory();
+    final tempPath = tempDir.path;
+
+    // Create the PDF file
+    final file = File('$tempPath/invoice_${invoice.invoiceNumber}.pdf');
+    await file.writeAsBytes(pdfBytes);
+
+    return file.path;
+  }
+
+  /// Opens PDF file (mobile only)
+  static Future<void> openPdf(String filePath) async {
+    if (isWeb) {
+      throw UnsupportedError('This method is not supported on web platform');
+    }
+
+    final result = await OpenFile.open(filePath);
+    if (result.type != ResultType.done) {
+      throw Exception('Could not open PDF: ${result.message}');
     }
   }
 
   static Future<Uint8List?> _loadNetworkImage(String? url) async {
-    if (url == null || url.isEmpty) return null;
-    try {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        return response.bodyBytes;
+    if (url == null || url.isEmpty) {
+      LoggerService.warning('Company logo URL is null or empty');
+      return null;
+    }
+
+    if (kIsWeb) {
+      try {
+        // Create an HTML image element
+        final imgElement = html.ImageElement()..src = url;
+
+        // Wait for the image to load
+        await imgElement.onLoad.first;
+
+        // Create a canvas and draw the image
+        final canvas = html.CanvasElement(
+          width: imgElement.naturalWidth,
+          height: imgElement.naturalHeight,
+        );
+        final context = canvas.context2D..drawImage(imgElement, 0, 0);
+
+        // Convert to blob
+        final blob = await canvas.toBlob('image/png');
+        final reader = html.FileReader();
+        reader.readAsArrayBuffer(blob);
+
+        // Wait for the read to complete
+        await reader.onLoad.first;
+
+        final result = reader.result as List<int>;
+        LoggerService.success('Successfully loaded company logo (web)',
+            {'url': url, 'size': result.length});
+
+        return Uint8List.fromList(result);
+      } catch (e, stackTrace) {
+        LoggerService.error('Error loading company logo in web',
+            error: e, stackTrace: stackTrace);
+        return null;
       }
-    } catch (e) {
-      debugPrint('Error loading network image: $e');
+    }
+
+    // Non-web platform handling
+    try {
+      final uri = Uri.parse(url);
+      if (!uri.isAbsolute) {
+        LoggerService.error('Invalid logo URL format',
+            error: 'URL must be absolute: $url');
+        return null;
+      }
+
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        if (response.bodyBytes.isEmpty) {
+          LoggerService.error('Logo image bytes are empty',
+              error: 'Empty response from $url');
+          return null;
+        }
+        LoggerService.success('Successfully loaded company logo',
+            {'url': url, 'size': response.bodyBytes.length});
+        return response.bodyBytes;
+      } else {
+        LoggerService.error('Failed to load company logo',
+            error: 'HTTP ${response.statusCode}',
+            stackTrace: StackTrace.current);
+      }
+    } catch (e, stackTrace) {
+      LoggerService.error('Error loading company logo',
+          error: e, stackTrace: stackTrace);
     }
     return null;
-  }
-
-  static Future<void> openPdf(String pdfPath) async {
-    if (kIsWeb) {
-      // For web: open in new tab
-      await PdfViewerService.openPDF(pdfPath);
-    } else {
-      // For mobile: open saved file
-      await PdfViewerService.openPDF(File(pdfPath));
-    }
   }
 
   static pw.Widget _buildInfoSection(
