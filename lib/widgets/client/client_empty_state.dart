@@ -26,7 +26,7 @@ class ClientEmptyState extends StatelessWidget {
           ),
           Gap(isMobile ? 16 : 24),
           AppText(
-            'Save Clienst Information here',
+            'Save Clients Information here',
             size: isMobile ? 18 : 24,
             weight: FontWeight.w600,
             textAlign: TextAlign.center,

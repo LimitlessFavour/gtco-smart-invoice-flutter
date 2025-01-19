@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import '../models/dashboard_analytics.dart';
 import '../repositories/dashboard_repository.dart';
+// import '../repositories/dummy_payments_repository.dart';
+import '../services/logger_service.dart';
+import '../providers/auth_provider.dart';
 
 class DashboardProvider extends ChangeNotifier {
   final DashboardRepository _repository;
+  // final DummyPaymentsRepository _dummyPayments;
+  final AuthProvider _authProvider;
+
   bool _isLoading = false;
   String? _error;
   DashboardAnalytics? _analytics;
@@ -11,10 +17,11 @@ class DashboardProvider extends ChangeNotifier {
   String _invoicesTimeline = 'LAST_6_MONTHS';
   bool _shouldAnimatePayments = false;
   bool _shouldAnimateInvoices = false;
-  bool _isFirstLoad = true;
   bool _initialLoadComplete = false;
 
-  DashboardProvider(this._repository) {
+  //  DashboardProvider(this._repository, this._authProvider)
+  //     : _dummyPayments = DummyPaymentsRepository() {
+  DashboardProvider(this._repository, this._authProvider) {
     loadDashboardData();
   }
 
@@ -28,32 +35,51 @@ class DashboardProvider extends ChangeNotifier {
   bool get initialLoadComplete => _initialLoadComplete;
 
   Future<void> loadDashboardData() async {
+    if (_authProvider.user?.company?.id == null) {
+      _error = 'Company information not found';
+      notifyListeners();
+      return;
+    }
+
     try {
       _isLoading = true;
       notifyListeners();
 
-      final paymentsData =
-          await _repository.getPaymentsAnalytics(_paymentsTimeline);
-      final invoicesData =
-          await _repository.getInvoiceAnalytics(_invoicesTimeline);
+      final companyId = int.parse(_authProvider.user!.company!.id);
 
-      _analytics = DashboardAnalytics(
-        paymentsTimeline: paymentsData,
-        invoiceStats: invoicesData,
-        topPayingClients: [],
-        topSellingProducts: [],
-      );
+      // // Get dummy payments data
+      // final paymentsData =
+      //     await _dummyPayments.getPaymentsAnalytics(_paymentsTimeline);
 
+      // // Get real dashboard data
+      final dashboardData = await _repository.getDashboardData(companyId);
+      //       _analytics = DashboardAnalytics(
+      //   paymentsTimeline: paymentsData,
+      //   invoiceStats: dashboardData.invoiceStats,
+      //   topPayingClients: dashboardData.topPayingClients,
+      //   topSellingProducts: dashboardData.topSellingProducts,
+      //   activities: dashboardData.activities,
+      // );
+
+      _analytics = dashboardData;
       _isLoading = false;
       _shouldAnimatePayments = true;
       _shouldAnimateInvoices = true;
       _initialLoadComplete = true;
+      _error = null;
       notifyListeners();
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to load dashboard data',
+        error: e,
+        stackTrace: stackTrace,
+      );
 
-      await _loadTopLists();
-    } catch (e) {
+      if (_analytics == null) {
+        _error = 'Failed to load dashboard data';
+      }
+
       _isLoading = false;
-      _error = e.toString();
       notifyListeners();
     }
   }
@@ -62,8 +88,7 @@ class DashboardProvider extends ChangeNotifier {
     if (_paymentsTimeline != timeline) {
       _paymentsTimeline = timeline;
       _shouldAnimatePayments = true;
-      await _loadPaymentsData();
-      _shouldAnimatePayments = false;
+      await loadDashboardData();
     }
   }
 
@@ -71,46 +96,14 @@ class DashboardProvider extends ChangeNotifier {
     if (_invoicesTimeline != timeline) {
       _invoicesTimeline = timeline;
       _shouldAnimateInvoices = true;
-      await _loadInvoiceData();
-      _shouldAnimateInvoices = false;
+      await loadDashboardData();
     }
   }
 
-  Future<void> _loadPaymentsData() async {
-    try {
-      final paymentsData =
-          await _repository.getPaymentsAnalytics(_paymentsTimeline);
-      _analytics = _analytics?.copyWith(paymentsTimeline: paymentsData);
-      notifyListeners();
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-    }
-  }
-
-  Future<void> _loadInvoiceData() async {
-    try {
-      final invoicesData =
-          await _repository.getInvoiceAnalytics(_invoicesTimeline);
-      _analytics = _analytics?.copyWith(invoiceStats: invoicesData);
-      notifyListeners();
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-    }
-  }
-
-  Future<void> _loadTopLists() async {
-    // Load top lists with delay for animation
-    await Future.delayed(const Duration(milliseconds: 500));
-    final topClients = await _repository.getTopClients();
-    _analytics = _analytics?.copyWith(topPayingClients: topClients);
-    notifyListeners();
-
-    await Future.delayed(const Duration(milliseconds: 300));
-    final topProducts = await _repository.getTopProducts();
-    _analytics = _analytics?.copyWith(topSellingProducts: topProducts);
-    notifyListeners();
+  Future<void> refreshDashboard() async {
+    _shouldAnimatePayments = true;
+    _shouldAnimateInvoices = true;
+    await loadDashboardData();
   }
 
   void onTabChanged() {
@@ -119,5 +112,12 @@ class DashboardProvider extends ChangeNotifier {
       _shouldAnimateInvoices = true;
       notifyListeners();
     }
+  }
+
+  void clearState() {
+    _analytics = null;
+    _error = null;
+    _initialLoadComplete = false;
+    notifyListeners();
   }
 }

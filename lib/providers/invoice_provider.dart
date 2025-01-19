@@ -436,4 +436,10 @@ class InvoiceProvider extends ChangeNotifier {
       rethrow;
     }
   }
+
+  void clearState() {
+  _invoices = [];
+  // _currentInvoice = null;
+  notifyListeners();
+}
 }

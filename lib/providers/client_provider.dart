@@ -305,4 +305,10 @@ class ClientProvider extends ChangeNotifier {
     _bulkUploadState = BulkUploadState();
     notifyListeners();
   }
+
+  void clearState() {
+    _clients = [];
+    _currentClient = null;
+    notifyListeners();
+  }
 }

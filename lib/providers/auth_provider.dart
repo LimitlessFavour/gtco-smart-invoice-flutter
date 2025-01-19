@@ -1,5 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:gtco_smart_invoice_flutter/models/auth/user.dart';
+import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/invoice_provider.dart';
+import 'package:gtco_smart_invoice_flutter/providers/product_provider.dart';
+import 'package:gtco_smart_invoice_flutter/services/navigation_service.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth/auth_token.dart';
 import '../models/auth/auth_dtos.dart';
@@ -14,52 +20,100 @@ class AuthProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   User? _user;
+  SharedPreferences? _prefs;
 
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'auth_user';
 
   AuthProvider(this._repository) {
-    _loadPersistedState();
+    _initSharedPrefs();
   }
 
-  // Load persisted state when provider is initialized
+  Future<void> _initSharedPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    await _loadPersistedState();
+  }
+
   Future<void> _loadPersistedState() async {
-    final prefs = await SharedPreferences.getInstance();
+    if (_prefs == null) return;
 
-    final tokenJson = prefs.getString(_tokenKey);
-    final userJson = prefs.getString(_userKey);
+    try {
+      final tokenJson = _prefs!.getString(_tokenKey);
+      final userJson = _prefs!.getString(_userKey);
 
-    if (tokenJson != null) {
-      final token = AuthToken.fromJson(json.decode(tokenJson));
-      // Only restore if the token isn't expired
-      if (!token.isAccessTokenExpired && !token.isRefreshTokenExpired) {
-        _token = token;
-      } else {
-        await prefs.remove(_tokenKey);
+      if (tokenJson != null) {
+        final token = AuthToken.fromJson(json.decode(tokenJson));
+        if (!token.isAccessTokenExpired && !token.isRefreshTokenExpired) {
+          _token = token;
+
+          if (userJson != null) {
+            _user = User.fromJson(json.decode(userJson));
+          }
+
+          notifyListeners();
+        } else {
+          // Clear expired token
+          await _clearPersistedState();
+        }
       }
-
-      if (userJson != null) {
-        _user = User.fromJson(json.decode(userJson));
-      }
+    } catch (e) {
+      LoggerService.error('Error loading persisted state', error: e);
+      await _clearPersistedState();
     }
-
-    notifyListeners();
   }
 
-  // Persist state whenever it changes
   Future<void> _persistState() async {
-    final prefs = await SharedPreferences.getInstance();
+    if (_prefs == null) return;
 
-    if (_token != null) {
-      await prefs.setString(_tokenKey, json.encode(_token!.toJson()));
-    } else {
-      await prefs.remove(_tokenKey);
+    try {
+      if (_token != null) {
+        await _prefs!.setString(_tokenKey, json.encode(_token!.toJson()));
+      } else {
+        await _prefs!.remove(_tokenKey);
+      }
+
+      if (_user != null) {
+        await _prefs!.setString(_userKey, json.encode(_user!.toJson()));
+      } else {
+        await _prefs!.remove(_userKey);
+      }
+    } catch (e) {
+      LoggerService.error('Error persisting state', error: e);
     }
+  }
 
-    if (_user != null) {
-      await prefs.setString(_userKey, json.encode(_user!.toJson()));
-    } else {
-      await prefs.remove(_userKey);
+  Future<void> _clearPersistedState() async {
+    if (_prefs == null) return;
+
+    try {
+      // Clear auth state
+      await _prefs!.remove(_tokenKey);
+      await _prefs!.remove(_userKey);
+      _token = null;
+      _user = null;
+
+      // Clear other providers' state using BuildContext
+      final context = NavigationService.navigatorKey.currentContext;
+      if (context != null) {
+        // Clear Invoice Provider state
+        context.read<InvoiceProvider>().clearState();
+
+        // Clear Product Provider state
+        context.read<ProductProvider>().clearState();
+
+        // Clear Client Provider state
+        context.read<ClientProvider>().clearState();
+
+        // Clear Dashboard Provider state
+        context.read<DashboardProvider>().clearState();
+
+        // Also clear navigation state
+        context.read<NavigationService>().clearNavigationState();
+      }
+
+      notifyListeners();
+    } catch (e) {
+      LoggerService.error('Error clearing persisted state', error: e);
     }
   }
 
@@ -69,11 +123,11 @@ class AuthProvider extends ChangeNotifier {
   User? get user => _user;
   bool get isOnboardingCompleted => _user?.onboardingCompleted ?? false;
   AuthToken? get token => _token;
+  String? get accessToken => _token?.accessToken;
 
   void _startLoading() {
     _isLoading = true;
     _error = null;
-    LoggerService.info('Starting authentication process');
     notifyListeners();
   }
 
@@ -86,13 +140,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _handleAuthResponse(AuthResponse response) {
+  void _handleAuthResponse(AuthResponse response) async {
     _token = AuthToken.fromJson({
       'access_token': response.accessToken,
       'refresh_token': response.refreshToken,
     });
     _user = response.user;
-    _persistState(); // Persist after state change
+    await _persistState();
     LoggerService.success('Authentication successful', {
       'user': response.user.email,
       'onboardingCompleted': response.user.onboardingCompleted,
@@ -210,10 +264,7 @@ class AuthProvider extends ChangeNotifier {
         await _repository.logout(_token!.refreshToken);
       }
 
-      _token = null;
-      _user = null;
-      await _persistState(); // Persist the cleared state
-
+      await _clearPersistedState();
       LoggerService.success('User logged out successfully');
       _stopLoading(null);
     } catch (e) {
@@ -257,8 +308,9 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  void updateUser(User user) {
+  void updateUser(User user) async {
     _user = user;
+    await _persistState();
     LoggerService.success('User updated', {
       'email': user.email,
       'onboardingCompleted': user.onboardingCompleted,
@@ -266,11 +318,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void handleTokenRefresh(AuthToken? newToken) {
+  void handleTokenRefresh(AuthToken? newToken) async {
     _token = newToken;
     if (newToken == null) {
-      // Token refresh failed, log out user
-      logout();
+      await logout();
+    } else {
+      await _persistState();
     }
     notifyListeners();
   }

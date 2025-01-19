@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:gtco_smart_invoice_flutter/main.dart';
 import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
 import 'package:gtco_smart_invoice_flutter/services/navigation_platform.dart';
@@ -46,6 +47,9 @@ enum SettingsScreen {
 }
 
 class NavigationService extends ChangeNotifier {
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   final NavigationPlatform _platform;
   AppScreen _currentScreen = AppScreen.dashboard;
   InvoiceScreen _currentInvoiceScreen = InvoiceScreen.list;
@@ -322,6 +326,18 @@ class NavigationService extends ChangeNotifier {
       }
     }
 
+    notifyListeners();
+  }
+
+  void clearNavigationState() {
+    _currentScreen = AppScreen.dashboard;
+    _currentInvoiceScreen = InvoiceScreen.list;
+    _currentInvoiceId = null;
+    _currentProductScreen = ProductScreen.list;
+    _currentClientScreen = ClientScreen.list;
+    _currentSettingsScreen = SettingsScreen.list;
+    _currentClientId = null;
+    _currentProductId = null;
     notifyListeners();
   }
 }

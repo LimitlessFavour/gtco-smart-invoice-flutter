@@ -285,4 +285,10 @@ class ProductProvider extends ChangeNotifier {
     _bulkUploadState = BulkUploadState();
     notifyListeners();
   }
+
+  void clearState() {
+    _products = [];
+    // _currentProduct = null;
+    notifyListeners();
+  }
 }

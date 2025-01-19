@@ -6,6 +6,8 @@ import '../../providers/dashboard_provider.dart';
 import 'package:intl/intl.dart';
 
 class PaymentChart extends StatefulWidget {
+  const PaymentChart({super.key});
+
   @override
   State<PaymentChart> createState() => _PaymentChartState();
 }
@@ -65,9 +67,11 @@ class _PaymentChartState extends State<PaymentChart>
                 return BarChart(
                   BarChartData(
                     alignment: BarChartAlignment.spaceAround,
-                    maxY: analytics.paymentsTimeline
-                        .map((p) => p.amount)
-                        .reduce((a, b) => a > b ? a : b),
+                    maxY: timelineData.isEmpty
+                        ? 100 // Default max if no data
+                        : timelineData
+                            .map((p) => p.amount)
+                            .reduce((a, b) => a > b ? a : b),
                     barTouchData: BarTouchData(enabled: false),
                     titlesData: FlTitlesData(
                       show: true,

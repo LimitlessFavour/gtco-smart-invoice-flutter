@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gtco_smart_invoice_flutter/layouts/main_layout.dart';
 import 'package:gtco_smart_invoice_flutter/providers/auth_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/client_provider.dart';
 import 'package:gtco_smart_invoice_flutter/providers/dashboard_provider.dart';
@@ -24,7 +25,6 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart' as provider;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import './firebase_options.dart';
@@ -33,8 +33,6 @@ import './firebase_options.dart';
 const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
 const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
 const String supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -125,8 +123,6 @@ class AppRoot extends StatelessWidget {
 
     final onboardingRepository = OnboardingRepository(dioClient, authProvider);
 
-    // Initialize SharedPreferences
-    // final sharedPrefs = await SharedPreferences.getInstance();
 
     return [
       provider.ChangeNotifierProvider<NavigationService>.value(
@@ -163,7 +159,8 @@ class AppRoot extends StatelessWidget {
       ),
       provider.ChangeNotifierProvider(
         create: (context) => DashboardProvider(
-          DashboardRepository(),
+          DashboardRepository(dioClient),
+          authProvider,
         ),
       ),
     ];
@@ -180,7 +177,7 @@ class SmartInvoiceApp extends StatelessWidget {
       theme: _buildAppTheme(context),
       debugShowCheckedModeBanner: false,
       home: const AppInitializationWrapper(),
-      navigatorKey: navigatorKey,
+      navigatorKey: NavigationService.navigatorKey,
     );
   }
 
@@ -273,7 +270,10 @@ class _AppInitializationWrapperState extends State<AppInitializationWrapper> {
       future: _initFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          // return const MainLayout();
+          // final authProvider = context.watch<AuthProvider>();
+          // if (authProvider.isAuthenticated) {
+          //   return const MainLayout();
+          // }
           return const LandingScreen();
         }
         return _buildLoadingScreen();

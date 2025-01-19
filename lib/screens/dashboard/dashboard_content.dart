@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dashboard/timeline_selector.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 import '../../constants/styles.dart';
 import '../../widgets/common/app_text.dart';
@@ -8,6 +10,7 @@ import '../../widgets/dashboard/activity_card.dart';
 import '../../widgets/dashboard/invoice_stats_card.dart';
 import '../../widgets/dashboard/payment_chart.dart';
 import '../../widgets/dashboard/top_list_card.dart';
+import '../../providers/dashboard_provider.dart';
 
 class DashboardContent extends StatelessWidget {
   const DashboardContent({super.key});
@@ -77,30 +80,22 @@ class DashboardContent extends StatelessWidget {
                                 Expanded(
                                   child: Container(
                                     decoration: AppStyles.cardDecoration,
-                                    child: const TopListCard(
-                                      title: 'Top Paying Clients',
-                                      items: [
-                                        TopListItem(
-                                          title: 'Sarah Johnson',
-                                          value: '₦485,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Michael Chen',
-                                          value: '₦362,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Aisha Patel',
-                                          value: '₦298,500',
-                                        ),
-                                        TopListItem(
-                                          title: 'David Williams',
-                                          value: '₦245,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Elena Rodriguez',
-                                          value: '₦189,000',
-                                        ),
-                                      ],
+                                    child: Consumer<DashboardProvider>(
+                                      builder: (context, provider, _) {
+                                        final clients = provider
+                                                .analytics?.topPayingClients ??
+                                            [];
+                                        return TopListCard(
+                                          title: 'Top Paying Clients',
+                                          items: clients
+                                              .map((client) => TopListItem(
+                                                    title: client.fullName,
+                                                    value:
+                                                        '₦${NumberFormat("#,##0").format(client.totalPaid)}',
+                                                  ))
+                                              .toList(),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
@@ -108,30 +103,22 @@ class DashboardContent extends StatelessWidget {
                                 Expanded(
                                   child: Container(
                                     decoration: AppStyles.cardDecoration,
-                                    child: const TopListCard(
-                                      title: 'Top Selling Products',
-                                      items: [
-                                        TopListItem(
-                                          title: 'Premium Hair Bundle',
-                                          value: '₦520,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Silk Base Closure',
-                                          value: '₦385,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Brazilian Wave',
-                                          value: '₦342,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Lace Frontal Wig',
-                                          value: '₦278,000',
-                                        ),
-                                        TopListItem(
-                                          title: 'Deep Wave Bundle',
-                                          value: '₦195,000',
-                                        ),
-                                      ],
+                                    child: Consumer<DashboardProvider>(
+                                      builder: (context, provider, _) {
+                                        final products = provider.analytics
+                                                ?.topSellingProducts ??
+                                            [];
+                                        return TopListCard(
+                                          title: 'Top Selling Products',
+                                          items: products
+                                              .map((product) => TopListItem(
+                                                    title: product.name,
+                                                    value:
+                                                        '₦${NumberFormat("#,##0").format(product.totalAmount)}',
+                                                  ))
+                                              .toList(),
+                                        );
+                                      },
                                     ),
                                   ),
                                 ),
