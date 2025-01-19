@@ -303,32 +303,53 @@ class _CurrentInvoiceContentState extends State<CurrentInvoiceContent> {
 
       provider.setLoadingState(true);
 
-      final pdfPath = await PdfGeneratorService.generateAndSavePdf(
-        context.read<AuthProvider>().user!,
-        invoice,
-      );
-
-      provider.setLoadingState(false);
-
-      if (context.mounted) {
-        final shouldOpen = await showDialog<bool>(
-          context: context,
-          builder: (_) => const AppSuccessDialog(
-            title: 'Download Successful!',
-            message: 'Your invoice has been downloaded successfully.',
-            buttonText: 'Open Now',
-          ),
+      if (PdfGeneratorService.isWeb) {
+        // For web platform
+        final pdfBytes = await PdfGeneratorService.generatePdfBytes(
+          context.read<AuthProvider>().user!,
+          invoice,
         );
 
-        if (shouldOpen == true && context.mounted) {
-          try {
-            await PdfGeneratorService.openPdf(pdfPath);
-          } catch (e) {
-            LoggerService.error('Failed to open PDF', error: e);
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Failed to open PDF')),
-              );
+        await PdfGeneratorService.downloadPdfWeb(
+          pdfBytes,
+          fileName: 'invoice_${invoice.invoiceNumber}.pdf',
+        );
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invoice downloaded successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // For mobile platforms
+        final pdfPath = await PdfGeneratorService.generateAndSavePdf(
+          context.read<AuthProvider>().user!,
+          invoice,
+        );
+
+        if (context.mounted) {
+          final shouldOpen = await showDialog<bool>(
+            context: context,
+            builder: (_) => const AppSuccessDialog(
+              title: 'Download Successful!',
+              message: 'Your invoice has been downloaded successfully.',
+              buttonText: 'Open Now',
+            ),
+          );
+
+          if (shouldOpen == true && context.mounted) {
+            try {
+              await PdfGeneratorService.openPdf(pdfPath);
+            } catch (e) {
+              LoggerService.error('Failed to open PDF', error: e);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Failed to open PDF')),
+                );
+              }
             }
           }
         }
@@ -341,6 +362,8 @@ class _CurrentInvoiceContentState extends State<CurrentInvoiceContent> {
           SnackBar(content: Text('Failed to generate PDF: $e')),
         );
       }
+    } finally {
+      provider.setLoadingState(false);
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:gtco_smart_invoice_flutter/widgets/common/custom_scroll_view.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/dashboard/timeline_selector.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -31,7 +32,7 @@ class DashboardContent extends StatelessWidget {
           const Gap(24),
           // Wrap the main content in Expanded + SingleChildScrollView
           Expanded(
-            child: SingleChildScrollView(
+            child: CustomScrollWrapper(
               child: IntrinsicHeight(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
