@@ -18,6 +18,9 @@ run-ipad-simulator:
 run:
 	flutter run --dart-define-from-file=.env.development lib/main.dart
 
+run-android:
+	flutter run --dart-define-from-file=.env lib/main.dart
+
 # Web
 build-web:
 	cp .env.production .env

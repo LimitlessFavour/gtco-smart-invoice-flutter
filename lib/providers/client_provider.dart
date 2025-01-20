@@ -21,7 +21,7 @@ class ClientProvider extends ChangeNotifier {
   Timer? _pollTimer;
 
   ClientProvider(this._repository) {
-    loadClients();
+    // loadClients();
   }
 
   List<Client> get clients {

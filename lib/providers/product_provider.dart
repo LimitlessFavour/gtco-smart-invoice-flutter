@@ -19,7 +19,7 @@ class ProductProvider extends ChangeNotifier {
   Timer? _pollTimer;
 
   ProductProvider(this._repository) {
-    loadProducts();
+    // loadProducts();
   }
 
   List<Product> get products {

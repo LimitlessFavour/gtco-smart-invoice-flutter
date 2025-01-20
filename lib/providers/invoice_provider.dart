@@ -46,6 +46,10 @@ class InvoiceProvider extends ChangeNotifier {
 
   // Add new field for stats
   InvoiceProvider(this._repository, this._authProvider) {
+    // setup();
+  }
+
+  void setup() {
     _currentInvoiceNumber = _generateInvoiceNumber();
     loadInvoices();
   }

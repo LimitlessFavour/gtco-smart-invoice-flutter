@@ -18,7 +18,7 @@ class DashboardProvider extends ChangeNotifier {
   bool _initialLoadComplete = false;
 
   DashboardProvider(this._repository, this._authProvider) {
-    loadInitialData();
+    // loadInitialData();
   }
 
   bool get isLoading => _isLoading;
