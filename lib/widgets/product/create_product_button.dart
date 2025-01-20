@@ -14,7 +14,6 @@ class ProductActionButton extends StatefulWidget {
   final Map<String, dynamic> formData;
   final VoidCallback? onCancel;
   final GlobalKey<FormState> formKey;
-  final VoidCallback? onSuccess;
   final String? productId;
 
   const ProductActionButton({
@@ -23,7 +22,6 @@ class ProductActionButton extends StatefulWidget {
     required this.formData,
     this.onCancel,
     required this.formKey,
-    this.onSuccess,
     this.productId,
   });
 
@@ -99,11 +97,16 @@ class _ProductActionButtonState extends State<ProductActionButton> {
           : await provider.createProduct(createProduct);
 
       if (success && context.mounted) {
-        widget.onSuccess?.call();
         widget.onCancel?.call();
-        await showDialog(
+
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        if (!context.mounted) return;
+
+        final shouldProceed = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
+          useRootNavigator: true,
           builder: (context) => AppSuccessDialog(
             title: 'Successful!',
             message: widget.isEdit
@@ -111,8 +114,8 @@ class _ProductActionButtonState extends State<ProductActionButton> {
                 : 'Product created successfully',
           ),
         );
-        if (context.mounted) {
-          widget.onSuccess?.call();
+
+        if (shouldProceed == true && context.mounted) {
           navigationService.navigateToProductScreen(ProductScreen.list);
         }
       }

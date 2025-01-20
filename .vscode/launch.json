@@ -9,6 +9,22 @@
             "args": ["--dart-define-from-file=.env"]
         },
         {
+            "name": "Flutter Profile (Chrome)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "program": "lib/main.dart",
+            "deviceId": "chrome",
+            "args": ["--dart-define-from-file=.env", "--web-renderer=html"]
+        },
+        {
+            "name": "Flutter Debug Chrome",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "chrome",
+            "args": ["--dart-define-from-file=.env", "--web-renderer=html"]
+            },
+        {
             "name": "Flutter iOS Simulator Debug",
             "request": "launch",
             "type": "dart",

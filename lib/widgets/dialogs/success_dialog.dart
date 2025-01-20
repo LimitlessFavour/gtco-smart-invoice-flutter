@@ -61,9 +61,12 @@ class AppSuccessDialog extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => Navigator.pop(context, true),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop(true);
+                },
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xffE04826), // Customize button color
+                  backgroundColor:
+                      const Color(0xffE04826), // Customize button color
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

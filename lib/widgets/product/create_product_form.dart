@@ -221,9 +221,9 @@ class _CreateProductFormState extends State<CreateProductForm> {
                             'vatCategory': _selectedVatCategory,
                             'image': _selectedImagePath,
                           },
-                          onCancel: widget.onCancel,
-                          onSuccess: () {
+                          onCancel: () {
                             _clearForm();
+                            widget.onCancel();
                           },
                         ),
                       ],
