@@ -171,7 +171,10 @@ class ClientProvider extends ChangeNotifier {
   }
 
   void searchClients(String query) {
-    _searchQuery = query;
+    _searchQuery = query.trim();
+    if (_searchQuery.isEmpty) {
+      // loadClients(); // Reload all clients when search is cleared
+    }
     notifyListeners();
   }
 

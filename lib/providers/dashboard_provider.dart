@@ -68,6 +68,7 @@ class DashboardProvider extends ChangeNotifier {
   }
 
   Future<void> loadInitialData() async {
+    debugPrint('loadInitialData');
     _paymentsTimeline = 'LAST_9_MONTHS';
     _invoicesTimeline = 'LAST_6_MONTHS';
     _shouldAnimatePayments = true;

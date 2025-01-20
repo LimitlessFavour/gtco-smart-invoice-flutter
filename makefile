@@ -16,7 +16,7 @@ run-ipad-simulator:
 
 # Development
 run:
-	flutter run $(DART_DEFINES)
+	flutter run --dart-define-from-file=.env.development lib/main.dart
 
 # Web
 build-web:
