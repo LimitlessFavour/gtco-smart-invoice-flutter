@@ -1,5 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, TargetPlatform, kIsWeb;
 import 'package:gtco_smart_invoice_flutter/models/dashboard_analytics.dart';
 import 'package:gtco_smart_invoice_flutter/widgets/common/app_text.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +20,10 @@ class _PaymentChartState extends State<PaymentChart>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
+  bool _isHovered = false;
+
+  String get _currencySymbol =>
+      defaultTargetPlatform == TargetPlatform.android ? 'NGN' : '₦';
 
   @override
   void initState() {
@@ -190,107 +196,116 @@ class _PaymentChartState extends State<PaymentChart>
               builder: (context, constraints) {
                 final barWidth = constraints.maxWidth / (labels.length * 2.5);
 
-                return BarChart(
-                  BarChartData(
-                    alignment: BarChartAlignment.spaceAround,
-                    maxY: maxY,
-                    minY: 0,
-                    barTouchData: BarTouchData(
-                      enabled: true,
-                      touchTooltipData: BarTouchTooltipData(
-                        tooltipBgColor: Colors.white,
-                        tooltipRoundedRadius: 8,
-                        tooltipPadding: const EdgeInsets.all(8),
-                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                          return BarTooltipItem(
-                            '₦${NumberFormat("#,##0").format(values[group.x.toInt()])}',
-                            const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    titlesData: FlTitlesData(
-                      show: true,
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 30,
-                          getTitlesWidget: (value, meta) {
-                            if (value >= 0 && value < labels.length) {
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: AppText(
-                                  labels[value.toInt()],
-                                  color: Colors.grey[600],
-                                  size: 12,
-                                ),
-                              );
-                            }
-                            return const Text('');
-                          },
-                        ),
-                      ),
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          reservedSize: 40,
-                          interval: maxY / 5, // Show 5 intervals
-                          getTitlesWidget: (value, meta) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: AppText(
-                                _formatYAxisLabel(value),
-                                color: Colors.grey[600],
-                                size: 12,
+                return MouseRegion(
+                  onEnter: (event) {
+                    if (mounted) setState(() => _isHovered = true);
+                  },
+                  onExit: (event) {
+                    if (mounted) setState(() => _isHovered = false);
+                  },
+                  child: BarChart(
+                    BarChartData(
+                      alignment: BarChartAlignment.spaceAround,
+                      maxY: maxY,
+                      minY: 0,
+                      barTouchData: BarTouchData(
+                        enabled: true,
+                        touchTooltipData: BarTouchTooltipData(
+                          tooltipBgColor: Colors.white,
+                          tooltipRoundedRadius: 8,
+                          tooltipPadding: const EdgeInsets.all(8),
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                            return BarTooltipItem(
+                              '$_currencySymbol${NumberFormat("#,##0").format(values[group.x.toInt()])}',
+                              const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
                               ),
                             );
                           },
                         ),
                       ),
-                      rightTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                      topTitles: const AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-                    gridData: FlGridData(
-                      show: true,
-                      drawVerticalLine: false,
-                      horizontalInterval: maxY / 5,
-                      getDrawingHorizontalLine: (value) {
-                        return FlLine(
-                          color: Colors.grey[200],
-                          strokeWidth: 1,
-                        );
-                      },
-                    ),
-                    borderData: FlBorderData(
-                      show: true,
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[300]!, width: 1),
-                        left: BorderSide(color: Colors.grey[300]!, width: 1),
-                      ),
-                    ),
-                    barGroups: values.asMap().entries.map((entry) {
-                      return BarChartGroupData(
-                        x: entry.key,
-                        barRods: [
-                          BarChartRodData(
-                            toY: entry.value * _animation.value,
-                            color: const Color(0xFFE04403),
-                            width: barWidth,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(4),
-                            ),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 30,
+                            getTitlesWidget: (value, meta) {
+                              if (value >= 0 && value < labels.length) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: AppText(
+                                    labels[value.toInt()],
+                                    color: Colors.grey[600],
+                                    size: 12,
+                                  ),
+                                );
+                              }
+                              return const Text('');
+                            },
                           ),
-                        ],
-                      );
-                    }).toList(),
+                        ),
+                        leftTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 40,
+                            interval: maxY / 5, // Show 5 intervals
+                            getTitlesWidget: (value, meta) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: AppText(
+                                  _formatYAxisLabel(value),
+                                  color: Colors.grey[600],
+                                  size: 12,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                      ),
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        horizontalInterval: maxY / 5,
+                        getDrawingHorizontalLine: (value) {
+                          return FlLine(
+                            color: Colors.grey[200],
+                            strokeWidth: 1,
+                          );
+                        },
+                      ),
+                      borderData: FlBorderData(
+                        show: true,
+                        border: Border(
+                          bottom:
+                              BorderSide(color: Colors.grey[300]!, width: 1),
+                          left: BorderSide(color: Colors.grey[300]!, width: 1),
+                        ),
+                      ),
+                      barGroups: values.asMap().entries.map((entry) {
+                        return BarChartGroupData(
+                          x: entry.key,
+                          barRods: [
+                            BarChartRodData(
+                              toY: entry.value * _animation.value,
+                              color: const Color(0xFFE04403),
+                              width: barWidth,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(4),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
                   ),
                 );
               },
