@@ -30,6 +30,7 @@ build-web:
 run-web:	
 	cp .env.development .env
 	flutter run -d chrome --dart-define-from-file=.env --release
+# flutter run -d chrome --dart-define-from-file=.env --release
 #   flutter run -d chrome $(DART_DEFINES)
 
 
