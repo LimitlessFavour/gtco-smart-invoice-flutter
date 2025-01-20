@@ -18,7 +18,7 @@ class DashboardProvider extends ChangeNotifier {
   bool _initialLoadComplete = false;
 
   DashboardProvider(this._repository, this._authProvider) {
-    loadInitialData();
+    // loadInitialData();
   }
 
   bool get isLoading => _isLoading;
@@ -68,6 +68,7 @@ class DashboardProvider extends ChangeNotifier {
   }
 
   Future<void> loadInitialData() async {
+    debugPrint('loadInitialData');
     _paymentsTimeline = 'LAST_9_MONTHS';
     _invoicesTimeline = 'LAST_6_MONTHS';
     _shouldAnimatePayments = true;

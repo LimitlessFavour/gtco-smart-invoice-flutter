@@ -212,7 +212,7 @@ class _CreateClientFormState extends State<CreateClientForm> {
                       ClientActionButton(
                         isEdit: isEdit,
                         formKey: _formKey,
-                        formData: {
+                        formData: () => {
                           'firstName': _firstNameController.text,
                           'lastName': _lastNameController.text,
                           'phoneNumber': _phoneController.text,

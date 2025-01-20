@@ -71,7 +71,6 @@ class _InvoiceStatsCardState extends State<InvoiceStatsCard>
           ''',
         );
 
-
         if (provider.shouldAnimateInvoices &&
             !_animationController.isAnimating) {
           _animationController.reset();

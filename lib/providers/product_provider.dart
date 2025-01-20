@@ -19,7 +19,7 @@ class ProductProvider extends ChangeNotifier {
   Timer? _pollTimer;
 
   ProductProvider(this._repository) {
-    loadProducts();
+    // loadProducts();
   }
 
   List<Product> get products {
@@ -161,7 +161,10 @@ class ProductProvider extends ChangeNotifier {
   }
 
   void searchProducts(String query) {
-    _searchQuery = query;
+    _searchQuery = query.trim();
+    if (_searchQuery.isEmpty) {
+      // loadProducts(); // Reload all products when search is cleared
+    }
     notifyListeners();
   }
 

@@ -46,6 +46,10 @@ class InvoiceProvider extends ChangeNotifier {
 
   // Add new field for stats
   InvoiceProvider(this._repository, this._authProvider) {
+    // setup();
+  }
+
+  void setup() {
     _currentInvoiceNumber = _generateInvoiceNumber();
     loadInvoices();
   }
@@ -273,8 +277,12 @@ class InvoiceProvider extends ChangeNotifier {
 
   // Add these methods
   void searchInvoices(String query) {
-    _searchQuery = query.toLowerCase();
-    _filterAndSortInvoices();
+    _searchQuery = query.trim().toLowerCase();
+    if (_searchQuery.isEmpty) {
+      // loadInvoices(); // Reload all invoices when search is cleared
+    } else {
+      _filterAndSortInvoices();
+    }
   }
 
   void setFilter(String filter) {
@@ -453,4 +461,3 @@ class InvoiceProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

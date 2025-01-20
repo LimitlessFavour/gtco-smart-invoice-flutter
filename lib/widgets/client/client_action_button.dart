@@ -10,7 +10,7 @@ import '../dialogs/success_dialog.dart';
 
 class ClientActionButton extends StatefulWidget {
   final bool isEdit;
-  final Map<String, dynamic> formData;
+  final Map<String, dynamic> Function() formData;
   final VoidCallback? onCancel;
   final GlobalKey<FormState> formKey;
   final VoidCallback? onSuccess;
@@ -72,7 +72,20 @@ class _ClientActionButtonState extends State<ClientActionButton> {
   }
 
   Future<void> _handleSubmit() async {
-    if (!widget.formKey.currentState!.validate() || _isLoading) return;
+    if (_isLoading) return;
+
+    // Save the form to ensure the latest values are available
+    widget.formKey.currentState!.save();
+
+    if (!widget.formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: AppText('Please fill in all required fields'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -81,17 +94,33 @@ class _ClientActionButtonState extends State<ClientActionButton> {
       final navigationService = context.read<NavigationService>();
       final user = context.read<AuthProvider>().user;
 
+      // Get the latest form data
+      final formData = widget.formData();
+
+      // Validate all required fields are filled
+      if (formData.values.any((field) => field.toString().trim().isEmpty)) {
+        //print the form data
+        debugPrint('Form data: $formData');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: AppText('Please fill in all required fields'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       final client = Client(
         id: widget.isEdit
             ? widget.clientId!
             : DateTime.now().millisecondsSinceEpoch.toString(),
         companyId: user?.company?.id ?? '1',
-        firstName: widget.formData['firstName'].trim(),
-        lastName: widget.formData['lastName'].trim(),
-        email: widget.formData['email'].trim(),
-        phoneNumber: widget.formData['phoneNumber'].trim(),
-        mobileNumber: widget.formData['mobileNumber'].trim(),
-        address: widget.formData['address'].trim(),
+        firstName: formData['firstName']!.toString(),
+        lastName: formData['lastName']!.toString(),
+        email: formData['email']!.toString(),
+        phoneNumber: formData['phoneNumber']!.toString(),
+        mobileNumber: formData['mobileNumber']!.toString(),
+        address: formData['address']!.toString(),
       );
 
       final success = await provider.submitClient(client, widget.isEdit);

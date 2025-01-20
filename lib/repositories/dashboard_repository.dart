@@ -25,13 +25,7 @@ class DashboardRepository {
         throw Exception('No data received from server');
       }
 
-      return DashboardAnalytics(
-        paymentsTimeline: _parsePaymentsTimeline(data['paymentsTimeline']),
-        invoiceStats: _parseInvoiceStats(data['invoiceStats']),
-        topPayingClients: _parseTopClients(data['topPayingClients']),
-        topSellingProducts: _parseTopProducts(data['topSellingProducts']),
-        activities: _parseActivities(data['activities']),
-      );
+      return DashboardAnalytics.fromJson(data);
     } catch (e, stackTrace) {
       LoggerService.error(
         'Failed to fetch dashboard data',
@@ -42,7 +36,24 @@ class DashboardRepository {
     }
   }
 
-  List<PaymentsByMonth> _parsePaymentsTimeline(dynamic data) {
+  List<DashboardTransaction> _parsePaymentsTimeline(dynamic data) {
+    if (data == null) return [];
+
+    try {
+      return (data as List).map((p) {
+        return DashboardTransaction.fromJson(p);
+      }).toList();
+    } catch (e, stackTrace) {
+      LoggerService.error(
+        'Failed to parse payments timeline',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
+  }
+
+  List<PaymentsByMonth> _parseInvoicesTimeline(dynamic data) {
     if (data == null) return [];
 
     try {
@@ -54,7 +65,7 @@ class DashboardRepository {
       }).toList();
     } catch (e, stackTrace) {
       LoggerService.error(
-        'Failed to parse payments timeline',
+        'Failed to parse invoices timeline',
         error: e,
         stackTrace: stackTrace,
       );

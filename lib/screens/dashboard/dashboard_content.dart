@@ -24,10 +24,15 @@ class DashboardContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText(
-            'Overview',
-            size: 28,
-            weight: FontWeight.w600,
+          InkWell(
+            onTap: () {
+              context.read<DashboardProvider>().loadInitialData();
+            },
+            child: const AppText(
+              'Overview',
+              size: 28,
+              weight: FontWeight.w600,
+            ),
           ),
           const Gap(24),
           // Wrap the main content in Expanded + SingleChildScrollView

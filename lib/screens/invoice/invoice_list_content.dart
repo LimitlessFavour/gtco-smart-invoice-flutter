@@ -157,15 +157,20 @@ class HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        AppText(
-          'Invoices',
-          size: 24,
-          weight: FontWeight.w600,
+        InkWell(
+          onTap: () {
+            context.read<InvoiceProvider>().loadInvoices();
+          },
+          child: const AppText(
+            'Invoices',
+            size: 24,
+            weight: FontWeight.w600,
+          ),
         ),
-        CreateInvoiceButton(),
+        const CreateInvoiceButton(),
       ],
     );
   }

@@ -1,5 +1,54 @@
+class DashboardTransaction {
+  final int? id;
+  final double amount;
+  final String? paymentType;
+  final String? paymentReference;
+  final DateTime createdAt;
+  final int? invoiceId;
+  final int? clientId;
+  final int? companyId;
+
+  DashboardTransaction({
+    this.id,
+    required this.amount,
+    this.paymentType,
+    this.paymentReference,
+    required this.createdAt,
+    this.invoiceId,
+    this.clientId,
+    this.companyId,
+  });
+
+  factory DashboardTransaction.fromJson(Map<String, dynamic> json) {
+    return DashboardTransaction(
+      id: json['id'],
+      amount: double.tryParse(json['amount'].toString()) ?? 0,
+      paymentType: json['paymentType'],
+      paymentReference: json['paymentReference'],
+      createdAt: DateTime.parse(json['createdAt']),
+      invoiceId: json['invoiceId'],
+      clientId: json['clientId'],
+      companyId: json['companyId'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'amount': amount,
+      'paymentType': paymentType,
+      'paymentReference': paymentReference,
+      'createdAt': createdAt.toIso8601String(),
+      'invoiceId': invoiceId,
+      'clientId': clientId,
+      'companyId': companyId,
+    };
+  }
+}
+
 class DashboardAnalytics {
-  final List<PaymentsByMonth> paymentsTimeline;
+  final List<DashboardTransaction> paymentsTimeline;
+  final List<PaymentsByMonth> invoicesTimeline;
   final InvoiceStats invoiceStats;
   final List<TopClient> topPayingClients;
   final List<TopProduct> topSellingProducts;
@@ -7,6 +56,7 @@ class DashboardAnalytics {
 
   DashboardAnalytics({
     required this.paymentsTimeline,
+    required this.invoicesTimeline,
     required this.invoiceStats,
     required this.topPayingClients,
     required this.topSellingProducts,
@@ -14,7 +64,8 @@ class DashboardAnalytics {
   });
 
   DashboardAnalytics copyWith({
-    List<PaymentsByMonth>? paymentsTimeline,
+    List<DashboardTransaction>? paymentsTimeline,
+    List<PaymentsByMonth>? invoicesTimeline,
     InvoiceStats? invoiceStats,
     List<TopClient>? topPayingClients,
     List<TopProduct>? topSellingProducts,
@@ -22,6 +73,7 @@ class DashboardAnalytics {
   }) {
     return DashboardAnalytics(
       paymentsTimeline: paymentsTimeline ?? this.paymentsTimeline,
+      invoicesTimeline: invoicesTimeline ?? this.invoicesTimeline,
       invoiceStats: invoiceStats ?? this.invoiceStats,
       topPayingClients: topPayingClients ?? this.topPayingClients,
       topSellingProducts: topSellingProducts ?? this.topSellingProducts,
@@ -29,10 +81,36 @@ class DashboardAnalytics {
     );
   }
 
-  //tojson
+  factory DashboardAnalytics.fromJson(Map<String, dynamic> json) {
+    return DashboardAnalytics(
+      paymentsTimeline: (json['paymentsTimeline'] as List?)
+              ?.map((e) => DashboardTransaction.fromJson(e))
+              .toList() ??
+          [],
+      invoicesTimeline: (json['invoicesTimeline'] as List?)
+              ?.map((e) => PaymentsByMonth.fromJson(e))
+              .toList() ??
+          [],
+      invoiceStats: InvoiceStats.fromJson(json['invoiceStats'] ?? {}),
+      topPayingClients: (json['topPayingClients'] as List?)
+              ?.map((e) => TopClient.fromJson(e))
+              .toList() ??
+          [],
+      topSellingProducts: (json['topSellingProducts'] as List?)
+              ?.map((e) => TopProduct.fromJson(e))
+              .toList() ??
+          [],
+      activities: (json['activities'] as List?)
+              ?.map((e) => DashboardActivity.fromJson(e))
+              .toList() ??
+          [],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'paymentsTimeline': paymentsTimeline.map((e) => e.toJson()).toList(),
+      'invoicesTimeline': invoicesTimeline.map((e) => e.toJson()).toList(),
       'invoiceStats': invoiceStats.toJson(),
       'topPayingClients': topPayingClients.map((e) => e.toJson()).toList(),
       'topSellingProducts': topSellingProducts.map((e) => e.toJson()).toList(),
@@ -50,7 +128,13 @@ class PaymentsByMonth {
     required this.amount,
   });
 
-  //to json
+  factory PaymentsByMonth.fromJson(Map<String, dynamic> json) {
+    return PaymentsByMonth(
+      month: json['month'] ?? '',
+      amount: double.tryParse(json['amount'].toString()) ?? 0,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'month': month,
